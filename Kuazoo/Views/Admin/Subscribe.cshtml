@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Subscribe";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(13);
+        $(document).tooltip();
+    });
+</script>
+
+@using (Html.BeginForm())
+{
+<div id="mainlist">
+<div id="mainwrap">
+    <h1>Subscribe</h1>
+    <div style="display:inline-table; text-align:left">
+        <input type="submit" value="Extract" id="btnSubmit" class="submitBtn" onclick="submit()" />
+    </div>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.MemberModel.SubscribeList>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.Email).Title("Name");
+            columns.Bound(p => p.SubscribeDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Subscribe Date");
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Read(read => read.Action("Subscribe_Read", "Admin"))
+        )
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+</div>
+</div>
+}

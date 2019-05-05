@@ -1,0 +1,347 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.WinnerShowModel
+@{
+    ViewBag.Title = "WinnersCircle";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+@section AddToHead{
+
+    <link href="@Url.Content("~/Content/Winner.css")" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript">
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '@Kuazoo.Helper.SetFacebookId',
+                xfbml: true,
+                version: 'v2.1'
+            });
+        };
+        (function (d) {
+            var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+            js = d.createElement('script'); js.id = id; js.async = true;
+            js.src = "//connect.facebook.net/en_US/all.js";
+            d.getElementsByTagName('head')[0].appendChild(js);
+        } (document));
+</script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+        changehomenav(3);
+
+            var sortParam1 = location.search.split('sort=')[1];
+            //console.log(sortParam1);
+            if(sortParam1!=null &sortParam1!=""){
+                var sortParam2 = sortParam1.split('&')[0];
+                if(sortParam2!=null && sortParam2!=""){
+                    $("#gday").removeClass("active");
+                    $("#gweek").removeClass("active");
+                    $("#gmonth").removeClass("active");
+                    $("#g"+sortParam2).addClass("active");
+                }
+            }
+        });
+        function sort(v) {
+            $("#gday").removeClass("active");
+            $("#gweek").removeClass("active");
+            $("#gmonth").removeClass("active");
+            $("#g"+v).addClass("active");
+            window.location="@Url.Action("WinnersCircle","Home")"+"?sort="+v;
+        }
+        function shareFB(name,imgurl,title) {
+            FB.ui(
+            {
+                method: 'feed',
+                name: name,
+                link: document.URL,
+                picture: imgurl,
+                caption: 'Prize '+title,
+                description: '',
+                message: ''
+            });
+        }
+    </script>
+
+}
+
+<div class="winners">
+
+@if (@Model.Item.Count() != 0)
+{
+<h2>Winners Circle</h2>
+<hr />
+<div class="sortdate">
+    Sort by : 
+    <div class="btn-group">
+      <button type="button" id="gday" class="btn btn-default" onclick="sort('day')">Day</button>
+      <button type="button" id="gweek" class="btn btn-default" onclick="sort('week')">Week</button>
+      <button type="button" id="gmonth" class="btn btn-default active" onclick="sort('month')">Month</button>
+    </div>
+</div>
+<hr />
+
+@*<div class="subtitle">MONTH WINNERS</div>
+<div class="wincontent">
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>iPod Nano 16MB (Green)</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/lydia-prize.png")" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                Lydia Penny<br />
+                <span>Petaling Jaya</span>
+            </div>
+            <div class="boxdetailimg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/lydia.jpg")" />
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('iPod Nano 16MB (Green)','@Url.Content("~/Content/img/winnerdummy/lydia-prize.png")','MONTH Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,Month,winners&text=Winner of iPod Nano 16MB (Green) Lydia Penny" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@Url.Content("~/Content/img/winnerdummy/lydia-prize.png")&description=Kuazoo Month Winner of Winner of iPod Nano 16MB (Green)  Lydia Penny" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>Fine Dine for Two at A 5 Star Hotel</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/muthusamy-prize.jpg")" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                Muthusamy Testing a Long Name<br />
+                <span>Wilayah Persekutuan</span>
+            </div>
+            <div class="boxdetailimg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/muthusamy.jpg")" />
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('Fine Dine for Two at A 5 Star Hotel','@Url.Content("~/Content/img/winnerdummy/muthusamy-prize.jpg")','MONTH Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,Month,winners&text=Winner of Fine Dine for Two at A 5 Star Hotel Lydia Penny" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@Url.Content("~/Content/img/winnerdummy/muthusamy-prize.jpg")&description=Kuazoo Month Winner of Winner of Fine Dine for Two at A 5 Star Hotel  Lydia Penny" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>iPad Air 16GB (White)</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/jane-prize.jpg")" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                Jane Smith<br />
+                <span>Johor Bahru</span>
+            </div>
+            <div class="boxdetailimg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/jane.jpg")" />
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('iPad Air 16GB (White)','@Url.Content("~/Content/img/winnerdummy/jane-prize.jpg")','MONTH Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,Month,winners&text=Winner of iPad Air 16GB (White) Lydia Penny" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@Url.Content("~/Content/img/winnerdummy/jane-prize.jpg")&description=Kuazoo Month Winner of Winner of iPad Air 16GB (White)  Lydia Penny" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>iPod Nano 16MB (Green)</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/lydia-prize.png")" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                Lydia Penny<br />
+                <span>Petaling Jaya</span>
+            </div>
+            <div class="boxdetailimg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/lydia.jpg")" />
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('iPod Nano 16MB (Green)','@Url.Content("~/Content/img/winnerdummy/lydia-prize.png")','MONTH Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,Month,winners&text=Winner of iPod Nano 16MB (Green) Lydia Penny" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@Url.Content("~/Content/img/winnerdummy/lydia-prize.png")&description=Kuazoo Month Winner of Winner of iPod Nano 16MB (Green)  Lydia Penny" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>Fine Dine for Two at A 5 Star Hotel</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/muthusamy-prize.jpg")" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                Muthusamy Testing a Long Name<br />
+                <span>Wilayah Persekutuan</span>
+            </div>
+            <div class="boxdetailimg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/muthusamy.jpg")" />
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('Fine Dine for Two at A 5 Star Hotel','@Url.Content("~/Content/img/winnerdummy/muthusamy-prize.jpg")','MONTH Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,Month,winners&text=Winner of Fine Dine for Two at A 5 Star Hotel Lydia Penny" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@Url.Content("~/Content/img/winnerdummy/muthusamy-prize.jpg")&description=Kuazoo Month Winner of Winner of Fine Dine for Two at A 5 Star Hotel  Lydia Penny" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>iPad Air 16GB (White)</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/jane-prize.jpg")" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                Jane Smith<br />
+                <span>Johor Bahru</span>
+            </div>
+            <div class="boxdetailimg">
+                <img class="lazy" data-original="@Url.Content("~/Content/img/winnerdummy/jane.jpg")" />
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('iPad Air 16GB (White)','@Url.Content("~/Content/img/winnerdummy/jane-prize.jpg")','MONTH Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,Month,winners&text=Winner of iPad Air 16GB (White) Lydia Penny" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@Url.Content("~/Content/img/winnerdummy/jane-prize.jpg")&description=Kuazoo Month Winner of Winner of iPad Air 16GB (White)  Lydia Penny" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+    foreach (var i in Model.Item)
+    {
+<div class="subtitle">@i.Sort.ToUpper() WINNERS</div>
+
+<div class="wincontent">
+    @foreach (var v in i.WinnerList)
+    {
+    <div class="box">
+        <div class="boxheader">
+            <div class="boxtitle">Winner of <br /><span>@v.PrizeName</span></div>
+            <div class="boximg">
+                <img class="lazy" data-original="@v.PrizeImageUrl" />
+            </div>
+        </div>
+        <div class="boxdetail">
+            <div class="boxdetailtext">
+                @v.FirstName @v.LastName<br />
+                <span>@v.City</span>
+            </div>
+            <div class="boxdetailimg">
+            @if (v.MemberImageUrl != null && v.MemberImageUrl != "")
+            {
+                <img class="lazy" data-original="@v.MemberImageUrl" />
+            }
+            else
+            {
+                <img class="lazy" data-original="@Url.Content("~/Content/img/default-image.jpg")" />
+            }
+            </div>
+        </div>
+        <div class="boxfooter">
+            <div class="boxfooterwrap">
+                <span class="fa fa-facebook fbicon active" onclick="shareFB('@v.PrizeName','@v.PrizeImageUrl','@i.Sort.ToUpper() Winners')"></span>
+                <a href="https://twitter.com/share?hashtags=kuazoo,@i.Sort,winners&text=Winner of @v.PrizeName @v.FirstName @v.LastName" target="_blank"><span class="fa fa-twitter twicon active"></span></a>
+                
+                <a href="http://www.pinterest.com/pin/create/button/?url=&media=@v.PrizeImageUrl&description=Kuazoo @i.Sort Winner of @v.PrizeName @v.FirstName @v.LastName" target="_blank">
+                    <span class="fa fa-pinterest pinicon active"></span>   
+                </a>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+    }
+<div class="winfooter">
+@if (Model.Total > 0)
+{
+    int currpage = ViewBag.currPage;
+    string currsort = ViewBag.currSort;
+    int page = (Model.Total / 6) + 1;
+    <ul class="pagination">
+      @if (currpage == 1)
+      {
+      <li class="disabled"><a href="">&laquo;</a></li>
+      }
+      else
+      {
+      <li><a href="@Url.Action("WinnersCircle", "Home", new { sort = currsort, page = 1 })">&laquo;</a></li>
+      }
+      @for (int i = 1; i <= page; i++)
+      {
+          if (currpage == i)
+          {
+            <li class="active"><a href="@Url.Action("WinnersCircle", "Home", new { sort = currsort, page = i })">@i</a></li>
+          }
+          else
+          {
+            <li><a href="@Url.Action("WinnersCircle", "Home", new { sort = currsort, page = i })">@i</a></li>
+          }
+      }
+      @if (currpage == page)
+      {
+      <li class="disabled"><a href="">&raquo;</a></li>
+      }
+      else
+      {
+      <li><a href="@Url.Action("WinnersCircle", "Home", new { sort = currsort, page = page })">&raquo;</a></li>
+      }
+    </ul>
+}
+</div>
+}
+else
+{
+    <div class="noinnercircle">
+        <p><h4>Be a Kuazoo winner!</h4></p>
+        <span class="noinnercircleimg"></span>
+        
+        <p><h6>Every time you buy a product or experience on Kuazoo.com you are rewarded with a chance to win great surPRIZES! How cool is that!?</h6></p>
+        
+        <p><h6>All winners will be placed in our Winners Circle. Maybe we’ll see you there shortly!</h6></p>
+        <br />
+        <a href="@Url.Action("FeaturedDeal", "Home")" class="btnMaroon">START SHOPPING</a>
+
+        <br /><br /><br />
+        <p><h6>For more information on how to win, check out:</h6></p>
+        <br />
+        <a href="@Url.Action("HowToGetTheSurPRIZE", "Home")" class="btnCheckOut">HOW TO WIN A SURPRIZE</a>
+    </div>
+}
+    
+</div>

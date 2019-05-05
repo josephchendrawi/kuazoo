@@ -1,0 +1,170 @@
+﻿@model com.kuazoo.Models.ProductModel.Product
+@{
+    ViewBag.Title = "Product";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(2);
+    });
+</script>
+<div id="main">
+<div id="mainwrap">
+    <h1>Product <a href="ProductAdd" class="addNewBtn">Add New</a></h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.ProductModel.Product>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.ProductId).Hidden(true);
+            columns.Bound(p => p.Name);
+            columns.Bound(p => p.MerchantName).Title("Merchant");
+            columns.Bound(p => p.CityName).Title("City");
+            columns.Bound(p => p.ExpireDate).Format("{0:dd MMM yyyy}").Title("Expiry Date");
+            columns.Bound(p => p.TagName).Title("Tag");
+            columns.Bound(p => p.Flag).ClientTemplate(
+                "<a class='gridBtn k-button-icontext k-grid-View' onclick='showDetails(e)' href=''>View</a>&nbsp;&nbsp;" +
+                "#if(Flag!='5'){#" +
+                "|&nbsp;&nbsp;<a class='gridBtn' href='ProductEdit?ProductId=#=ProductId#'>Edit</a>&nbsp;&nbsp;" +
+                "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-delete'  href=''>Archive</a>" +
+                "#}#").Title("Action").Filterable(filter => filter.Enabled(false));
+            columns.Command(command => command.Custom("View").Click("showDetails")).Hidden(true);
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        @*.ToolBar(toolbar =>
+        {
+            toolbar.Template(@<text>
+                @(Html.Kendo().DropDownList()
+                    .Name("flag")
+                    .OptionLabel("All")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .AutoBind(false)
+                    .Events(e => e.Change("changeFlag"))
+                    .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                            Text = "Created",
+                            Value = "1"
+                        },
+                        new SelectListItem() {
+                            Text = "Updated",
+                            Value = "3"
+                        },
+                        new SelectListItem() {
+                            Text = "Deleted",
+                            Value = "5"
+                        }
+                    })
+                )
+                    
+            </text>);
+        })*@
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("Product_Read", "Admin"))
+            .Destroy(destroy => destroy.Action("Product_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.ProductId);
+            })
+            .Filter(filter=>filter.Add(p=>p.Flag).IsNotEqualTo("5"))
+        )
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        //.Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    @(Html.Kendo().Window().Name("Details")
+        .Title("Product Details")
+        .Visible(false)
+        .Modal(true)
+        .Draggable(true)  
+        .Width(600)
+    )
+    </div>
+</div>
+</div>
+ <script type="text/x-kendo-template" id="template">
+    <div>
+        <div class="colleft">Merchant </div><div class="colright">#= MerchantName #</div>
+        <div class="colleft">Country </div><div class="colright">#= CountryName #</div>
+        <div class="colleft">State </div><div class="colright">#= StateName #</div>
+        <div class="colleft">City </div><div class="colright">#= CityName #</div>
+        <div class="colleft">Product Name </div><div class="colright">#= Name #</div>
+        <div class="colleft">Currency </div><div class="colright">#= CurrencyName #</div>
+        <div class="colleft">Original Price </div><div class="colright">#= Price #</div>
+        <div class="colleft">Discount </div><div class="colright">#= Discount #%</div>
+        <div class="colleft">Discount Price </div><div class="colright">#= Price*Discount/100 #</div>
+        <div class="colleft">Amount </div><div class="colright">#= Amount #</div>
+        <div class="colleft">Description </div><div class="colright">#= Description==null?"":Description #</div>
+        <div class="colleft">Keywords </div><div class="colright">#= Keyword==null?"":Keyword #</div>
+        <div class="colleft">Product Type </div><div class="colright">#= ProductTypeName #</div>
+        <div class="colleft">Tag </div><div class="colright">#= TagName #</div>
+        <div class="colleft" style="vertical-align:top">Image </div><div class="colright"><img src="#= ImageUrl #" class="imgThumb"></div>
+    </div>
+</script>
+<script type="text/javascript">
+    var detailsTemplate = kendo.template($("#template").html());
+    function showDetails(e) {
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#Details").data("kendoWindow");
+
+        wnd.content(detailsTemplate(dataItem));
+        wnd.center().open();
+    }
+    function changeFlag() {
+        var value = this.value(),
+		 	 grid = $("#grid").data("kendoGrid");
+
+        if (value) {
+            grid.dataSource.filter({ field: "Flag", operator: "eq", value: value });
+        } else {
+            grid.dataSource.filter({});
+        }
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        if (this == "1") {
+                            message = "Success Delete";
+                        }
+                        else if (this == "2") {
+                            message = "Failed Delete";
+                        }
+                        else {
+                            message = this;
+                        }
+                    });
+                }
+            });
+            alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

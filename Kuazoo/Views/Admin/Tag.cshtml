@@ -1,0 +1,249 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.Tag
+@{
+    ViewBag.Title = "Tag";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(6);
+        $(document).tooltip();
+    });
+</script>
+<div id="msgresult">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        @if (ViewBag.msg == "1")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New tag successfully created</div></div>
+        }
+        else if (ViewBag.msg == "3")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Create new tag unsuccessful.</div></div>
+        }
+        else if (ViewBag.msg == "11")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Tag updated successfully</div></div>
+        }
+        else if (ViewBag.msg == "33")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Update tag failed.</div></div>
+        }
+        @*<div class="notif cnotice"><div class="notifwrap notice"><strong>Notice:</strong> A</div></div>
+        <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> A</div></div>
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> A</div></div>
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> A</div></div>*@
+    </div>
+</div>
+}
+</div>
+<div id="mainlist">
+<div id="mainwrap">
+    <h1>Tag <a href="TagAdd" class="addNewBtn">Add New</a></h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.InventoryItemModel.Tag>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.TagName).Title("Name");
+            columns.Bound(p => p.ShowAsCategory)
+                .Title("Show As Category")
+                .ClientTemplate("#if(ShowAsCategory==false){#-#}else{#True#}#")
+                .Filterable(filterable =>
+                 {
+                     filterable.Messages(m => m.IsTrue("Yes"));
+                     filterable.Messages(m => m.IsFalse("No"));
+                 });
+            columns.Bound(p => p.ParentName).Title("Tag Parent");
+            columns.Bound(p => p.Create).Format("{0:dd MMM yyyy}").Title("Created On");
+            columns.Bound(p => p.LastAction).ClientTemplate(
+                "#if(LastAction!='5'){#" +
+                "<a class='gridBtn' href='TagEdit?TagId=#=TagId#'><span class='fa fa-pencil' title='Edit' ></span></a>&nbsp;&nbsp;" +
+                "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-delete'  href=''><span class='fa fa-archive' title='Archive' ></span></a>" +
+                "#}#").Title("Action").Filterable(filter => filter.Enabled(false));
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        .Editable(editable => editable.DisplayDeleteConfirmation("Do you want to archive this tag?"))
+        @*.ToolBar(toolbar =>
+        {
+            toolbar.Template(@<text>
+                @(Html.Kendo().DropDownList()
+                    .Name("LastAction")
+                    .OptionLabel("All")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .AutoBind(false)
+                    .Events(e => e.Change("changeLastAction"))
+                    .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                            Text = "Created",
+                            Value = "1"
+                        },
+                        new SelectListItem() {
+                            Text = "Updated",
+                            Value = "3"
+                        },
+                        new SelectListItem() {
+                            Text = "Deleted",
+                            Value = "5"
+                        }
+                    })
+                )
+                    
+            </text>);
+        })*@
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("Tag_Read", "Admin"))
+            .Destroy(destroy => destroy.Action("Tag_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.TagId);
+            })
+            //.Filter(filter=>filter.Add(p=>p.LastAction).IsNotEqualTo("5"))
+        )
+        .Events(events => events.DataBound("onDataBound").Change("onChange"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Filterable()
+        .Selectable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    $(window).load(function () {
+        filtergrid();
+    });
+    var viewactive = 0;
+    function onDataBound(e) {
+        var data = this.dataSource.filter();
+        if (data != null) {
+            //console.log(data);
+            document.location.hash = "";
+            if (data.filters.length > 1) {
+                for (var i = 1; i < data.filters.length; i++) {
+                    console.log(data.filters[i].field + " " + data.filters[i].operator + " " + data.filters[i].value);
+                    insertParam(data.filters[i].field, data.filters[i].value);
+                }
+            }
+        }
+        $(".gridBtn").click(function () {
+            viewactive = 1;
+            setTimeout(function () {
+                viewactive = 0;
+            }, 100);
+        });
+    }
+    function onChange(e) {
+        setTimeout(function () {
+            if (viewactive == 0) {
+                //var data = this.select();
+                //console.log(data);
+                var grid = $("#grid").data("kendoGrid");
+                var selectedItem = grid.dataItem(grid.select());
+                window.location = "TagEdit?TagId=" + selectedItem.TagId;
+            }
+        }, 100);
+    }
+    function insertParam(key, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        //console.log(kvp);
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+
+            if (x[0] == key) {
+                x[1] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var array = { 'field': 'LastAction', 'operator': 'neq', 'value': '5' };
+        param.push(array);
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': 'contains', 'value': re[1] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+        }
+    }
+    function changeLastAction() {
+        var value = this.value(),
+		 	 grid = $("#grid").data("kendoGrid");
+
+        if (value) {
+            grid.dataSource.filter({ field: "LastAction", operator: "eq", value: value });
+        } else {
+            grid.dataSource.filter({});
+        }
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var result ='<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Tag archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

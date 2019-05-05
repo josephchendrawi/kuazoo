@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "How Kuazoo Works";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/careers.css")" rel="stylesheet" type="text/css" />
+}
+<div class="content careers">
+<h2>How Kuazoo Works</h2>
+<h3>“At Kuazoo we believe that spontaneity lies at the heart of every memorable moment. It is our mission to open this door of possibilities to everybody, everyday.”</h3>
+
+<div class="row hkw">
+    <div class="col-sm-3 left center">
+        <div class="hkwicon"><span class="fa fa-cubes"></span></div>
+    </div>
+    <div class="col-sm-9 right">
+        <p class="title">Kuazoo - the most unique marketing platform in Malaysia</p>Kuazoo is Malaysia’s most unique marketplace to find and share the best lifestyle deals at your doorstep. The goal of Kuazoo is to bring local businesses and consumers together and make life easier and more exciting for everybody.<br /><br />With the most exclusive and diverse lifestyle deals, we open a door of new possibilities to online shoppers across Malaysia. Combined with a reliable and seamless shopping experience, you will never run out of possibilities.<br /><br />In order to make shopping at Kuazoo even more exciting, we use several break-through ideas that create an exciting new buying experience; surPRIZES, Group Deals, Kuazoo Points and Flash Deals are all designed to provide the best shopping experience for you!
+    </div>
+</div>
+<div class="row hkw">
+    <div class="col-sm-3 left center">
+        <div class="hkwicon"><span class="fa fa-gift"></span></div>
+    </div>
+    <div class="col-sm-9 right">
+        <p class="title">surPRIZE - everybody wins!</p>At Kuazoo, it is all about fun, excitement and engagement! Every time you buy a deal or voucher on Kuazoo.com you are eligible to participate in a short skills-based game or lucky draw. In this way, you are rewarded with the opportunity to win exciting and cool surPRIZES against unbelievable odds! <br /><br />Once a deal hits a predetermined sales target, the deal gets “KUAZOOD!”. This means that the surPRIZE has been activated and the winner will be announced as well as placed in our Winner’s Circle! Maybe we’ll see you there shortly!
+    </div>
+</div>
+<div class="row hkw">
+    <div class="col-sm-3 left center">
+        <div class="hkwicon"><span class="fa fa-clock-o"></span></div>
+    </div>
+    <div class="col-sm-9 right">
+        <p class="title">Group Deals - accelerating the draw</p>In order to accelerate the time it takes for one deal to gets KUAZOOD! the Group Deals system puts several deals together. This means that the predetermined sales target for one surPRIZE is reached sooner by accumulating several deals. In this way, the “remaining deals” bar moves faster and you never have to wait long before you know whether you won a surPRIZE.
+    </div>
+</div>
+<div class="row hkw">
+    <div class="col-sm-3 left center">
+        <div class="hkwicon"><div class="iconkuazoopoint"></div></div>
+    </div>
+    <div class="col-sm-9 right">
+        <p class="title">Kuazoo Points - because we value our loyal customers</p>On top of all these innovative ideas we’d also like to thank our loyal customers for continuing to shop with us. For every purchase you make, you are rewarded with Kuazoo points. These can be exchanged for additional discounts on other deals or vouchers.
+    </div>
+</div>
+<div class="row hkw">
+    <div class="col-sm-3 left center">
+        <div class="hkwicon"><span class="fa fa-flash"></span></div>
+    </div>
+    <div class="col-sm-9 right">
+        <p class="title">Flash Deals - deals that cannot be missed</p>Once in a flashing moment certain deals become even more exciting! This means that Kuazoo offers customers more value by giving even crazier discounts. Better check us out regularly so you don’t miss out on the deepest discounts in town!
+
+    </div>
+</div>
+</div>

@@ -1,0 +1,160 @@
+﻿@model com.kuazoo.Models.BannerModel
+@{
+    ViewBag.Title = "Banner Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+
+
+<script type="text/javascript">
+    var hook = true;
+    window.onbeforeunload = function () {
+        if (hook) {
+            return "You are about to leave this page";
+        }
+    }
+    $(document).ready(function () {
+        changeverticalnav(-1);
+        $('.fancybox').fancybox();
+    });
+
+</script>
+
+<input type="hidden" value="" id="tempChoose" name="tempChoose"/>
+<input type="hidden" value="" id="tempChooseName" name="tempChooseName"/>
+<input type="hidden" value="" id="tempChooseUrl" name="tempChooseUrl"/>
+<input type="hidden" value="" id="tempChooseDraft" name="tempChooseDraft"/>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="LandingPage">Banner</a> <span class="active"> / Edit Banner</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New banner successfully updated</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update New Banner</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Edit Banner</h1>
+    </div>
+        @using (Html.BeginForm())
+        {
+            @Html.HiddenFor(model => model.BannerId)
+    <div id="wrap">
+    <div class="colright">
+        <div class="colhalf">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                <div class="colright">@Html.TextBoxFor(model => model.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Name)</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Link)</div>
+                <div class="colright">@Html.TextBoxFor(model => model.Link, new { @class = "long", id="bannerlink", placeholder = "http://www.website.com" })@Html.ValidationMessageFor(model => model.Link)</div>
+            </div>
+
+            <div>
+                <div class="colleft" style="vertical-align:top">Image</div>
+                @Html.HiddenFor(model => model.SubImageId)
+                @Html.HiddenFor(model => model.SubImageName)
+                @Html.HiddenFor(model => model.SubImageUrl, new { id = "bannerimg" })
+                <div class="colright"  id="mainimageplace">
+                    @if (Model != null && Model.SubImageId != 0)
+                    {
+                        <a  class="fancybox" style="float:left" href="@Model.SubImageUrl">
+                            <img src="@Model.SubImageUrl" class="imgThumb" />
+                        </a> 
+                        @*<div class="deleteIcon" onclick="deleteImg()"></div>*@                       
+                    }
+                </div>
+                <div class="colright" style="display:table;width:150px;">
+                    <input id="mainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                    @Html.ValidationMessageFor(model => model.SubImageId)
+                    <span class="field-validation-error" id="errImageId"></span>
+                </div>
+            </div> 
+
+            
+            <div>
+                <div class="colleft">Sequence</div>
+                <div class="colright">@Html.TextBoxFor(model => model.Seq, new { @class = "short" })@Html.ValidationMessageFor(model => model.Seq)</div>
+            </div>
+        </div>
+    </div>
+    </div>
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    <a href="@Url.Action("SliderPreview", "Admin")" id="sliderpreview"><input type="button" value="Preview" class="grayBtn"/></a>
+                    <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf()"/>
+                    <a href="LandingPage"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>
+        }
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Name").focus();
+
+        $("#mainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<a  class="fancybox" style="float:left" href="' + $("#tempChooseUrl").val() + '"><img src="' + $("#tempChooseUrl").val() + '" class="imgThumb" id="bannerimgnew" /></a>';
+                        //html += '<div class="deleteIcon" onclick="deleteImg()"></div>';
+                        $("#mainimageplace").html(html);
+                        $("#SubImageId").val($("#tempChoose").val());
+                        $("#SubImageName").val($("#tempChooseName").val());
+                        $("#SubImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+
+                    }
+                }
+            });
+        });
+    });
+
+
+    function deleteImg() {
+        $("#mainimageplace").html("");
+        $("#SubImageId").val(0);
+        $("#SubImageName").val("");
+        $("#SubImageUrl").val("");
+    }
+</script>
+
+<script type="text/javascript">
+    document.getElementById("sliderpreview").onclick = function () {
+        if (document.getElementById("bannerimgnew") == null) {
+            window.open(document.getElementById("sliderpreview").href + "?link=" + document.getElementById("bannerlink").value + "&imgurl=" + document.getElementById("bannerimg").value, '_blank');
+        }
+        else {
+            window.open(document.getElementById("sliderpreview").href + "?link=" + document.getElementById("bannerlink").value + "&imgurl=" + $('#bannerimgnew').attr('src'), '_blank');
+        }
+        return false;
+    };
+</script>

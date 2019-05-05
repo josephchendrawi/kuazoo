@@ -1,0 +1,249 @@
+﻿@model com.kuazoo.Models.GameModel
+@{
+    ViewBag.Title = "Game Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+<script type="text/javascript">
+
+$(document).ready(function () {
+    changeverticalnav(2);
+    $(document).tooltip();
+    $('.fancybox').fancybox();
+    @if (ViewBag.errors != null || ViewBag.result != null)
+    {
+    <text>
+    $("#_Description").val(decodeURI($("#Description").val()));
+    $("#_Description").htmlarea();
+    $("#_Instruction").val(decodeURI($("#Instruction").val()));
+    $("#_Instruction").htmlarea();
+    </text>
+    }
+    else{
+    <text>
+    $("#_Description").val($("#Description").val());
+    $("#_Description").htmlarea();
+    $("#_Instruction").val($("#Instruction").val());
+    $("#_Instruction").htmlarea();
+    </text>
+    }
+});
+function UpdateConf() {
+    $("#Instruction").val(encodeURI($("#_Instruction").val()));
+    $("#Description").val(encodeURI($("#_Description").val()));
+    return true;
+}
+</script>
+<input type="hidden" value="" id="tempChoose" name="tempChoose"/>
+<input type="hidden" value="" id="tempChooseName" name="tempChooseName"/>
+<input type="hidden" value="" id="tempChooseUrl" name="tempChooseUrl"/>
+<input type="hidden" value="" id="tempChooseDraft" name="tempChooseDraft"/>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="@Url.Action("PrizeView", "Admin")?PrizeId=@ViewBag.PrizeId#game">Game</a> <span class="active"> / Edit Game</span>  
+        <div id="msgplace">
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Game updated successfully</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Game</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+        </div>
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Edit Game</h1>
+    </div>
+        @using (Html.BeginForm(null, null, new { PrizeId = ViewBag.PrizeId }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.HiddenFor(model => model.GameId) 
+    <div id="wrap">
+    <div class="colright">
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.PrizeId)</div>
+            <div class="colright">
+                                @(Html.Kendo().DropDownListFor(model => model.PrizeId)
+                                    .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                    .OptionLabel("--Select Prize--")
+                                    .DataTextField("Name")
+                                    .DataValueField("PrizeId")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("PrizeList", "Admin");
+                                        });
+                                    })
+                                )
+            </div>
+        </div> 
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Name)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Description)</div>
+            <div class="colright"><textarea id="_Description" class="long textarea" rows="15"></textarea>
+            @Html.HiddenFor(model => model.Description, new { @class = "long textarea"})
+            @Html.ValidationMessageFor(model => model.Description)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Instruction)</div>
+            <div class="colright"><textarea id="_Instruction" class="long textarea" rows="15"></textarea>
+            @Html.HiddenFor(model => model.Instruction, new { @class = "long textarea" })
+            @Html.ValidationMessageFor(model => model.Instruction)</div>
+        </div>
+    </div>
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.ExpiryDate)</div>
+            <div class="colright">
+            @(Html.Kendo().DatePickerFor(model => model.ExpiryDate)
+                .HtmlAttributes(new { @class = "w200" })
+                .Format("dd MMM yyyy")
+            )
+            @Html.ValidationMessageFor(model => model.ExpiryDate)
+            </div>
+        </div>  
+        <div>
+            <div class="colleft" style="vertical-align:top">Image</div>
+            @Html.HiddenFor(model => model.ImageId)
+            @Html.HiddenFor(model => model.ImageName)
+            @Html.HiddenFor(model => model.ImageUrl)
+            <div class="colright"  id="Gamemainimageplace" style="position:relative;">
+                @if (Model != null && Model.ImageId != 0)
+                {
+                    var imgsp = "top:" + (Model.Latitude-3) + "px;left:" + (Model.Longitude-3) + "px";
+                    <div class="imgSpot" style="@imgsp;display:block" onclick="spotClick()"></div>
+                    <img src="@Model.ImageUrl" class="imgGame" style="float:left" onclick="imgClick()"/>               
+                    <div class="deleteIcon" onclick="deleteImgGame()"></div>        
+                }
+            </div>
+            <div class="colright" style="display:table;width:150px;">
+                <input id="GamemainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                        @Html.ValidationMessageFor(model => model.ImageId)
+            </div>
+        </div>
+        <div>
+            <div class="colleft">Hidden Coordinate</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Latitude, new { @class = "short" }) @Html.TextBoxFor(model => model.Longitude, new { @class = "short"})
+            
+                <input id="imagecoordinatebtn" type="button" value="Set Coordinate" class="submitBtn"/>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf()"/>
+                    <a href="@Url.Action("PrizeView","Admin")?PrizeId=@ViewBag.PrizeId#game"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>  
+        }
+</div>
+<script type="text/javascript">
+    var activeCoordinate = 0;
+    $(document).ready(function () {
+        $("#Name").focus();
+
+        $("#GamemainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<div class="imgSpot" style="top:0px;left:0px" onclick="spotClick()"></div>';
+                        html += '<img src="' + $("#tempChooseUrl").val() + '"  class="imgGame" style="float:left" onclick="imgClick()"/>';
+                        html += '<div class="deleteIcon" onclick="deleteImgGame()"></div>';
+                        $("#Gamemainimageplace").html(html);
+                        $("#ImageId").val($("#tempChoose").val());
+                        $("#ImageName").val($("#tempChooseName").val());
+                        $("#ImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                        $("#Latitude").val("");
+                        $("#Longitude").val("");
+                    }
+                }
+            });
+        });
+        $("#imagecoordinatebtn").click(function () {
+            if (activeCoordinate == 0) {
+                activeSpotImage();       
+                activeCoordinate = 1;
+                $("#imagecoordinatebtn").val("Disable");
+                $(".imgSpot").css("display", "block");
+            }
+            else {
+                activeCoordinate = 0;
+                $("#imagecoordinatebtn").val("Set Coordinate");
+                $(".imgSpot").css("display", "none");
+            }
+        });
+    });
+    function activeSpotImage() {
+        $image = $('.imgGame');
+        $image.mousemove(function (e) {
+            if (activeCoordinate != 0) {
+                imgPos = [
+                    $image.offset().left,
+                    $image.offset().top,
+                    $image.offset().left + $image.outerWidth(),
+                    $image.offset().top + $image.outerHeight()
+                ];
+                var y = parseFloat(e.pageY - imgPos[1]).toFixed(2);
+                var x = parseFloat(e.pageX - imgPos[0]).toFixed(2);
+                $("#Latitude").val(x);
+                $("#Longitude").val(y);
+                $(".imgSpot").css("top", e.pageY - imgPos[1] - 3);
+                $(".imgSpot").css("left", e.pageX - imgPos[0] - 3);
+            }
+        });
+    }
+    function spotClick() {
+        if (activeCoordinate == 0) {
+            activeCoordinate = 1;
+            $("#imagecoordinatebtn").val("Disable");
+        }
+        else {
+            activeCoordinate = 0;
+            $("#imagecoordinatebtn").val("Set Coordinate");
+        }
+    }
+    function imgClick() {
+        if (activeCoordinate == 1) {
+            activeCoordinate = 0;
+            $("#imagecoordinatebtn").val("Set Coordinate");
+        }
+    }
+    function deleteImgGame() {
+        $("#Gamemainimageplace").html("");
+        $("#ImageId").val(0);
+        $("#ImageName").val("");
+        $("#ImageUrl").val("");
+    }
+    
+</script>

@@ -1,0 +1,1648 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItem
+@{
+    ViewBag.Title = "Inventory Item Add";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.inventory.sample.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+<script type="text/javascript">
+    var hook = true;
+    window.onbeforeunload = function () {
+        if (hook) {
+            return "You are about to leave this page";
+        }
+    }
+    $(document).ready(function () {
+        $('.fancybox').fancybox();
+        changeverticalnav(4);
+        
+        $.post('TagList', function (obj) {
+            var listItems = "";
+            for (var i = 0; i < obj.length; i++) {
+                listItems += "<option value='" + obj[i].TagId + "'>" + obj[i].TagName + "</option>";
+            }
+            $("#InventoryItemTagDropDown").html(listItems);
+            $("#InventoryItemTagDropDown").chosen({ no_results_text: "Oops, nothing found!", max_selected_options: 5 });
+            $("#InventoryItemTagDropDown").trigger("liszt:updated");
+        });
+
+        pricediscount();
+        $("#Price").keyup(function () {
+            pricediscount();
+        });
+        $("#Discount").keyup(function () {
+            pricediscount();
+        });
+        $("#discountprice").keyup(function () {
+            pricediscounttoprice();
+        });
+//        $("#btnFirst").click(function (e) {
+//            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+//            var myTab = tabstrip.tabGroup.children("li").eq(1);
+//            tabstrip.select(myTab);
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "block");
+//            $("._third").css("display", "none");
+//        });
+//        $("#btnPrev").click(function (e) {
+//            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+//            var myTab = tabstrip.tabGroup.children("li").eq(0);
+//            tabstrip.select(myTab);
+//            $("._first").css("display", "block");
+//            $("._second").css("display", "none");
+//            //$("._third").css("display", "none");
+//        });
+        $("#btnSecond").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+//            var myTab = tabstrip.tabGroup.children("li").eq(2);
+            var myTab = tabstrip.tabGroup.children("li").eq(1);
+            tabstrip.select(myTab);
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "none");
+//            $("._third").css("display", "block");
+            $("._first").css("display", "none");
+            $("._second").css("display", "block");
+            $("._third").css("display", "none");
+        });
+        $("#btnSecond2").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+//            var myTab = tabstrip.tabGroup.children("li").eq(2);
+            var myTab = tabstrip.tabGroup.children("li").eq(2);
+            tabstrip.select(myTab);
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "none");
+//            $("._third").css("display", "block");
+            $("._first").css("display", "none");
+            $("._second").css("display", "none");
+            $("._third").css("display", "block");
+        });
+        $("#btnPrev2").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+//            var myTab = tabstrip.tabGroup.children("li").eq(1);
+            var myTab = tabstrip.tabGroup.children("li").eq(0);
+            tabstrip.select(myTab);
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "block");
+//            $("._third").css("display", "none");
+            $("._first").css("display", "block");
+            $("._second").css("display", "none");
+            $("._third").css("display", "none");
+        });
+        $("#btnPrev3").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+//            var myTab = tabstrip.tabGroup.children("li").eq(1);
+            var myTab = tabstrip.tabGroup.children("li").eq(1);
+            tabstrip.select(myTab);
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "block");
+//            $("._third").css("display", "none");
+            $("._first").css("display", "none");
+            $("._second").css("display", "block");
+            $("._third").css("display", "none");
+        });
+        
+        @if (Model == null)
+        {
+        <text>
+        $("#GeneralDescription").val("Introduction text\n<p>\n<h3>Highlights</h3>\n</p>\n<ul>\n<li>Highlight 1</li>\n<li>Highlight 2</li>\n<li>Highlight 3</li>\n</ul>");
+        $("#Description").val("<ul>\n<li>detail 1</li>\n<li>detail 2</li>\n<li>detail 3</li>\n</ul>");
+        $("#Terms").val("<ul>\n<li>fine print 1</li>\n<li>fine print 2</li>\n<li>fine print 3</li>\n</ul>");
+        </text>
+        }
+        @if (ViewBag.errors != null || ViewBag.result != null)
+        {
+        <text>
+        $("#_GeneralDescription").val(decodeURI($("#GeneralDescription").val()));
+        $("#_GeneralDescription").htmlarea();
+        $("#_Description").val(decodeURI($("#Description").val()));
+        $("#_Description").htmlarea();
+        $("#_Terms").val(decodeURI($("#Terms").val()));
+        $("#_Terms").htmlarea();
+        </text>
+        }
+        else{
+        <text>
+        $("#_GeneralDescription").val($("#GeneralDescription").val());
+        $("#_GeneralDescription").htmlarea();
+        $("#_Description").val($("#Description").val());
+        $("#_Description").htmlarea();
+        $("#_Terms").val($("#Terms").val());
+        $("#_Terms").htmlarea();
+        </text>
+        }
+    });
+    function tabOnSelect(e) {
+        var tab = $(e.item).find("> .k-link").text();
+        //alert(text);
+//        if (tab == "Info") {
+//            $("._first").css("display", "block");
+//            $("._second").css("display", "none");
+//            $("._third").css("display", "none");
+//        }
+//        else if(tab=="Prize") {
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "block");
+//            $("._third").css("display", "none");
+//        }
+//        else {
+//            $("._first").css("display", "none");
+//            $("._second").css("display", "none");
+//            $("._third").css("display", "block");
+//        }
+            if (tab == "Info") {
+                $("._first").css("display", "block");
+                $("._second").css("display", "none");
+                $("._third").css("display", "none");
+            }
+            else if(tab=="Variance") {
+                $("._first").css("display", "none");
+                $("._second").css("display", "block");
+                $("._third").css("display", "none");
+            }
+            else {
+                $("._first").css("display", "none");
+                $("._second").css("display", "none");
+                $("._third").css("display", "block");
+            }
+    }
+    function pricediscount(){
+        var price = $("#Price").val();
+        var discount = $("#Discount").val();
+        if(price.length<1)price=0;
+        if(discount.length<1)discount=0;
+        var discountprice = price - (price * discount / 100);
+        //discountprice = Math.ceil(discountprice * 10) / 10;
+        discountprice = Math.round(discountprice*1000)/1000;
+        $("#discountprice").val(discountprice.toFixed(2));
+    }
+    function pricediscounttoprice(){
+        var price = $("#Price").val();
+        var discountprice = $("#discountprice").val();
+        if(price.length<1)price=0;
+        if(discountprice.length<1)discountprice=0;
+        var discount = ((price-discountprice)/price)*100;
+        $("#Discount").val(discount.toFixed(3));
+    }
+    function UpdateConf(i) {
+        $("#_submit").val(i);
+        $("#GeneralDescription").val(encodeURI($("#_GeneralDescription").val()));
+        $("#Description").val(encodeURI($("#_Description").val()));
+        $("#Terms").val(encodeURI($("#_Terms").val()));
+        $("#errMerchantId").html("");
+        $("#errCityId").html("");
+        $("#errName").html("");
+        $("#errShortDesc").html("");
+        $("#errInventoryItemTypeId").html("");
+        $("#errImageId").html("");
+        $("#errPrice").html("");
+        $("#errDiscount").html("");
+        $("#errMaximumSales").html("");
+        $("#errMinimumSales").html("");
+        $("#errMargin").html("");
+        $("#errExpireDate").html("");
+        $("#errPublishDate").html("");
+        $("#errPrizeId").html("");
+        $("#lblVarianceLimitInfo").html("");
+        $("#lblVarianceNameInfo").html("");
+        if(i!=2){
+            if($("#MerchantId").val()==""){$("#errMerchantId").html("*");return false;}
+            else if($("#CityId").val()==""){$("#errCityId").html("*");return false;}
+            else if($("#Name").val()==""){$("#errName").html("*");return false;}
+            else if($("#ShortDesc").val()==""){$("#errShortDesc").html("*");return false;}
+            else if($("#InventoryItemTypeId").val()==""){$("#errInventoryItemTypeId").html("*");return false;}
+            else if($("#ImageId").val()==""){$("#errImageId").html("*");return false;}
+            else if($("#Price").val()==""){$("#errPrice").html("*");return false;}
+            else if($("#Discount").val()==""){$("#errDiscount").html("*");return false;}
+            else if($("#MaximumSales").val()==""){$("#errMaximumSales").html("*");return false;}
+            else if($("#MinimumSales").val()==""){$("#errMinimumSales").html("*");return false;}
+            else if($("#Margin").val()==""){$("#errMargin").html("*");return false;}
+            else if($("#ExpireDate").val()==""){$("#errExpireDate").html("*");return false;}
+            else if($("#PublishDate").val()==""){$("#errPublishDate").html("*");return false;}
+            else if($("#PrizeId").val()==""){$("#errPrizeId").html("*");return false;}
+            
+            else if ($("#Variance").val() == "") {
+                $("#lblVarianceLimitInfo").html("");
+                $("#lblVarianceNameInfo").html("");
+                if ($("#VarianceName").val() == "") {
+                    $("#lblVarianceNameInfo").html("*");
+                    return false;
+                }
+                else if ($("#Limit").val() == "" || $("#Limit").val()<1) {
+                    $("#lblVarianceLimitInfo").html("*");
+                    return false;
+                }
+            }
+        }
+        else{
+            if($("#MerchantId").val()==""){$("#errMerchantId").html("*");return false;}
+            else if($("#CityId").val()==""){$("#errCityId").html("*");return false;}
+            else if($("#Name").val()==""){$("#errName").html("*");return false;}
+            else if($("#InventoryItemTypeId").val()==""){$("#errInventoryItemTypeId").html("*");return false;}
+            else if($("#PrizeId").val()==""){$("#errPrizeId").html("*");return false;}
+        }
+        hook = false;
+        return true;
+    }
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="InventoryItem">Inventory Item</a> <span class="active"> / Add Inventory Item</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New inventory item successfully created</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Inventory Item</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Add Inventory Item</h1>
+<input type="hidden" value="" id="tempChoose" name="tempChoose"/>
+<input type="hidden" value="" id="tempChooseName" name="tempChooseName"/>
+<input type="hidden" value="" id="tempChooseUrl" name="tempChooseUrl"/>
+<input type="hidden" value="" id="tempChooseDraft" name="tempChooseDraft"/>
+
+
+<input type="hidden" value="" id="tempChoose2" name="tempChoose2"/>
+<input type="hidden" value="" id="tempChooseName2" name="tempChooseName2"/>
+<input type="hidden" value="" id="tempChooseUrl2" name="tempChooseUrl2"/>
+<input type="hidden" value="" id="tempChooseDraft2" name="tempChooseDraft2"/>
+    </div>
+        @using (Html.BeginForm(null, null, new { PrizeId = ViewBag.PrizeId }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @(Html.Kendo().TabStrip()
+                    .Name("tabstrip")
+                    .Events(events => events.Select("tabOnSelect"))
+                    .Items(tabstrip =>
+                    {
+                        tabstrip.Add().Text("Info")
+                            .Selected(true)
+                            .Content(@<text>     
+    <div id="wrap">
+        <div class="colright">
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MerchantId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().ComboBoxFor(model => model.MerchantId)
+                                            .Value("")
+                                            .Text("")
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .Placeholder("--Select Merchant--")
+                                            .DataTextField("Name")
+                                            .DataValueField("MerchantId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("MerchantList", "Admin");
+                                                });
+                                            })
+                                                    .Events(e => { e.Change("merchantChange"); })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.MerchantId)
+                                        <span class="field-validation-error" id="errMerchantId"></span>
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">Merchant City</div>
+                    <div class="colright"><label id="merchantCity"></label></div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.CountryId)</div>
+                    <div class="colright">
+                        @(Html.Kendo().DropDownList()
+                            .Name("countryDropDown")
+                                .HtmlAttributes(new { @class = "kendoDropdown" })
+                                .OptionLabel("--Select Country--")
+                                .DataTextField("CountryName")
+                                .DataValueField("CountryId")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("CountryList", "Admin");
+                                    });
+                                })
+                                .SelectedIndex(1)
+                        )
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.CityId)</div>
+                    <div class="colright">
+                    @if (Model != null && Model.CityId != null)
+                    {
+                        @(Html.Kendo().ComboBox()
+                            .Name("cityDropDown")
+                                .HtmlAttributes(new { @class = "kendoDropdown" })
+                                .Placeholder("--Select City--")
+                                .DataTextField("CityName")
+                                .DataValueField("CityId")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("CityList", "Admin").Data("filterCity");
+                                    }).ServerFiltering(true);
+                                })
+                            .CascadeFrom("countryDropDown")
+                                .Events(e =>
+                                {
+                                    e.Change("citychange");
+                                })
+                                .Value(Model.CityId.ToString())
+                        )
+                    }
+                    else
+                    {
+                        @(Html.Kendo().ComboBox()
+                            .Name("cityDropDown")
+                                .HtmlAttributes(new { @class = "kendoDropdown" })
+                                .Placeholder("--Select City--")
+                                .DataTextField("CityName")
+                                .DataValueField("CityId")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("CityList", "Admin").Data("filterCity");
+                                    }).ServerFiltering(true);
+                                })
+                            .CascadeFrom("countryDropDown")
+                                .Events(e =>
+                                {
+                                    e.Change("citychange");
+                                })
+                        )
+                    }
+                        <script>
+                            function filterCity() {
+                                return {
+                                    countryid: $("#countryDropDown").val()
+                                };
+                            }
+                            function citychange() {
+                                $("#CityId").val($("#cityDropDown").val());
+                            };
+                        </script>
+                        @Html.HiddenFor(model => model.CityId)
+                        @Html.ValidationMessageFor(model => model.CityId)
+                        <span class="field-validation-error" id="errCityId"></span>
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Name)
+                        <span class="field-validation-error" id="errName"></span></div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.ShortDesc)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.ShortDesc, new { @class = "long" })@Html.ValidationMessageFor(model => model.ShortDesc)
+                        <span class="field-validation-error" id="errShortDesc"></span></div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.InventoryItemTypeId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().DropDownListFor(model => model.InventoryItemTypeId)
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .OptionLabel("--Select Inventory Item Type--")
+                                            .DataTextField("InventoryItemTypeName")
+                                            .DataValueField("InventoryItemTypeId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("InventoryItemTypeList", "Admin");
+                                                });
+                                            })
+                                        )@Html.ValidationMessageFor(model => model.InventoryItemTypeId)
+                        <span class="field-validation-error" id="errInventoryItemTypeId"></span>
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.GeneralDescription)</div>
+                    <div class="colright"><textarea id="_GeneralDescription" class="long textarea" rows="15"></textarea>
+                    @Html.HiddenFor(model => model.GeneralDescription, new { @class = "long textarea" })
+                    @Html.ValidationMessageFor(model => model.GeneralDescription)</div>
+                </div>
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.Description)</div>
+                    <div class="colright"><textarea id="_Description" class="long textarea" rows="15"></textarea>
+                    @Html.HiddenFor(model => model.Description, new { @class = "long textarea" })
+                    @Html.ValidationMessageFor(model => model.Description)</div>
+                </div>
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.Terms)</div>
+                    <div class="colright"><textarea id="_Terms" class="long textarea" rows="15"></textarea>
+                    @Html.HiddenFor(model => model.Terms, new { @class = "long textarea" })
+                    @Html.ValidationMessageFor(model => model.Terms)</div>
+                </div>
+                <div>
+                    <div class="colleft">Tag</div>
+                    <div class="colright" style="color:#8e8071">
+                        <select data-placeholder="" multiple id="InventoryItemTagDropDown" name="InventoryItemTagDropDown" class="long w400">
+                            <option></option>
+                        </select>
+                    </div>
+                </div>     
+                <div>
+                    <div class="colleft" style="vertical-align:top">Main Image</div>
+                    @Html.HiddenFor(model => model.ImageId)
+                    @Html.HiddenFor(model => model.ImageName)
+                    @Html.HiddenFor(model => model.ImageUrl)
+                    <div class="colright"  id="mainimageplace">
+                        @if (Model != null && Model.ImageId != 0)
+                        {
+                            <a  class="fancybox" style="float:left" href="@Model.ImageUrl">
+                                <img src="@Model.ImageUrl" class="imgThumb" />
+                            </a> 
+                            <div class="deleteIcon" onclick="deleteImg()"></div>                       
+                        }
+                    </div>
+                    <div class="colright" style="display:table;width:150px;">
+                        <input id="mainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                        @Html.ValidationMessageFor(model => model.ImageId)
+                        <span class="field-validation-error" id="errImageId"></span>
+                    </div>
+                </div> 
+                <div>
+                    <div class="colleft" style="vertical-align:top">Sub Image</div>
+                    @Html.HiddenFor(model => model.SubImageId)
+                    @Html.HiddenFor(model => model.SubImageName)
+                    @Html.HiddenFor(model => model.SubImageUrl)
+                    <div class="colright"  id="subimageplace">
+                        @if (Model != null && Model.SubImageId != null)
+                        {
+                            var imgid = Model.SubImageId.Split(',');
+                            var imgname = Model.SubImageName.Split('|');
+                            var imgurl = Model.SubImageUrl.Split('|');
+                            for (int i = 0; i < imgid.Count(); i++)
+                            {
+                                if (imgid[i] != "")
+                                {
+                                    var str = "subimg" + imgid[i];
+                                <div id="@str">
+                                    <a  class="fancybox" style="float:left" href="@imgurl[i]">
+                                        <img src="@imgurl[i]" class="imgThumb" />
+                                    </a>    
+                                    <div class="deleteIcon" onclick="deleteSubImg(@imgid[i],'@imgname[i]','@imgurl[i]')"></div>
+                                </div>
+                                }
+                            }
+                        }
+                    </div>
+                    <div class="colright" style="display:table;width:150px;">
+                        <input id="subImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                    </div>
+                </div> 
+                 
+            </div>
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Price)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Price, new { @class = "medium", autocomplete = "off", onkeyup = "infoAddVariance()" })@Html.ValidationMessageFor(model => model.Price)
+                        <span class="field-validation-error" id="errPrice"></span></div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Discount)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Discount, new { @class = "medium", maxlength = "6", autocomplete = "off", onkeyup = "infoAddVariance()" }) % @Html.ValidationMessageFor(model => model.Discount)
+                        <span class="field-validation-error" id="errDiscount"></span></div>
+                </div>   
+                <div>
+                    <div class="colleft">Discounted Price</div>
+                    <div class="colright"><input type="text" id="discountprice" name="discountprice" class="medium"  autocomplete = "off"  onkeyup = "infoAddVariance()" /></div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MaximumSales)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.MaximumSales, new { @class = "medium" })@Html.ValidationMessageFor(model => model.MaximumSales)
+                        <span class="field-validation-error" id="errMaximumSales"></span></div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MinimumTarget)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.MinimumTarget, new { @class = "medium" })@Html.ValidationMessageFor(model => model.MinimumTarget)
+                        <span class="field-validation-error" id="errMinimumTarget"></span></div>
+                </div>  
+                @*<div>
+                    <div class="colleft">@Html.LabelFor(model => model.RemainSales)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.RemainSales, new { @class = "medium" })@Html.ValidationMessageFor(model => model.RemainSales)</div>
+                </div>*@
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Margin)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Margin, new { @class = "medium", autocomplete = "off", onkeyup = "marginChange()" })@Html.ValidationMessageFor(model => model.Margin)
+                        <span class="field-validation-error" id="errMargin"></span></div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.ExpireDate)</div>
+                    <div class="colright">
+                    @{
+                        var datenow = DateTime.Now;
+                        if (ViewBag.ExpiryDate != null) { datenow = ViewBag.ExpiryDate; }
+                        }
+                    @(Html.Kendo().DatePickerFor(model => model.ExpireDate)
+                        .HtmlAttributes(new { @class = "w200" })
+                                .Value(datenow)
+                        .Format("dd MMM yyyy")
+                    )
+                    @Html.ValidationMessageFor(model => model.ExpireDate)
+                        <span class="field-validation-error" id="errExpireDate"></span>
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.PublishDate)</div>
+                    <div class="colright">
+                    @{
+                        var datenowpub = DateTime.Now;
+                        if (ViewBag.PublishDate != null) { datenowpub = ViewBag.PublishDate; }
+                        }
+                    @(Html.Kendo().DateTimePickerFor(model => model.PublishDate)
+                        .HtmlAttributes(new { @class = "w200" })
+                        .Value(datenowpub)
+                        .Min(datenowpub)
+                        .Format("dd MMM yyyy hh:mm tt")
+                    )
+                    @Html.ValidationMessageFor(model => model.PublishDate)
+                        <span class="field-validation-error" id="errPublishDate"></span>
+                    </div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.PrizeId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().DropDownListFor(model => model.PrizeId)
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .OptionLabel("--Select Prize--")
+                                            .DataTextField("Name")
+                                            .DataValueField("PrizeId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("PrizeList", "Admin");
+                                                });
+                                            })
+                                            .Events(e => { e.Change("prizeChange"); })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.PrizeId)
+                        <span class="field-validation-error" id="errPrizeId"></span>
+                    </div>
+                </div> 
+                @*<div>
+                    <div class="colleft">Variance</div>
+                    <div class="colright">
+                        @Html.HiddenFor(model => model.Variance)
+                        @Html.HiddenFor(model => model.TempVariance)
+                        <input type="text" id="txtVariance" placeholder="Name" class="medium"/> 
+                        <input type="text" id="txtVariancePrice" placeholder="Price" class="short" onkeypress="return isNumberKey(event)"/> 
+                        <input type="text" id="txtVarianceDiscount" placeholder="Discount" class="short" onkeypress="return isNumberKey(event)"/> 
+                        <input id="btnVariance" type="button" value="Add" class="submitBtn" onclick="addVariance()"/>
+                        <br />
+                        <div id="listVariance">
+                            @if (Model != null && Model.Variance != null && Model.TempVariance!=null)
+                            {
+                                var variance = Model.Variance.Split('|');
+                                for (int i = 0; i < variance.Count(); i++)
+                                {
+                                    if (variance[i] != "")
+                                    {
+                                        var variance2 = variance[i].Split(',');
+                                        var disprice = decimal.Parse(variance2[1]) - (decimal.Parse(variance2[1]) * decimal.Parse(variance2[2]) / 100);
+                                        disprice = Math.Ceiling(disprice*10)/10;
+                                    <div id="data-@variance2[0].Replace(" ","-")">@variance2[0] - RM @variance2[1] @variance2[2]% (RM @disprice.ToString("N2"))<div class="delicon" onclick="deleteVariance('@variance2[0]','@variance2[1]','@variance2[2]')"></div></div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>*@
+                @*<div>
+                    <div class="colleft">Set as Featured Deal?</div>
+                    <div class="colright">
+                        <div class="onoffswitch">
+                            <input class="onoffswitch-checkbox" data-val="true" data-val-required="The Featured field is required." id="Featured" name="Featured" type="checkbox" value="true">
+                            <label class="onoffswitch-label" for="Featured">
+                                <div class="onoffswitch-inner"></div>
+                                <div class="onoffswitch-switch"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div> *@
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.SalesVisualMeter)</div>
+                    <div class="colright">
+                            @(Html.Kendo().SliderFor(model => model.SalesVisualMeter)
+                                  .Min(0)
+                                  .Max(100)
+                                  .SmallStep(1)
+                                  .LargeStep(10)
+                                  .TickPlacement(SliderTickPlacement.BottomRight)
+                            )                    
+                    </div>
+                </div> 
+                <div>
+                    <div class="colleft">Variance Name</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.VarianceName, new { @class = "long", autocomplete = "off", onkeyup = "infoAddVariance()" }) <span id="lblVarianceNameInfo" class="err"></span></div>
+                </div>
+                <div>
+                    <div class="colleft">Available Limit</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Limit, new { @class = "short", autocomplete = "off", onkeyup = "infoAddVariance()" }) <span id="lblVarianceLimitInfo" class="err"></span></div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Priority)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Priority, new { @class = "medium", autocomplete = "off" })@Html.ValidationMessageFor(model => model.Priority)
+                        <span class="field-validation-error" id="errPriority"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+                            </text>);
+                        tabstrip.Add().Text("Variance")
+                            .Content(@<text>
+                        @Html.HiddenFor(model => model.Variance)
+                        @Html.HiddenFor(model => model.TempVariance)
+                              <div id="wrap">
+                                <div class="colright">
+                                    <div>
+                                        <div class="colleft">Name</div>
+                                        <div class="colright">  <input type="text" id="txtVariance" class="medium"/> <span id="lblVariance" class="err"></span></div>
+                                    </div>
+                                    <div>
+                                        <div class="colleft">Price</div>
+                                        <div class="colright"><input type="text" id="txtVariancePrice" class="short" onkeypress="return isNumberKey2(event)"/> <span id="lblVariancePrice" class="err"></span></div>
+                                    </div>
+                                    <div>
+                                        <div class="colleft">Discount</div>
+                                        <div class="colright"><input type="text" id="txtVarianceDiscount" class="short" onkeypress="return isNumberKey2(event)"/>% <span id="lblVarianceDiscount" class="err"></span></div>
+                                    </div>
+                                    <div>
+                                        <div class="colleft">Margin</div>
+                                        <div class="colright"><input type="text" id="txtVarianceMargin"  class="short" onkeypress="return isNumberKey2(event)"/> <span id="lblVarianceMargin" class="err"></span></div>
+                                    </div>
+                                    <div>
+                                        <div class="colleft">Available Limit</div>
+                                        <div class="colright"><input type="text" id="txtVarianceLimit"  class="short" onkeypress="return isNumberKey(event)"/> <span id="lblVarianceLimit" class="err"></span></div>
+                                    </div>
+                                    <div>
+                                        <input id="btnVariance" type="button" value="Add" class="submitBtn" onclick="addVariance()"/>
+                                    </div>
+                                    <div class="listVariance head">
+                                        <div class="coln">Name</div>
+                                        <div class="col">Price</div>
+                                        <div class="col">Discount</div>
+                                        <div class="col">Discount Price</div>
+                                        <div class="col2">Margin</div>
+                                        <div class="col">Available Limit</div>
+                                    </div>
+                                    <div id="listVariance" class="listVariance">
+                                        @if (Model != null && Model.Variance != null && Model.TempVariance != null)
+                                        {
+                                            var variance = Model.Variance.Split('|');
+                                            for (int i = 0; i < variance.Count(); i++)
+                                            {
+                                                if (variance[i] != "")
+                                                {
+                                                    var variance2 = variance[i].Split(',');
+                                                    var disprice = decimal.Parse(variance2[1]) - (decimal.Parse(variance2[1]) * decimal.Parse(variance2[2]) / 100);
+                                                    //disprice = Math.Ceiling(disprice * 10) / 10;
+                                                    <div id="data-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="rowl">
+                                                        <div id="display">
+                                                            <div class="coln">@variance2[0]</div>
+                                                            <div class="col">RM @variance2[1]</div>
+                                                            <div class="col">@variance2[2]%</div>
+                                                            <div class="col">RM @disprice.ToString("N0")</div>
+                                                            <div class="col2">@variance2[3]</div>
+                                                            <div class="col">@variance2[4]</div>
+                                                            <div class="editicon" onclick="editVariance('@variance2[0]')"></div>
+                                                            <div class="delicon" onclick="deleteVariance('@variance2[0]','@variance2[1]','@variance2[2]','@variance2[3]','@variance2[4]')"></div>
+                                                            <div class="upicon" onclick="upVariance('@variance2[0]','@variance2[1]','@variance2[2]','@variance2[3]','@variance2[4]')"></div>
+                                                            <div class="downicon" onclick="downVariance('@variance2[0]','@variance2[1]','@variance2[2]','@variance2[3]','@variance2[4]')"></div>
+                                                        </div>
+                                                        <div id="edit" style="display:none">
+                                                            <div class="coln"><input type="text" id="txtVariance-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="full2" value="@variance2[0]" /></div>
+                                                            <div class="col"><input type="text" id="txtVariancePrice-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="full2" value="@variance2[1]" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc('@variance2[0]')"/></div>
+                                                            <div class="col"><input type="text" id="txtVarianceDiscount-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="full2" value="@variance2[2]" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc('@variance2[0]')"/></div>
+                                                            <div class="col"><input type="text" id="lblVarianceDiscount-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="full2" value="@disprice.ToString("N2")" onkeypress="return isNumberKey2(event)" onkeyup="variancepricediscrevert('@variance2[0]')"/></div>
+                                                            <div class="col2"><input type="text" id="txtVarianceMargin-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="full2" value="@variance2[3]" onkeypress="return isNumberKey2(event)"/></div>
+                                                            <div class="col"><input type="text" id="txtVarianceLimit-@Kuazoo.Helper.ReplaceSymbol(variance2[0])" class="full2" value="@variance2[4]" onkeypress="return isNumberKey2(event)"/></div>
+                                                            <div class="yesicon" onclick="yesVariance('@variance2[0]','@variance2[1]','@variance2[2]','@variance2[3]','@variance2[4]')"></div>
+                                                            <div class="cancelicon" onclick="cancelVariance('@variance2[0]')"></div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                </div>
+                            </text>);
+
+                        @*tabstrip.Add().Text("Prize")
+                            .Content(@<text>
+    <div id="wrap">
+    <div class="colright">
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Name)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Prize.Name)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.SponsorName)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.SponsorName, new { @class = "long" })@Html.ValidationMessageFor(model => model.Prize.SponsorName)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Price)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.Price, new { @class = "medium" })@Html.ValidationMessageFor(model => model.Prize.Price)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Description)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Description, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Description)</div>
+        </div>
+    </div>
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Terms)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Terms, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Terms)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Detail)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Detail, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Detail)</div>
+        </div>
+        <div>
+            <div class="colleft" style="vertical-align:top">Main Image</div>
+            @Html.HiddenFor(model => model.Prize.ImageId)
+            @Html.HiddenFor(model => model.Prize.ImageName)
+            @Html.HiddenFor(model => model.Prize.ImageUrl)
+            <div class="colright"  id="prizemainimageplace">
+                @if (Model != null && Model.Prize != null && Model.Prize.ImageId != null && Model.Prize.ImageId != 0)
+                {
+                    <a  class="fancybox" style="float:left" href="@Model.Prize.ImageUrl">
+                        <img src="@Model.Prize.ImageUrl" class="imgThumb" />
+                    </a>                        
+                    <div class="deleteIcon" onclick="deleteImgPrize()"></div>        
+                }
+            </div>
+            <div class="colright" style="display:table;width:150px;">
+                <input id="prizemainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                        @Html.ValidationMessageFor(model => model.Prize.ImageId)
+            </div>
+        </div> 
+        <div>
+            <div class="colleft" style="vertical-align:top">Sub Image</div>
+            @Html.HiddenFor(model => model.Prize.SubImageId)
+            @Html.HiddenFor(model => model.Prize.SubImageName)
+            @Html.HiddenFor(model => model.Prize.SubImageUrl)
+            <div class="colright"  id="prizesubimageplace">
+                @if (Model != null && Model.Prize != null && Model.Prize.SubImageId != null)
+                {
+                    var imgid = Model.Prize.SubImageId.Split(',');
+                    var imgname = Model.Prize.SubImageName.Split('|');
+                    var imgurl = Model.Prize.SubImageUrl.Split('|');
+                    for (int i = 0; i < imgid.Count(); i++)
+                    {
+                        var str = "subimgprize" + imgid[i];
+                        <div id="@str">
+                            <a  class="fancybox" style="float:left" href="@imgurl[i]">
+                                <img src="@imgurl[i]" class="imgThumb" />
+                            </a>    
+                            <div class="deleteIcon" onclick="deleteSubImgPrize(@imgid[i],'@imgname[i]','@imgurl[i]')"></div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="colright" style="display:table;width:150px;">
+                <input id="prizesubImagebtn" type="button" value="Add Image" class="submitBtn"/>
+            </div>
+        </div> 
+    </div>
+    </div>
+    </div>
+                            </text>);*@
+
+                        tabstrip.Add().Text("Flash Deal")
+                            .Content(@<text>
+                             <div id="wrap">
+                                <div>
+                                    <div class="colleft">@Html.LabelFor(model => model.FlashDeal.Discount)</div>
+                                    <div class="colright">@Html.TextBoxFor(model => model.FlashDeal.Discount, new { @class = "medium", maxlength = "6", autocomplete = "off", @Value = 0 })%@Html.ValidationMessageFor(model => model.FlashDeal.Discount)</div>
+                                </div>
+                                <div>
+                                    <div class="colleft">@Html.LabelFor(model => model.FlashDeal.StartTime)</div>
+                                    <div class="colright">
+                                    @(Html.Kendo().DateTimePickerFor(model => model.FlashDeal.StartTime)
+                                        .Value(DateTime.Now)
+                                        .Format("dd MMM yyyy hh:mm tt")
+                                    )
+                                    @Html.ValidationMessageFor(model => model.FlashDeal.StartTime)
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="colleft">@Html.LabelFor(model => model.FlashDeal.EndTime)</div>
+                                    <div class="colright">
+                                    @(Html.Kendo().DateTimePickerFor(model => model.FlashDeal.EndTime)
+                                        .Value(DateTime.Now)
+                                        .Format("dd MMM yyyy hh:mm tt")
+                                    )
+                                    @Html.ValidationMessageFor(model => model.FlashDeal.EndTime)
+                                    </div>
+                                </div>
+                            </div>
+
+                            </text>);
+
+                    })
+                                                                                                                                            )
+                 
+            <div class="wrapend">
+                <div class="colleft"><input type="hidden" value="0" id="_submit" name="_submit"/></div>
+                <div class="colright">
+                    @*<div class="_first">
+                        <input type="button" value="Next" class="grayBtn" id="btnFirst" />
+                    </div>
+                    <div class="_second" style="display:none">
+                        <input type="button" value="Back" class="grayBtn" id="btnPrev" />
+                        <input type="submit" value="Submit without Flash Deal" class="submitBtn" onclick="return UpdateConf(0)"/>
+                        <input type="button" value="Next" class="grayBtn" id="btnSecond" />
+                    </div>
+                    <div class="_third" style="display:none">
+                        <input type="button" value="Back" class="grayBtn" id="btnPrev2" />
+                        <input type="submit" value="Submit without Flash Deal" class="submitBtn" onclick="return UpdateConf(0)"/>
+                        <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf(1)"/>
+                    </div>*@
+                    <div class="_first">
+                        <input type="submit" value="Submit without Flash Deal" class="submitBtn" onclick="return UpdateConf(0)"/>
+                        @*<input type="submit" value="Save as Draft" class="submitBtn" onclick="return UpdateConf(2)"/>*@
+                        <input type="button" value="Next" class="grayBtn" id="btnSecond" />
+                        <a href="InventoryItem"><input type="button" value="Cancel" class="grayBtn"/></a>
+                        <input type="button" value="Preview" class="submitBtn" onclick="addToSample()"/>
+                        <input type="button" value="Preview in Home" class="submitBtn" onclick="addToHomeSample()"/>
+                    </div>
+                    <div class="_second" style="display:none">
+                        <input type="button" value="Back" class="grayBtn" id="btnPrev2" />
+                        <input type="button" value="Next" class="grayBtn" id="btnSecond2" />
+                        <input type="submit" value="Submit without Flash Deal" class="submitBtn" onclick="return UpdateConf(0)"/>
+                       @* <input type="submit" value="Save as Draft" class="submitBtn" onclick="return UpdateConf(2)"/>*@
+                        <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf(1)"/>
+                        <input type="button" value="Preview" class="submitBtn" onclick="addToSample()"/>
+                        <input type="button" value="Preview in Home" class="submitBtn" onclick="addToHomeSample()"/>
+                    </div>
+                    <div class="_third" style="display:none">
+                        <input type="button" value="Back" class="grayBtn" id="btnPrev3" />
+                        <input type="submit" value="Submit without Flash Deal" class="submitBtn" onclick="return UpdateConf(0)"/>
+                        @*<input type="submit" value="Save as Draft" class="submitBtn" onclick="return UpdateConf(2)"/>*@
+                        <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf(1)"/>
+                        <input type="button" value="Preview" class="submitBtn" onclick="addToSample()"/>
+                        <input type="button" value="Preview in Home" class="submitBtn" onclick="addToHomeSample()"/>
+                    </div>
+                </div>
+            </div>   
+        }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#MerchantId").data("kendoComboBox").input.focus();
+        @if (ViewBag.PrizeId != null && ViewBag.PrizeId != 0)
+        {
+            <text>
+            $("#PrizeId").data("kendoDropDownList").value(@ViewBag.PrizeId);
+             $("#PrizeId").data("kendoDropDownList").enable(false);
+            </text>
+        }
+        $("#mainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<a  class="fancybox" style="float:left" href="' + $("#tempChooseUrl").val() + '"><img src="' + $("#tempChooseUrl").val() + '" class="imgThumb" /></a>';
+                        html += '<div class="deleteIcon" onclick="deleteImg()"></div>';
+                        $("#mainimageplace").html(html);
+                        $("#ImageId").val($("#tempChoose").val());
+                        $("#ImageName").val($("#tempChooseName").val());
+                        $("#ImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+        $("#subImagebtn").click(function () {
+            $("#tempChoose2").val("");
+            $("#tempChooseUrl2").val("");
+            $("#tempChooseName2").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageListMulti", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose2").val() != "") {
+                        var ch = $("#tempChoose2").val().split('|');
+                        var chi = $("#tempChooseName2").val().split('|');
+                        var chu = $("#tempChooseUrl2").val().split('|');
+                        var html = "";
+                        for (var i = 0; i < ch.length; i++) {
+                            if (ch[i] != '') {
+                                html += '<div id="subimg' + ch[i] + '"><a  class="fancybox" style="float:left" href="' + chu[i] + '"><img src="' + chu[i] + '" class="imgThumb" /></a>';
+                                var cho = ch[i] + ",'" + chi[i] + "','" + chu[i] + "'";
+                                html += ' <div class="deleteIcon" onclick="deleteSubImg(' + cho + ')"></div></div>';
+                                $("#SubImageId").val($("#SubImageId").val() + "," + ch[i]);
+                                $("#SubImageName").val($("#SubImageName").val() + "|" + chi[i]);
+                                $("#SubImageUrl").val($("#SubImageUrl").val() + "|" + chu[i]);
+                            }
+                        }
+                        $("#subimageplace").append(html);
+                        $("#tempChoose2").val("");
+                        $("#tempChooseUrl2").val("");
+                        $("#tempChooseName2").val("");
+                    }
+                }
+            });
+        });
+
+        $("#prizemainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<a  class="fancybox" style="float:left" href="' + $("#tempChooseUrl").val() + '"><img src="' + $("#tempChooseUrl").val() + '" class="imgThumb" /></a>';
+                        html += '<div class="deleteIcon" onclick="deleteImgPrize()"></div>';
+                        $("#prizemainimageplace").html(html);
+                        $("#Prize_ImageId").val($("#tempChoose").val());
+                        $("#Prize_ImageName").val($("#tempChooseName").val());
+                        $("#Prize_ImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+        $("#prizesubImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageListMulti", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var ch = $("#tempChoose").val().split('|');
+                        var chi = $("#tempChooseName").val().split('|');
+                        var chu = $("#tempChooseUrl").val().split('|');
+                        var html = "";
+                        for (var i = 0; i < ch.length; i++) {
+                            if (ch[i] != '') {
+                                html += '<div id="subimgprize' + ch[i] + '"><a  class="fancybox" style="float:left" href="' + chu[i] + '"><img src="' + chu[i] + '" class="imgThumb" /></a>';
+                                var cho = ch[i] + ",'" + chi[i] + "','" + chu[i] + "'";
+                                html += ' <div class="deleteIcon" onclick="deleteSubImgPrize(' + cho + ')"></div></div>';
+                                $("#Prize_SubImageId").val($("#Prize_SubImageId").val() + "," + ch[i]);
+                                $("#Prize_SubImageName").val($("#Prize_SubImageName").val() + "|" + chi[i]);
+                                $("#Prize_SubImageUrl").val($("#Prize_SubImageUrl").val() + "|" + chu[i]);
+                            }
+                        }
+                        $("#prizesubimageplace").append(html);
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+    });
+
+    function deleteImg() {
+        $("#mainimageplace").html("");
+        $("#ImageId").val(0);
+        $("#ImageName").val("");
+        $("#ImageUrl").val("");
+    }
+    function deleteSubImg(id, name, url) {
+        $("#subimg" + id).remove();
+        var current = $("#SubImageId").val();
+        current = current.replace(id, '');
+        $("#SubImageId").val(current);
+        var currentname = $("#SubImageName").val();
+        currentname = currentname.replace(name, '');
+        $("#SubImageName").val(currentname);
+        var currenturl = $("#SubImageUrl").val();
+        currenturl = currenturl.replace(url, '');
+        $("#SubImageUrl").val(currenturl);
+    }
+
+    function deleteImgPrize() {
+        $("#prizemainimageplace").html("");
+        $("#Prize_ImageId").val(0);
+        $("#Prize_ImageName").val("");
+        $("#Prize_ImageUrl").val("");
+    }
+    function deleteSubImgPrize(id, name, url) {
+        $("#subimgprize" + id).remove();
+        var current = $("#Prize_SubImageId").val();
+        current = current.replace(id, '');
+        $("#Prize_SubImageId").val(current);
+        var currentname = $("#Prize_SubImageName").val();
+        currentname = currentname.replace(name, '');
+        $("#Prize_SubImageName").val(currentname);
+        var currenturl = $("#Prize_SubImageUrl").val();
+        currenturl = currenturl.replace(url, '');
+        $("#Prize_SubImageUrl").val(currenturl);
+    }
+    function isNumberKey(evt)
+      {
+         var charCode = (evt.which) ? evt.which : event.keyCode
+         if (charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+
+         return true;
+      }
+    function isNumberKey2(evt)
+      {
+         var charCode = (evt.which) ? evt.which : event.keyCode
+         if (charCode > 31 && charCode!=46 && charCode!=44 && (charCode < 48 || charCode > 57))
+            return false;
+
+         return true;
+      }
+    function infoAddVariance(){
+            var name = $("#VarianceName").val();
+            name = name.replace("'", "");
+            name = name.replace(",", "");
+            name = name.replace('"', '');
+            name = name.replace('`', '');
+    var list = $("#Variance").val().split('|');
+        var check = true;
+//        for (var i = 0; i < list.length; i++) {
+//            if (list[i] != "") {
+//                check = false;break;
+//            }
+//        }
+        if(list.length>0 && list[0] !=""){
+            if(list.length>1 && list[1] == "" ){
+                var _vari = list[0].split(',');
+                if(_vari[0]==name){
+                    $("#Variance").val("");
+                    $("#TempVariance").val("");
+                    $("#data-"+namereplace(name)).remove();
+                }
+                else{
+                    check=false;
+                }
+            }
+            else{
+                check=false;
+            }
+        }
+        if (check) {
+            var price = $("#Price").val();
+            var disc = $("#Discount").val();
+            var discprice = price - (price*disc/100);
+            //discprice = Math.ceil(discprice*10)/10;
+            var margin = $("#Margin").val();
+            var limit = $("#Limit").val();
+            if(name !="" && price!="" && disc !="" && margin !="" && limit !="" && limit > 0){
+                var add = name+","+price+","+disc+","+margin+","+limit;
+                $("#Variance").val($("#Variance").val() + add + "|");
+                $("#TempVariance").val($("#TempVariance").val() + name+"|");
+//                var html = '<div id="data-'+name.replace(/ /g, "-")+'" class="rowl"><div class="col">'+name+'</div>';
+//                    html +='<div class="col">RM '+price+'</div>';
+//                    html +='<div class="col">'+disc+'%</div>';
+//                    html +='<div class="col">RM '+discprice.toFixed(0)+'</div>';
+//                    html +='<div class="col">'+margin+'</div>';
+//                    html +='<div class="col">'+limit+'</div>';
+//                    html +='<div class="delicon" onclick="deleteVariance(\''+name+'\',\'' + price + '\',\''+disc+'\',\''+margin+'\',\''+limit+'\')"></div>';
+//                    html +='<div class="upicon" onclick="upVariance(\''+name+'\',\'' + price + '\',\''+disc+'\',\''+margin+'\',\''+limit+'\')"></div>';
+//                    html +='<div class="downicon" onclick="downVariance(\''+name+'\',\'' + price + '\',\''+disc+'\',\''+margin+'\',\''+limit+'\')"></div>';
+//                    html+='</div>';
+//                $("#listVariance").append(html);
+                var html = '<div id="data-' + namereplace(name) + '" class="rowl">';
+                html += '<div id="display">';
+                html += '<div class="coln">' + name + '</div>';
+                html += '<div class="col">RM ' + price + '</div>';
+                html += '<div class="col">' + disc + '%</div>';
+                html += '<div class="col">RM ' + discprice.toFixed(2) + '</div>';
+                html += '<div class="col2">' + margin + '</div>';
+                html += '<div class="col">' + limit + '</div>';
+                html += '<div class="editicon" onclick="editVariance(\'' + name + '\')"></div>';
+                html += '<div class="delicon" onclick="deleteVariance(\'' + name + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="upicon" onclick="upVariance(\'' + name + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="downicon" onclick="downVariance(\'' + name + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '</div><div id="edit" style="display:none">';
+                html += '<div class="coln"><input type="text" id="txtVariance-' + namereplace(name) + '" class="full2" value="' + name + '"/></div>';
+                html += '<div class="col"><input type="text" id="txtVariancePrice-' + namereplace(name) + '" class="full2" value="' + price + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc(\'' + name + '\')"/></div>';
+                html += '<div class="col"><input type="text" id="txtVarianceDiscount-' + namereplace(name) + '" class="full2" value="' + disc + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc(\'' + name + '\')"/></div>';
+                //html += '<div class="col"><label id="lblVarianceDiscount-' + namereplace(name) + '" class="pad10">RM ' + discprice.toFixed(2) + '</label></div>';
+                html += '<div class="col"><input type="text" id="lblVarianceDiscount-' + namereplace(name) + '" class="full2" value="' + discprice.toFixed(2) + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricediscrevert(\'' + name + '\')"/></div>';
+                html += '<div class="col2"><input type="text" id="txtVarianceMargin-' + namereplace(name) + '" class="full2" value="' + margin + '" onkeypress="return isNumberKey2(event)"/></div>';
+                html += '<div class="col"><input type="text" id="txtVarianceLimit-' + namereplace(name) + '" class="full2" value="' + limit + '" onkeypress="return isNumberKey2(event)"/></div>';
+                html += '<div class="yesicon" onclick="yesVariance(\'' + name + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="cancelicon" onclick="cancelVariance(\'' + name + '\')"></div>';
+                html += '</div></div>';
+                $("#listVariance").append(html);
+            }
+        }
+    }
+    function namereplace(name) {
+        
+//        var symbols = {
+//            '@@': '',
+//            '&amp;': '',
+//            ':': '',
+//            '*': '',
+//            '+': '',
+//            '/': '',
+//            ' ': '-',
+//            '!': '',
+//            '{':'',
+//            '}':'',
+//            '(':'',
+//            ')':'',
+//            '[':'',
+//            ']':''
+//        };
+        //        var res= name.replace(/([@@*+/]|&(amp|lt|gt);)/g, function (m) { return symbols[m]; });
+        var res = replaceAll(name, '@@', '');
+        res = replaceAll(res, ':', '');
+        res = replaceAll(res, '*', '');
+        res = replaceAll(res, '+', '');
+        res = replaceAll(res, '/', '');
+        res = replaceAll(res, ' ', '-');
+        res = replaceAll(res, '!', '');
+        res = replaceAll(res, '{', '');
+        res = replaceAll(res, '}', '');
+        res = replaceAll(res, '(', '');
+        res = replaceAll(res, ')', '');
+        res = replaceAll(res, ']', '');
+        res = replaceAll(res, '[', '');
+        res = replaceAll(res, '=', '');
+        res = replaceAll(res, '%', '');
+        res = replaceAll(res, '&', '');
+        res = replaceAll(res, '.', '');
+        return res;
+    }
+    function escapeRegExp(string) {
+    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    }
+    function replaceAll(string, find, replace) {
+      return string.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+    }
+    function addVariance() {
+        var add = $("#txtVariance").val();
+        var price = $("#txtVariancePrice").val();
+        var disc = $("#txtVarianceDiscount").val();
+        var discprice = price - (price*disc/100);
+        //discprice = Math.ceil(discprice*10)/10;
+        var margin = $("#txtVarianceMargin").val();
+        var limit = $("#txtVarianceLimit").val();
+        $("#lblVariance").html("");
+        $("#lblVariancePrice").html("");
+        $("#lblVarianceDiscount").html("");
+        $("#lblVarianceMargin").html("");
+        $("#lblVarianceLimit").html("");
+        if(add==""){
+            $("#lblVariance").html("*");
+            $("#txtVariance").focus();
+        }
+        else if(price==""){
+            $("#lblVariancePrice").html("*");
+            $("#txtVariancePrice").focus();
+        }
+        else if(disc==""){
+            $("#lblVarianceDiscount").html("*");
+            $("#txtVarianceDiscount").focus();
+        }
+        else if(margin==""){
+            $("#lblVarianceMargin").html("*");
+            $("#txtVarianceMargin").focus();
+        }
+        else if(limit==""){
+            $("#lblVarianceLimit").html("*");
+            $("#txtVarianceLimit").focus();
+        }
+        else{
+            add = add.replace("'", "");
+            add = add.replace(",", "");
+            add = add.replace('"', '');
+            add = add.replace('`', '');
+            var temp= add;
+            add = add+","+price+","+disc+","+margin+","+limit;
+            var list = $("#TempVariance").val().split('|');
+            var check = true;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i] == temp) {
+                    check = false;
+                    break;
+                }
+            }
+            if (check) {
+                $("#Variance").val($("#Variance").val() + add + "|");
+                $("#TempVariance").val($("#TempVariance").val() + temp + "|");
+//                var html = '<div id="data-' + temp.replace(/ /g, "-") + '" class="rowl"><div class="col">' + temp + '</div>';
+//                    html +='<div class="col">RM '+price+'</div>';
+//                    html +='<div class="col">'+disc+'%</div>';
+//                    html +='<div class="col">RM '+discprice.toFixed(0)+'</div>';
+//                    html +='<div class="col">'+margin+'</div>';
+//                    html +='<div class="col">'+limit+'</div>';
+//                    html +='<div class="delicon" onclick="deleteVariance(\'' + temp + '\',\'' + price + '\',\''+disc+'\',\''+margin+'\',\''+limit+'\')"></div>';
+//                    html +='<div class="upicon" onclick="upVariance(\'' + temp + '\',\'' + price + '\',\''+disc+'\',\''+margin+'\',\''+limit+'\')"></div>';
+//                    html +='<div class="downicon" onclick="downVariance(\'' + temp + '\',\'' + price + '\',\''+disc+'\',\''+margin+'\',\''+limit+'\')"></div>';
+//                    html+='</div>';
+//                $("#listVariance").append(html);
+                var html = '<div id="data-' + namereplace(temp) + '" class="rowl">';
+                html += '<div id="display">';
+                html += '<div class="coln">' + temp + '</div>';
+                html += '<div class="col">RM ' + price + '</div>';
+                html += '<div class="col">' + disc + '%</div>';
+                html += '<div class="col">RM ' + discprice.toFixed(2) + '</div>';
+                html += '<div class="col2">' + margin + '</div>';
+                html += '<div class="col">' + limit + '</div>';
+                html += '<div class="editicon" onclick="editVariance(\'' + temp + '\')"></div>';
+                html += '<div class="delicon" onclick="deleteVariance(\'' + temp + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="upicon" onclick="upVariance(\'' + temp + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="downicon" onclick="downVariance(\'' + temp + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '</div><div id="edit" style="display:none">';
+                html += '<div class="coln"><input type="text" id="txtVariance-' + namereplace(temp) + '" class="full2" value="'+temp+'" /></div>';
+                html += '<div class="col"><input type="text" id="txtVariancePrice-' + namereplace(temp) + '" class="full2" value="' + price + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc(\'' + temp + '\')"/></div>';
+                html += '<div class="col"><input type="text" id="txtVarianceDiscount-' + namereplace(temp) + '" class="full2" value="' + disc + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc(\'' + temp + '\')"/></div>';
+                //html += '<div class="col"><label id="lblVarianceDiscount-' + namereplace(temp) + '" class="pad10">RM ' + discprice.toFixed(2) + '</label></div>';
+                html += '<div class="col"><input type="text" id="lblVarianceDiscount-' + namereplace(temp) + '" class="full2" value="' + discprice.toFixed(2) + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricediscrevert(\'' + temp + '\')"/></div>';
+                html += '<div class="col2"><input type="text" id="txtVarianceMargin-' +namereplace(temp) + '" class="full2" value="' + margin + '" onkeypress="return isNumberKey2(event)"/></div>';
+                html += '<div class="col"><input type="text" id="txtVarianceLimit-' + namereplace(temp) + '" class="full2" value="' + limit + '" onkeypress="return isNumberKey2(event)"/></div>';
+                html += '<div class="yesicon" onclick="yesVariance(\'' + temp + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="cancelicon" onclick="cancelVariance(\'' + temp + '\')"></div>';
+                html += '</div></div>';
+                $("#listVariance").append(html);
+            }
+            $("#txtVariance").val("");
+            $("#txtVariancePrice").val("");
+            $("#txtVarianceDiscount").val("");
+            $("#txtVarianceMargin").val("");
+            $("#txtVarianceLimit").val("");
+        }
+
+    }
+    function editVariance(data) {
+        $("#data-" + namereplace(data) + " #display").css("display", "none");
+        $("#data-" + namereplace(data) + " #edit").css("display", "block");
+    }
+    function yesVariance(data, priceold, discold, marginold, limitold) {
+        var add = $("#txtVariance-" + namereplace(data)).val();
+        var price = $("#txtVariancePrice-" + namereplace(data)).val();
+        var disc = $("#txtVarianceDiscount-" + namereplace(data)).val();
+        var discprice = price - (price * disc / 100);
+        //discprice = Math.ceil(discprice * 10) / 10;
+        var margin = $("#txtVarianceMargin-" +namereplace(data)).val();
+        var limit = $("#txtVarianceLimit-" + namereplace(data)).val();
+        if (add == "") {
+            $("#txtVariance-" + namereplace(data)).focus();
+        }
+        else if (price == "") {
+            $("#txtVariancePrice-" + namereplace(data)).focus();
+        }
+        else if (disc == "") {
+            $("#txtVarianceDiscount-" + namereplace(data)).focus();
+        }
+        else if (margin == "") {
+            $("#txtVarianceMargin-" + namereplace(data)).focus();
+        }
+        else if (limit == "") {
+            $("#txtVarianceLimit-" +namereplace(data)).focus();
+        }
+        else {
+            
+            add = add.replace("'", "");
+            add = add.replace(",", "");
+            add = add.replace('"', '');
+            add = add.replace('`', '');
+            var list = $("#TempVariance").val().split('|');
+            var check = true;
+              if (data != add) {
+                  for (var i = 0; i < list.length; i++) {
+                      if (list[i] == add) {
+                          check = false;
+                          break;
+                      }
+                  }
+              }
+            if (check) {
+            var olddata = data + "," + priceold + "," + discold + "," + marginold + "," + limitold + "|";
+            var newdata = add + "," + price + "," + disc + "," + margin + "," + limit + "|";
+
+                var html = '<div class="coln">' + add + '</div>';
+                html += '<div class="col">RM ' + price + '</div>';
+                html += '<div class="col">' + disc + '%</div>';
+                html += '<div class="col">RM ' + discprice.toFixed(2) + '</div>';
+                html += '<div class="col2">' + margin + '</div>';
+                html += '<div class="col">' + limit + '</div>';
+                html += '<div class="editicon" onclick="editVariance(\''+add +'\')"></div>';
+                html += '<div class="delicon" onclick="deleteVariance(\'' + add + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="upicon" onclick="upVariance(\'' + add + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                html += '<div class="downicon" onclick="downVariance(\'' + add + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+            
+                $("#data-" + namereplace(data) + " #display").html(html);
+
+                var htmledit = '<div class="coln"><input type="text" id="txtVariance-' + namereplace(add) + '" class="full2" value="'+add+'" /></div>';
+                htmledit+='<div class="col"><input type="text" id="txtVariancePrice-'+namereplace(add)+'" class="full2" value="'+price+'" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc(\'' + add + '\')"/></div>';
+                htmledit+='<div class="col"><input type="text" id="txtVarianceDiscount-'+namereplace(add)+'" class="full2" value="'+disc+'" onkeypress="return isNumberKey2(event)" onkeyup="variancepricedisc(\'' + add + '\')"/></div>';
+                //htmledit+='<div class="col"><label id="lblVarianceDiscount-'+namereplace(add)+'" class="pad10">RM '+discprice.toFixed(0)+'</label></div>';
+                htmledit += '<div class="col"><input type="text" id="lblVarianceDiscount-' + namereplace(add) + '" class="full2" value="' + discprice.toFixed(2) + '" onkeypress="return isNumberKey2(event)" onkeyup="variancepricediscrevert(\'' + add + '\')"/></div>';
+                htmledit+='<div class="col2"><input type="text" id="txtVarianceMargin-'+namereplace(add)+'" class="full2" value="'+margin+'" onkeypress="return isNumberKey2(event)"/></div>';
+                htmledit+='<div class="col"><input type="text" id="txtVarianceLimit-'+namereplace(add)+'" class="full2" value="'+limit+'" onkeypress="return isNumberKey2(event)"/></div>';
+                htmledit+='<div class="yesicon" onclick="yesVariance(\'' + add + '\',\'' + price + '\',\'' + disc + '\',\'' + margin + '\',\'' + limit + '\')"></div>';
+                htmledit += '<div class="cancelicon" onclick="cancelVariance(\'' + add + '\')"></div>';
+            
+                $("#data-" + namereplace(data) + " #edit").html(htmledit);
+
+                $("#data-"+namereplace(data)).attr("id","data-"+namereplace(add));
+
+                var current = $("#Variance").val();
+                current = current.replace(olddata, newdata);
+                $("#Variance").val(current);
+                var current2 = $("#TempVariance").val();
+                current2 = current2.replace(data + "|", add+"|");
+                $("#TempVariance").val(current2);
+            $("#data-" + namereplace(add) + " #display").css("display", "block");
+            $("#data-" + namereplace(add) + " #edit").css("display", "none");
+            }
+            else{
+            $("#data-" + namereplace(data) + " #display").css("display", "block");
+            $("#data-" + namereplace(data) + " #edit").css("display", "none");
+            }
+        }
+    }
+    function cancelVariance(data) {
+        $("#data-" + namereplace(data) + " #display").css("display", "block");
+        $("#data-" + namereplace(data) + " #edit").css("display", "none");
+    }
+    function variancepricedisc(data) {
+        var price = $("#txtVariancePrice-" + namereplace(data)).val();
+        var discount = $("#txtVarianceDiscount-" + namereplace(data)).val();
+        if (price.length < 1) price = 0;
+        if (discount.length < 1) discount = 0;
+        var discountprice = price - (price * discount / 100);
+        //discountprice = Math.ceil(discountprice * 10) / 10;
+        discountprice = Math.round(discountprice*1000)/1000;
+        $("#lblVarianceDiscount-" + namereplace(data)).val(discountprice.toFixed(2));
+    }
+    function variancepricediscrevert(data) {
+        var price = $("#txtVariancePrice-" + namereplace(data)).val();
+        var discountprice = $("#lblVarianceDiscount-" + namereplace(data)).val();
+        if (price.length < 1) price = 0;
+        if (discountprice.length < 1) discountprice = 0;
+        var discount = ((price - discountprice) / price) * 100;
+        if (discount < 0) { discount = 0; }
+        //discountprice = Math.ceil(discountprice * 10) / 10;
+        $("#txtVarianceDiscount-" + namereplace(data)).val(discount.toFixed(3));
+    }
+    function deleteVariance(data,price,disc,margin,limit) {
+        var r = confirm("Confirm delete " + data + "?");
+        if(r==true){
+            var current = $("#Variance").val();
+            current = current.replace(data+","+price +","+disc+","+margin+","+limit+ "|", '');
+            $("#Variance").val(current);
+            var current = $("#TempVariance").val();
+            current = current.replace(data + "|", '');
+            $("#TempVariance").val(current);
+            $("#data-" + namereplace(data)).remove();
+        }
+    }
+    function upVariance(data,price,disc,margin,limit) {
+        var add = data+","+price+","+disc+","+margin+","+limit;
+        var list = $("#Variance").val().split('|');
+        var pos=0;
+        for (var i = 0; i < list.length; i++) {
+            if(list[i]==add){
+                pos=i;
+                break;
+            }
+        }
+        if(pos>0){
+            pos=pos-1;
+            var remove = $("#Variance").val().replace(add+"|",'');
+            var listremove = remove.split('|');
+            
+            var result="";
+            for (var j = 0; j < listremove.length; j++) {
+                if(j==pos){
+                result+=add+"|";
+                }
+                if(listremove[j]!=""){
+                    result+=listremove[j]+"|";
+                }
+            }
+            $("#Variance").val(result);
+            
+            var curr = $("#TempVariance").val().split('|');
+            $('#data-'+namereplace(data)).after($('#data-'+namereplace(curr[pos])));
+            
+            var remove2 = $("#TempVariance").val().replace(data+'|','');
+            var listremove2 = remove2.split('|');
+            var result2="";
+            for (var j = 0; j < listremove2.length; j++) {
+                if(j==pos){
+                result2+=data+"|";
+                }
+                if(listremove2[j]!=""){
+                    result2+=listremove2[j]+"|";
+                }
+            }
+            $("#TempVariance").val(result2);
+
+        }
+    }
+    
+    function downVariance(data,price,disc,margin,limit) {
+        var add = data+","+price+","+disc+","+margin+","+limit;
+        var list = $("#Variance").val().split('|');
+        var pos=0;
+        for (var i = 0; i < list.length; i++) {
+            if(list[i]==add){
+                pos=i;
+                break;
+            }
+        }
+        if(pos<list.length){
+            pos=pos;
+            var remove = $("#Variance").val().replace(add+"|",'');
+            var listremove = remove.split('|');
+            
+            var result="";
+            if(pos< listremove.length-1){
+                for (var j = 0; j < listremove.length; j++) {
+                    if(listremove[j]!=""){
+                        result+=listremove[j]+"|";
+                    }
+                    if(j==pos){
+                    result+=add+"|";
+                    }
+                }
+            }
+            else{
+            console.log(2);
+                result=remove+add+"|";
+            }
+            $("#Variance").val(result);
+            
+            var curr = $("#TempVariance").val().split('|');
+            $('#data-'+namereplace(data)).before($('#data-'+namereplace(curr[pos+1])));
+            
+            var remove2 = $("#TempVariance").val().replace(data+'|','');
+            var listremove2 = remove2.split('|');
+            var result2="";
+            if(pos< listremove2.length-1){
+                for (var j = 0; j < listremove2.length; j++) {
+                    if(listremove2[j]!=""){
+                        result2+=listremove2[j]+"|";
+                    }
+                    if(j==pos){
+                    result2+=data+"|";
+                    }
+                }
+            }
+            else{
+                result2=remove2+data+"|";
+            }
+            $("#TempVariance").val(result2);
+
+        }
+    }
+    var merchantname="";
+    var merchantaddr="";
+    var merchantdesc="";
+    var merchantsubimg ="";
+    var merchantsubimglink ="";
+    var _sales=0;
+    var _visual=0;
+    var lat=0;
+    var long=0;
+    var prize="";
+    var prizeimagelist="";
+    var prizedesc="";
+    var prizeterms="";
+    var prizedetail="";
+    var expiredate="";
+    function addToSample() {
+        var name = $("#Name").val();
+        var shortdesc=$("#ShortDesc").val();
+        var price=$("#Price").val();
+        var discount=$("#Discount").val();
+        //var visualmeter=$("#SalesVisualMeter").val();
+        //var sales=$("#RemainSales").val();
+        var mainimage=$("#ImageUrl").val();
+        var subimage=$("#SubImageUrl").val();
+        var imagelist=subimage;
+        var taglist="";
+        $('#InventoryItemTagDropDown option:selected').each(function(i, selected) {
+            taglist=taglist+$(selected).text()+"|";
+        });
+        var general=$("#_GeneralDescription").val();
+        var details=$("#_Description").val();
+        var terms=$("#_Terms").val();
+        var values = { mainimage:mainimage,name:name,shortdesc:shortdesc,price:price,discount:discount,visualmeter:_visual,sales:_sales,expiredate:expiredate,        imagelist:imagelist,prize:prize,prizeimagelist:prizeimagelist,prizedesc:prizedesc,prizeterms:prizeterms,prizedetails:prizedetail,        taglist:taglist,general:general,details:details,merchantname:merchantname,merchantaddr:merchantaddr, merchantdesc:merchantdesc,merchantsubimg:merchantsubimg,merchantsubimglink:merchantsubimglink,lat:lat,long:long,term:terms};
+        //console.log(values);
+        _addToSample(values);
+        var win = window.open("@Url.Action("InventoryItemSample", "Admin")", '_blank');
+        win.focus();
+    }
+    function addToHomeSample() {
+        var name = $("#Name").val();
+        var shortdesc=$("#ShortDesc").val();
+        var price=$("#Price").val();
+        var discount=$("#Discount").val();
+        var visualmeter=$("#SalesVisualMeter").val();
+        var sales=$("#RemainSales").val();
+        var mainimage=$("#ImageUrl").val();
+        var subimage=$("#SubImageUrl").val();
+        var imagelist=subimage;
+        var taglist="";
+        $('#InventoryItemTagDropDown option:selected').each(function(i, selected) {
+            taglist=taglist+$(selected).text()+"|";
+        });
+        var general=$("#_GeneralDescription").val();
+        var details=$("#_Description").val();
+        var terms=$("#_Terms").val();
+        var values = { mainimage:mainimage,name:name,shortdesc:shortdesc,price:price,discount:discount,visualmeter:_visual,sales:_sales,expiredate:expiredate,        imagelist:imagelist,prize:prize,prizeimagelist:prizeimagelist,prizedesc:prizedesc,prizeterms:prizeterms,prizedetails:prizedetail,        taglist:taglist,general:general,details:details,merchantname:merchantname,merchantaddr:merchantaddr, merchantdesc:merchantdesc,merchantsubimg:merchantsubimg,merchantsubimglink:merchantsubimglink,lat:lat,long:long,term:terms};
+        //console.log(values);
+        _addToSample(values);
+        var win = window.open("@Url.Action("InventoryItemHomeSample", "Admin")", '_blank');
+        win.focus();
+    }
+    function merchantChange(){
+        var merchantid = $("#MerchantId").val();
+        merchantname="";
+        merchantaddr="";
+        lat=0;
+        long=0;
+        $.post('MerchantDetail',{id:merchantid}, function (obj) {
+             merchantname = obj.Name;
+             merchantaddr = obj.AddressLine1+"<br />"+obj.City.CityName+","+obj.PostCode+","+obj.Country.CountryName;
+             lat = obj.Latitude;
+             long = obj.Longitude;
+             merchantdesc = obj.Description;
+             merchantsubimg=obj.SubImageUrl;
+             merchantsubimglink = obj.SubImageUrlLink;
+             $("#merchantCity").html(obj.City.CityName);
+        });
+    }
+    function prizeChange(){
+        var prizeid = $("#PrizeId").val();
+        prize="";
+        prizeimagelist="";
+        prizedesc="";
+        prizeterms="";
+        prizedetail="";
+        $.post('PrizeDetail',{id:prizeid}, function (obj) {
+            prize= obj.Name;
+            prizedesc = obj.Description;
+            prizeterms = obj.Terms;
+            prizedetail = obj.Detail;
+            prizeimagelist = obj.ImageUrl+"|"+obj.SubImageUrl;
+            expiredate = obj.ExpiryDateStr;
+        });
+        _sales=0;
+        _visual=0;
+        var margin = $("#Margin").val();
+        if(margin==""){margin=0;}
+        if(prizeid==""){prizeid=0;}
+        $.post('TempSalesVisual',{id:prizeid, margin:margin}, function (obj) {
+            _sales=obj.RemainSales;
+            _visual = obj.VisualMeter;
+        });
+    }
+    function marginChange(){
+        infoAddVariance();
+        var prizeid = $("#PrizeId").val();
+        var margin = $("#Margin").val();
+        if(margin==""){margin=0;}
+        if(prizeid==""){prizeid=0;}
+        $.post('TempSalesVisual',{id:prizeid, margin:margin}, function (obj) {
+            _sales=obj.RemainSales;
+            _visual = obj.VisualMeter;
+        });
+    }
+</script>

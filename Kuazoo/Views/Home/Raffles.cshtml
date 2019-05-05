@@ -1,0 +1,536 @@
+﻿@{
+    ViewBag.Title = "Raffles";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+@section AddToHead{
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml: true,
+            version: 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        changehomenav(3);
+    });
+    function goTo(url) {
+        if ($("#childChoose").val() == "0") {
+            window.location.href = url;
+        }
+    }
+</script>
+<script type="text/javascript">
+    function countdownStart(id, endtime) {
+        //$("#" + id).html('02<span class="small">H</span>16<span class="small">M</span>')
+        var end = new Date(endtime);
+        var now = new Date();
+        var c = end.getTime() - now.getTime();
+        c = c / (60 * 1000);
+        if (c > 0) {
+            c = c + 1;
+            //console.log(c);
+            var hour = parseInt(c / 60);
+            //console.log(hour);
+            var minute = parseInt(c - (hour * 60));
+            //console.log(minute);
+            if (hour < 10) {
+                hour = "0" + hour;
+            }
+            if (minute < 10) {
+                minute = "0" + minute;
+            }
+            $("#countdown" + id).html(hour + '<span class="small">H</span>' + minute + '<span class="small">M</span>');
+            setTimeout(function () {
+                countdownStart(id, endtime);
+            }, 1000);
+        }
+        else {
+            $("#boxflashdeal" + id).css("display", "none");
+        }
+    }
+</script>
+}
+<div class="banner">
+    <div class="sidelogo">FLASH<BR /><span>DEAL!</span></div><div class="sidelogoshape"></div>
+    <div class="bannertext">
+        <div class="bannerTitle">When deals go cheaper for a flashing moment!</div>
+        <a href="@Url.Action("FlashDeals", "Home")"><div class="bannerSubtitle">What is a Flash Deal anyway?</div></a>
+    </div>
+</div>
+
+<h2>Raffles</h2>
+
+<div class="content">
+    @if (Model.item != null)
+    {
+        foreach (var v in Model.item)
+        {
+            if (v.TypeName.ToLower().Equals("raffle"))
+            {
+                <div class="dealbox" onclick="goTo('@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and"), d = 3 })')">
+                    <div class="boxraffle">
+                        <div class="boxrafflecontent">
+                            <div class="raflleticket">RM @v.Price</div>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        <div class="boxsocialraf">
+                        @{
+                        var strinv = "inventoryimgname" + v.InventoryItemId;
+                        var strname = "inventoryname" + v.InventoryItemId;
+                        var strurl = "inventoryurl" + v.InventoryItemId;
+                        var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Url.Content("~/Home/Deals")/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")" />
+                             
+                            
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if(v.Wishlist){activestr="active";}
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             } 
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Url.Content("~/Home/Deals")/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                            <div class="boxoffbig2"><span class="boxoffmedium">RM</span>@v.Price</div>
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="pricedisc">RAFFLE TICKET</span>
+                            </div>
+                            @if(v.Prize.GameType == null || v.Prize.GameType ==0 || v.Prize.GameType == 1){
+                            <div>
+                                @{
+                        var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales raffle tickets remaining!</div>
+                                }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
+@*<div class="citycontent">
+    <div class="citytitle">BROWSE BY CITY</div>
+    <div class="citylistwrap">
+        <div class="cityitem"><a href="@Url.Action("Raffles", "Home", new { id = 0 })" class="@if (ViewBag.cityid == 0)
+                                                                                              {<text>active</text>}">All</a></div>
+        @foreach (var v in Kuazoo.Helper.GetListCity())
+        {
+            <div class="cityitem"><a href="@Url.Action("Raffles", "Home", new { id = v.Value })" class="@if (ViewBag.cityid == v.Value)
+                                                                                                        {<text>active</text>}">@v.Key</a></div>
+        }
+    </div>
+</div>*@
+
+
+
+<input type="hidden" id="twitterChoose" value="" />
+<input type="hidden" id="childChoose" value="0" />
+<input type="hidden" id="emailMsg" value="" />
+
+@section AddToFooter{
+<script src="@Url.Content("~/Scripts/jquery.easing.1.3.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.mobile.just-touch.js")"></script>
+<script src="@Url.Content("~/Scripts/mightyslider.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+<script type="text/javascript" async src="http://assets.pinterest.com/js/pinit.js"></script>
+ <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+    
+<script type="text/javascript">
+    twttr.ready(function (twttr) {
+        twttr.events.bind('tweet', function (event) {
+            var id = $("#twitterChoose").val();
+             $("#twitterChoose").val("");
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckPostFB", "Home")",
+                data: {id:id,type:"Twitter"},
+                dataType:"json",
+                success:function(data){
+                    if(data.success){
+                        //alert("Successfully shared this great deal to your friend!");
+//                        $("#msgDialog").html("Successfully shared this great deal to your friend!");
+//                
+//                        $("#msgDialog").dialog({
+//                            modal: true,
+//                            buttons: {
+//                                Ok: function () {
+//                                    $(this).dialog("close");
+//                                }
+//                            }
+//                        });
+                        bootbox.alert("Successfully shared this great deal to your friend!");
+                    }
+                }
+            });
+        });
+    });
+    function shareTwitter(id) {
+        $("#childChoose").val(1);
+       $.ajax({
+            type:'POST',
+            url: "@Url.Action("CheckLimitShare", "Home")",
+            data: {id:id,type:"Twitter"},
+            dataType:"json",
+            success:function(data){
+                var check=false;
+                if(data.success && data.login){
+                    check=true;
+                }
+                else if(data.success == false && data.login==true){
+                    check=false;
+                    //alert(data.error);
+//                    $("#msgDialog").html(data.error);
+//                
+//                    $("#msgDialog").dialog({
+//                        modal: true,
+//                        buttons: {
+//                            Ok: function () {
+//                                $(this).dialog("close");
+//                            }
+//                        }
+//                    });
+                    bootbox.alert(data.error);
+                }
+                else if(data.success== false && data.login==false){
+                    check=true;
+                }
+                if(check){
+                $("#twitterChoose").val(id);
+                    document.getElementById("sharetwitterid").click();
+                }
+                $("#childChoose").val(0);
+            }
+        });
+    }
+    function shareFB(id){
+        $("#childChoose").val(1);
+        $.ajax({
+            type:'POST',
+            url: "@Url.Action("CheckLimitShare", "Home")",
+            data: {id:id,type:"Facebook"},
+            dataType:"json",
+            success:function(data){
+        $("#childChoose").val(0);
+                var check=false;
+                if(data.success && data.login){
+                    check=true;
+                }
+                else if(data.success == false && data.login==true){
+                    check=false;
+                    //alert(data.error);
+//                    $("#msgDialog").html(data.error);
+//                
+//                    $("#msgDialog").dialog({
+//                        modal: true,
+//                        buttons: {
+//                            Ok: function () {
+//                                $(this).dialog("close");
+//                            }
+//                        }
+//                    });
+                    bootbox.alert(data.error);
+                }
+                else if(data.success== false && data.login==false){
+                    check=true;
+                }
+                if(check){
+                    _shareFB(id);                    
+                }
+            }
+        });
+    }
+    function _shareFB(id) {
+        var imgname=  $("#inventoryimgname"+id).val();
+        var url = $("#inventoryurl"+id).val(); 
+        var picurl = '@Kuazoo.Helper.imagebaseURL' + 'thumb-'+imgname;
+        FB.ui(
+        {
+            method: 'share',
+            display: 'popup',
+            href: url,
+            picture:  picurl,
+            scrape:true
+        },
+        function(response){
+            if(response && !response.error_code){
+                 $.ajax({
+                    type:'POST',
+                    url: "@Url.Action("CheckPostFB", "Home")",
+                    data: {id:id,type:"Facebook"},
+                    dataType:"json",
+                    success:function(data){
+                        if(data.success){
+                            //alert("Successfully shared this great deal to your friend!");
+//                            $("#msgDialog").html("Successfully shared this great deal to your friend!");
+//                
+//                            $("#msgDialog").dialog({
+//                                modal: true,
+//                                buttons: {
+//                                    Ok: function () {
+//                                        $(this).dialog("close");
+//                                    }
+//                                }
+//                            });
+                            bootbox.alert("Successfully shared this great deal to your friend!");
+                        }
+                    }
+                });
+            }
+        });
+    }
+    var pincount=0;
+    function pinCount(id){
+        var url = $("#inventoryurl"+id).val(); 
+        $.ajax({
+            url: 'http://api.pinterest.com/v1/urls/count.json?callback=?',
+            data: {
+                url: url
+            },
+            success: function(data) {
+                if(pincount==0){
+                    pincount = data.count;
+                }
+                else{
+                    console.log(data.count);
+                    if(pincount==data.count){
+                        pincount=0;
+                    }
+                    else{
+                        pincount=0;
+                         $.ajax({
+                            type:'POST',
+                            url: "@Url.Action("CheckPostFB", "Home")",
+                            data: {id:id,type:"Pinterest"},
+                            dataType:"json",
+                            success:function(data){
+                                if(data.success){
+                                    //alert("Successfully shared this great deal to your friend!");
+//                                    $("#msgDialog").html("Successfully shared this great deal to your friend!");
+//                
+//                                    $("#msgDialog").dialog({
+//                                        modal: true,
+//                                        buttons: {
+//                                            Ok: function () {
+//                                                $(this).dialog("close");
+//                                            }
+//                                        }
+//                                    });
+                                    bootbox.alert("Successfully shared this great deal to your friend!");
+                                }
+                            }
+                        });
+                    }
+                }
+            },
+            dataType: 'jsonp'
+        });
+    }
+    function sharePin(id){
+        $("#childChoose").val(1);
+        $.ajax({
+            type:'POST',
+            url: "@Url.Action("CheckLimitShare", "Home")",
+            data: {id:id,type:"Pinterest"},
+            dataType:"json",
+            success:function(data){
+        $("#childChoose").val(0);
+                var check=false;
+                if(data.success && data.login){
+                    check=true;
+                }
+                else if(data.success == false && data.login==true){
+                    check=false;
+                    //alert(data.error);
+//                    $("#msgDialog").html(data.error);
+//                
+//                    $("#msgDialog").dialog({
+//                        modal: true,
+//                        buttons: {
+//                            Ok: function () {
+//                                $(this).dialog("close");
+//                            }
+//                        }
+//                    });
+                    bootbox.alert(data.error);
+                }
+                else if(data.success== false && data.login==false){
+                    check=true;
+                }
+                if(check){
+                    _sharePin(id);                    
+                }
+            }
+        });
+    }
+    function _sharePin(id){
+        var url = $("#inventoryurl"+id).val(); 
+        var name = $("#inventoryname"+id).val();
+        console.log(url);
+        var pinUrl = "http://pinterest.com/pin/create/button/?url=";
+        pinUrl += encodeURIComponent(url);
+        pinUrl += "&media=http://appstream.com.my/air.jpg";
+        pinUrl += "&description="+name;          
+        pinCount(id);
+        var win = window.open(pinUrl,'signin', 'height=300,width=665');
+        var timer = setInterval(function() {   
+            if(win.closed) {  
+                clearInterval(timer);  
+                //alert('closed');        
+                pinCount(id);
+            }  
+        }, 1000); 
+    }
+    function addWishList(e,id){
+        $("#childChoose").val(1);
+        @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+        {
+            <text>
+            var wishlist = {id:id};
+            var result = addToWishlist(wishlist);
+            if(result=="true"){
+                $("#inventoryfav"+id).addClass("active");
+                //alert("Successfully added to wish list!");
+//                $("#msgDialog").html("Successfully added to wish list!");
+//                
+//                $("#msgDialog").dialog({
+//                    modal: true,
+//                    buttons: {
+//                        Ok: function () {
+//                            $(this).dialog("close");
+//                        }
+//                    }
+//                });
+                    bootbox.alert("Successfully added to wish list!",function(){$("#childChoose").val(0);});
+            }
+            else{
+                //alert(result);
+//                $("#msgDialog").html(result);
+//                
+//                $("#msgDialog").dialog({
+//                    modal: true,
+//                    buttons: {
+//                        Ok: function () {
+//                            $(this).dialog("close");
+//                        }
+//                    }
+//                });
+                    bootbox.alert(result,function(){$("#childChoose").val(0);});
+            }
+            
+            </text>
+        }
+        else
+        {
+            <text>
+        $.ajax({
+            type:'POST',
+            url: "@Url.Action("WishlistAdd", "Home")",
+            data: {id:id},
+            dataType:"json",
+            success:function(data){
+                $("#childChoose").val(0);
+                if(data.success==true){
+                 $("#inventoryfav"+id).addClass("active");
+                    //alert("Successfully added to wish list!");
+//                    $("#msgDialog").html("Successfully added to wish list!");
+//                
+//                    $("#msgDialog").dialog({
+//                        modal: true,
+//                        buttons: {
+//                            Ok: function () {
+//                                $(this).dialog("close");
+//                            }
+//                        }
+//                    });
+                    bootbox.alert("Successfully added to wish list!");
+                }
+                else{
+                    if(data.error=="Unauthorized access."){
+                        
+                    }
+                    else{
+//                        $("#msgDialog").html(data.error);
+//                
+//                        $("#msgDialog").dialog({
+//                            modal: true,
+//                            buttons: {
+//                                Ok: function () {
+//                                    $(this).dialog("close");
+//                                }
+//                            }
+//                        });
+                    bootbox.alert(data.error);
+                    }
+                }
+            }
+        });
+            </text>
+        }
+    }
+    function shareEmail(id) {
+        $("#childChoose").val(1);
+        setTimeout(function(){
+        $("#childChoose").val(0);},1000);
+        $.fancybox.open({
+            href: '@Url.Action("ShareEmail", "Home")/'+id,
+            type: 'iframe',
+            padding: 0,
+            width: 500,
+            afterClose: function() {
+                var msg= $("#emailMsg").val();
+                if(msg!=""){
+                    bootbox.alert(msg);
+                }
+            }
+        });
+    }
+
+</script>
+}

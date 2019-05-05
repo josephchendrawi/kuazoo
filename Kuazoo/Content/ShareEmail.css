@@ -1,0 +1,111 @@
+﻿
+@font-face {
+	font-family: 'BrushScriptStd';
+    src: url('fonts/BrushScriptStd.eot'); /* IE9 Compat Modes */
+    src: url('fonts/BrushScriptStd.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/BrushScriptStd.ttf') format("truetype");
+}
+
+@font-face {
+	font-family: 'OpenSans';
+    src: url('fonts/OpenSans-Regular.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Regular.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansBold';
+    src: url('fonts/OpenSans-Bold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Bold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansSemiBold';
+    src: url('fonts/OpenSans-Semibold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Semibold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Semibold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansLight';
+    src: url('fonts/OpenSans-Light.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Light.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Light.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansItalic';
+	src: url('fonts/OpenSans-Italic.ttf') format("truetype");
+    src: url('fonts/OpenSans-Italic.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Italic.ttf') format("truetype");
+}
+.shareemailwrap
+{
+    width:100%;
+    position:relative;
+    background:#fff;
+    text-align:center;
+}
+.shareemailwrap .header
+{
+   /* padding:20px;
+    border-bottom:1px solid #cccccc;*/
+    width: 100%;
+    /*background: #fafafa;*/
+    padding-top:40px;
+}
+.shareemailwrap .footer
+{
+    padding:20px;
+    border-top:1px solid #cccccc;
+    width: 100%;
+    background: #fafafa;
+    text-align:right;
+}
+    .shareemailwrap h2
+    {
+        font-size:32px;
+        font-family:OpenSans;
+        color:#428bca;
+        margin: 0px;
+    }
+   
+.shareemailwrap .row
+{
+   margin-top:10px;
+   margin-bottom:10px;
+   margin-left:0px;
+   margin-right:0px;
+}
+.shareemailwrap .rowcontent
+{
+    display:table-cell;
+    padding:20px;
+}
+/*
+.shareemailwrap .right
+{
+    text-align:right;
+    line-height:40px;
+}*/
+.shareemailwrap .col-xs-4
+{
+    padding:5px;
+}
+.shareemailwrap .txtInput100x.left
+{
+    text-align:left;
+}
+.shareemailwrap .txtInput100x.right
+{
+    text-align:right;
+}
+.shareemailwrap .txtInput100x.center
+{
+    text-align:center;
+}
+.shareemailwrap .btnComment
+{
+    background:#d14828;
+        font-size:28px;
+        height:auto;
+        font-family:OpenSans;
+}

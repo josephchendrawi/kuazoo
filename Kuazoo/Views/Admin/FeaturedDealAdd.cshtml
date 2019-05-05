@@ -1,0 +1,96 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryFeatured
+@{
+    ViewBag.Title = "ImageList";
+    Layout = "~/Views/Shared/_EmptyLayout2.cshtml";
+}
+   <link href="@Url.Content("~/Content/dataviz/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/dataviz/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/web/kendo.common.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/web/kendo.rtl.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/web/kendo.default.min.css")">
+      <script src="@Url.Content("~/Scripts/kendo/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/console.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/prettify.min.js")"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+    });
+</script>
+    <div id="mainwrap">
+        <h1>Add Featured Deal</h1>
+    </div>
+    <div id="wrap">
+            <div>
+                <div class="colleft">Inventory Item</div>
+                <div class="colright">
+                                    @(Html.Kendo().DropDownListFor(model => model.InventoryItemId)
+                                        .HtmlAttributes(new { style = "width: 300px" })
+                                        .OptionLabel("--Select Inventory Item--")
+                                        .DataTextField("Name")
+                                        .DataValueField("InventoryItemId")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("InventoryItemListNonFeatured", "Admin");
+                                            });
+                                        })
+                                    )
+                                    <span id="inventoryitemerr" style="color:Red"></span>
+                </div>
+            </div> 
+            <div>
+                <div class="colleft">Type Number</div>
+                <div class="colright"><input type="text" id="FeatureSeq" onkeypress="return isNumberKey(this)" maxlength="1" /><span id="featureseqerr" style="color:Red"></span></div>
+            </div>
+    </div>
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    <input type="button" value="Submit" class="submitBtn" onclick="submitInventory()"/>
+                </div>
+            </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+    });
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode;
+        if ((charCode < 49 || charCode > 53))
+            return false;
+
+        return true;
+    }
+    function submitInventory() {
+        $("#inventoryitemerr").html("");
+        $("#featureseqerr").html("");
+        var id = $("#InventoryItemId").val();
+        var seq = $("#FeatureSeq").val();
+        if (id == "") {
+            $("#inventoryitemerr").html("*");
+            $("#InventoryItemId").focus();
+        }
+        else if (seq == "") {
+            $("#featureseqerr").html("*");
+            $("#FeatureSeq").focus();
+        }
+        else {
+             $.ajax({
+                type:'POST',
+                url: "@Url.Action("FeaturedDealAdd_Add", "Admin")",
+                data: {id:id,seq:seq},
+                dataType:"json",
+                success:function(data){
+                    if(data.result){
+                        parent.document.getElementById("tempMessage").value = data.message;
+                    }
+                    else{
+                        parent.document.getElementById("tempMessageerr").value = data.message;
+                    }
+                    parent.$.fancybox.close();
+                }
+            });
+        }
+    }
+</script>

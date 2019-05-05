@@ -1,0 +1,534 @@
+﻿
+@font-face {
+	font-family: 'BrushScriptStd';
+    src: url('fonts/BrushScriptStd.eot'); /* IE9 Compat Modes */
+    src: url('fonts/BrushScriptStd.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/BrushScriptStd.ttf') format("truetype");
+}
+
+@font-face {
+	font-family: 'OpenSans';
+    src: url('fonts/OpenSans-Regular.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Regular.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansBold';
+    src: url('fonts/OpenSans-Bold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Bold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansSemiBold';
+    src: url('fonts/OpenSans-Semibold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Semibold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Semibold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansLight';
+    src: url('fonts/OpenSans-Light.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Light.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Light.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansItalic';
+	src: url('fonts/OpenSans-Italic.ttf') format("truetype");
+    src: url('fonts/OpenSans-Italic.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Italic.ttf') format("truetype");
+}
+.profile
+{
+    display:inline-table;
+    width:100%;
+    margin-bottom: 50px;
+}
+.profile .proleft
+{
+    width:150px;
+    float:left;
+    z-index:2;
+    position:relative;
+    padding-top:20px;
+}
+.profile .proright
+{
+    width:788px;
+    float:left;
+    background:#ffffff;
+    border-radius:5px;
+    border:1px solid #cccccc;
+    min-height:399px;
+    z-index:1;
+    position:relative;
+    margin-left:-1px;
+    padding:10px;
+}
+    .profile .proleft .nav .active
+    {
+        background:#ffffff;
+        border:1px solid #cccccc;
+        border-right:0px;
+    }
+    .profile .proleft .nav .active a:after
+    {
+        border:2px solid red;
+    }
+.mprow
+{
+    display:inline-table;
+    width:100%;
+    border: 1px solid #cccccc;
+    margin-bottom:20px;
+}
+.mprow .mpheader
+{
+    width: 100%;
+    background: #eeeeee;
+    font-size: 14px;
+    font-family: OpenSans;
+    color: #333333;
+    padding: 5px 10px 5px 10px;
+    border-bottom: 1px solid #cccccc;
+}
+    .mprow .mpheader .mpheaderright
+    {
+        float:right;
+        font-family:OpenSansBold;
+    }
+        .mprow .mpheader .mpheaderright span
+        {
+            font-family: OpenSans;
+        }
+.mprow .mprowcontent
+{
+    display:table;
+    width:100%;
+}
+.mprow .mpcolship
+{
+    display:table-cell;
+    width:200px;
+    border-right:1px solid #cccccc;
+    vertical-align: top;
+    padding: 10px;
+    font-size: 14px;
+    font-family: OpenSans;
+    color: #333333;
+}
+    .mprow .mpcolship span
+    {
+        font-family:OpenSansBold;
+    }
+.mprow .mpcolitem
+{
+    display:table-cell;
+    width: 210px;
+    padding: 10px;
+    vertical-align: top;
+}
+    .mprow .mpcolitem .imageplace
+    {
+        display:inline-table;
+        border:1px solid #cccccc;
+    }
+    .mprow .mpcolitem .imageplace .image1
+    {
+        width:120px;
+        height:80px;
+        float:left;
+        position:relative;
+    }
+        .mprow .mpcolitem .imageplace .image1 img
+        {
+            width:120px;
+            height:80px;
+        }
+    .mprow .mpcolitem .imageplace .image2
+    {
+        width:64px;
+        height:80px;
+        float:left;
+        text-align:center;
+    }
+        .mprow .mpcolitem .imageplace .image2 div
+        {
+            font-size: 12px;
+            font-family: OpenSansBold;
+            color: #d60c7d;
+        }
+        .mprow .mpcolitem .imageplace .image2 img
+        {
+            width:54px;
+            height:54px;
+            margin-top:4px;
+        }
+    .mprow .mpcolitem .prizeexpire.expire
+    {
+        color:#999999;
+    }
+    .mprow .mpcolitem .prizeexpire
+    {
+        font-size:14px;
+        font-family:OpenSansBold;
+        color:#333333;
+    }
+        .mprow .mpcolitem .prizeexpire span
+        {
+            font-family:OpenSans;
+        }
+    .mprow .mpcolitem .kuazoo
+    {
+        position: absolute;
+        z-index: 1;
+        height: 100%;
+        width: 100%;
+        display: table;
+    }
+        .mprow .mpcolitem .kuazoo .kuazoobg
+        {
+            position: absolute;
+            z-index: 1;
+            background: #0093c9;
+            height: 100%;
+            width: 100%;
+            opacity: 0.85;
+        }
+        .mprow .mpcolitem .kuazoo .kuazoowrap
+        {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .mprow .mpcolitem .kuazoo .kuazoowrap .boxTitle
+        {
+            z-index: 2;
+            position: relative;
+            font-size: 18px;
+            color: white;
+            font-family: OpenSansBold;
+        }
+        .mprow .mpcolitem .kuazoo .kuazoowrap .boxSubtitle
+        {
+            z-index: 2;
+            position: relative;
+            font-size: 10px;
+            color: white;
+            font-family: OpenSansSemiBold;
+            letter-spacing: 4px;
+        }
+.mprow .mpcoldetail
+{
+    display:table-cell;
+    vertical-align: top;
+    padding: 10px 10px 10px 0px;
+    font-family:OpenSans;
+    font-size:14px;
+    color:#333333;
+} 
+    .mprow .mpcoldetail span
+    {
+        color: #d60c7d;
+    }
+    .mprow .mpcoldetail div div
+    {
+        float:right;
+        display:inline-table;
+    }
+    .mprow .mpcoldetail .bold
+    {
+        font-family:OpenSansBold;
+    }
+
+.reviewrow .reviewitem
+{
+    display:table-cell;
+    width: 205px;
+    vertical-align: top;
+}
+    .reviewrow .reviewitem .imageplace
+    {
+        display:inline-table;
+        border:1px solid #cccccc;
+    }
+    .reviewrow .reviewitem .imageplace .image1
+    {
+        width:120px;
+        height:80px;
+        float:left;
+    }
+        .reviewrow .reviewitem .imageplace .image1 img
+        {
+            width:120px;
+            height:80px;
+        }
+    .reviewrow .reviewitem .imageplace .image2
+    {
+        width:64px;
+        height:80px;
+        float:left;
+        text-align:center;
+    }
+        .reviewrow .reviewitem .imageplace .image2 div
+        {
+            font-size: 12px;
+            font-family: OpenSansBold;
+            color: #d60c7d;
+        }
+        .reviewrow .reviewitem .imageplace .image2 img
+        {
+            width:54px;
+            height:54px;
+            margin-top:4px;
+        }
+.reviewrow .reviewaction
+{
+    display:table-cell;
+    width: 80px;
+    vertical-align: top;
+}
+
+.asrow
+{
+    display:inline-table;
+    width:100%;
+    border-bottom:1px solid #cccccc;
+    padding-top:10px;
+    padding-bottom:10px;
+}
+.asrowblank1
+{
+    display:inline-table;
+    width:100%;
+    padding-top:10px;
+}
+.asrowblank2
+{
+    display:inline-table;
+    width:100%;
+}
+.asrowblank3
+{
+    display:inline-table;
+    width:100%;
+    padding-bottom:10px;
+    border-bottom:1px solid #cccccc;
+}
+.ascol1
+{
+    display:table-cell;
+    width: 150px;
+    vertical-align: middle;
+    text-align:right;
+}
+.ascol11top
+{
+    display:table-cell;
+    width: 150px;
+    vertical-align: top;
+    text-align:right;
+    padding-top:10px;
+}
+.ascol11
+{
+    display:table-cell;
+    width: 150px;
+    vertical-align: top;
+    text-align:right;
+}
+.ascol2
+{
+    padding-left:20px;
+    display:table;
+    width:100%;
+}
+    .ascol2 .full
+    {
+        display:inline-table;
+        width:100%;
+        padding-bottom:10px;
+    }
+    .ascol2 .ascol21
+    {
+        display:table-cell;
+        width:50%;
+    }
+    .ascol2 .ascol2space
+    {
+        width:10px;
+    }
+    .ascol2 .ascol22
+    {
+        display:table-cell;
+        width:50%;
+    }
+    .ascol2 label
+    {
+        font-family:OpenSans;
+        font-weight:normal;
+    }
+    .ascol2 #imageplace
+    {
+        width:120px;
+        height:100px;
+        display:table-cell;
+    }
+        .ascol2 #imageplace img
+        {
+            width:100px;
+            height:100px;
+        }
+    .ascol2 .imgbtn
+    {
+        width:100%;
+        vertical-align:middle;
+    }
+    .ascol2 .fbicon
+    {
+        color:White;
+        background:#4d68a1;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        border-radius: 25px;
+        vertical-align: middle;
+        padding-top: 5px;
+        margin-right:10px;
+    }
+    .ascol2 .twicon
+    {
+        color:White;
+        background:#55acee;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        border-radius: 25px;
+        vertical-align: middle;
+        padding-top: 5px;
+        margin-right:10px;
+    }
+.ascol3
+{
+    display:table-cell;
+    width: 100px;
+    vertical-align: top;
+}
+.ascolfull
+{
+    display:inline-table;
+    width:100%;
+    padding-top:10px;
+    padding-bottom:10px;
+    text-align:right;
+}
+.h30
+{
+    height:30px !important;
+}
+
+
+.payment.molpay
+{
+    background:url("img/icon/icon-molpay.png")no-repeat;
+    background-size:100% 100%;
+    width:63px;
+    height:50px;
+}
+
+
+.noentry
+{
+    text-align: center;
+    padding: 30px 100px 30px 100px;
+}
+
+.noentry hr
+{
+    border-color: #DDDDDD;
+    margin: 30px;
+}
+
+.noentry h2
+{
+    font-size:28px;
+    font-family:OpenSansLight;
+    color:#333333;
+    padding: 0px;
+    margin: 0px;
+}
+.noentry h4
+{
+    font-size:19px;
+    font-family:OpenSansLight;
+    color:#000;
+    padding: 0px;
+    margin: 0px;
+    font-style: italic;
+}
+.noentry h5
+{
+    font-size:16px;
+    font-family:OpenSans;
+    color:#007FB0;
+    padding: 0px;
+    margin: 0px;
+}
+.noentry h6
+{
+    font-size:13px;
+    font-family:OpenSans;
+    color:#000;
+    padding: 0px;
+    margin: 0px;
+    line-height: 10px;
+}
+
+.nopurchaseimg
+{
+    background:url("img/nopurchase.png")no-repeat center center;
+    background-size:100% 100%;
+    width:140px;
+    height:119px;
+    display: inline-block;
+}
+.noreviewimg
+{
+    background:url("img/noreview.png")no-repeat center center;
+    background-size:100% 100%;
+    width:151px;
+    height:120px;
+    display: inline-block;
+}
+.nowishlistimg
+{
+    background:url("img/nowishlist.png")no-repeat center center;
+    background-size:100% 100%;
+    width:141px;
+    height:121px;
+    display: inline-block;
+}
+
+.lovehandimg
+{
+    background:url("img/lovehand.png")no-repeat center center;
+    background-size:100% 100%;
+    width:76px;
+    height:49px;
+    display: inline-block;
+}
+.monkeyheadlogoimg
+{
+    background:url("img/monkeyheadlogo.png")no-repeat center center;
+    background-size:100% 100%;
+    width:109px;
+    height:54px;
+    display: inline-block;
+}
+.folderimg
+{
+    background:url("img/folder.png")no-repeat center center;
+    background-size:100% 100%;
+    width:72px;
+    height:55px;
+    display: inline-block;
+}

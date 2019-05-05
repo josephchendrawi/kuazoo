@@ -1,0 +1,40 @@
+﻿@model com.kuazoo.Models.AdminModel
+@{
+    ViewBag.Title = "Admin View";
+    Layout = "~/Views/Shared/_AdminSettingLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(3);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Admin">Admin</a> <span class="active"> / View Admin</span>
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View Admin</h1>
+    </div>
+    <div id="wrap">
+    @Html.HiddenFor(
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.FirstName)</div>
+            <div class="colright">@Model.FirstName</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.LastName)</div>
+            <div class="colright">@Model.LastName</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Email)</div>
+            <div class="colright">@Model.Email</div>
+        </div>
+    </div>
+            <div class="wrapend">
+            <div class="colleft"></div>
+            <div class="colright"><a href="AdminEdit?AdminId=@Model.AdminId" class="submitBtn">Edit</a>
+            <a href="Admin" class="grayBtn">Back</a></div>
+        </div>
+</div>

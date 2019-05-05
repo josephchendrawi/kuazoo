@@ -1,0 +1,153 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.FlashDeal
+@{
+    ViewBag.Title = "Flash Deal Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(7);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="FlashDeal">Flash Deal</a> <span class="active"> / Edit Flash Deal</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Flash Deal updated successfully</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Flash Deal</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Edit Flash Deal</h1>
+    </div>
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.HiddenFor(model => model.FlashDealId) 
+             <div id="wrap">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model=>model.MerchantId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().ComboBox()
+                                            .Name("merchantComboBox")
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .Placeholder("--Select Merchant--")
+                                            .DataTextField("Name")
+                                            .DataValueField("MerchantId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("MerchantList", "Admin");
+                                                });
+                                            })
+                                            .Value(Model.MerchantId.ToString())
+                                        )
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.InventoryItemId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().ComboBox()
+                                            .Name("inventoryComboBox")
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .Placeholder("--Select Inventory Item--")
+                                            .DataTextField("Name")
+                                            .DataValueField("InventoryItemId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("InventoryItemListByMerchant", "Admin").Data("filterInventory");
+                                                }).ServerFiltering(true);
+                                            })
+                                            .CascadeFrom("merchantComboBox")
+                                            .Events(e =>
+                                            {
+                                                e.Change("inventorychange");
+                                            })
+                                            .Value(Model.InventoryItemId.ToString())
+                                        )
+                                        <script>
+                                            function filterInventory() {
+                                                return {
+                                                    MerchantId: $("#merchantComboBox").val()
+                                                };
+                                            }
+                                            function inventorychange() {
+                                                $("#InventoryItemId").val($("#inventoryComboBox").val());
+                                            };
+                                        </script>
+                                        @Html.HiddenFor(model => model.InventoryItemId)
+                                        @Html.ValidationMessageFor(model => model.InventoryItemId)
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model=>model.Discount)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Discount, new { @class = "medium", maxlength = "6", autocomplete = "off" })%@Html.ValidationMessageFor(model => model.Discount)</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model=>model.StartTime)</div>
+                    <div class="colright">
+                    @(Html.Kendo().DateTimePickerFor(model => model.StartTime)
+                        .Format("dd MMM yyyy hh:mm tt")
+                    )
+                    @Html.ValidationMessageFor(model => model.StartTime)
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model=>model.EndTime)</div>
+                    <div class="colright">
+                    @(Html.Kendo().DateTimePickerFor(model => model.EndTime)
+                        .Format("dd MMM yyyy hh:mm tt")
+                    )
+                    @Html.ValidationMessageFor(model => model.EndTime)
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">Active</div>
+                    <div class="colright">
+                        <div class="onoffswitch">
+                            <input class="onoffswitch-checkbox" data-val="true" data-val-required="The Active field is required." id="Flag" name="Flag" type="checkbox" value="true" @{if (Model.Flag)
+                                                                                                                                                                                       {<text>checked="checked"</text>}}>
+                            <label class="onoffswitch-label" for="Flag">
+                                <div class="onoffswitch-inner"></div>
+                                <div class="onoffswitch-switch"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+            <div class="wrapend">
+                <div class="colleft"><input type="hidden" value="0" id="_submit" name="_submit"/></div>
+                <div class="colright">                  
+                      <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf()"/>
+                      <a href="FlashDeal"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>   
+        }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#merchantComboBox").data("kendoComboBox").input.focus();
+    });
+    function UpdateConf() {
+        var r = confirm("Confirm update Flash Deal details?");
+        if (r == true) return true;
+        else return false;
+    }
+</script>

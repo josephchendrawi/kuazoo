@@ -1,0 +1,328 @@
+﻿@{
+    ViewBag.Title = "Landing Page";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(-1);
+        $(document).tooltip();
+    });
+</script>
+
+<div id="msgresult">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        @if (ViewBag.msg == "1")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New banner successfully created</div></div>
+        }
+        else if (ViewBag.msg == "3")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Banner</div></div>
+        }
+        else if (ViewBag.msg == "11")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Banner updated successfully</div></div>
+        }
+        else if (ViewBag.msg == "33")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Banner</div></div>
+        }
+        else if (ViewBag.msg == "2")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New Blog/Video/Deal successfully created</div></div>
+        }
+        else if (ViewBag.msg == "4")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Blog/Video/Deal</div></div>
+        }
+        else if (ViewBag.msg == "22")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Blog/Video/Deal updated successfully</div></div>
+        }
+        else if (ViewBag.msg == "44")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Blog/Video/Deal</div></div>
+        }
+        @*<div class="notif cnotice"><div class="notifwrap notice"><strong>Notice:</strong> A</div></div>
+        <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> A</div></div>
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> A</div></div>
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> A</div></div>*@
+    </div>
+</div>
+}
+</div>
+
+<div id="mainlist">
+<div id="mainwrap">
+@(Html.Kendo().TabStrip()
+    .Name("tabstrip")
+    .Items(tabstrip =>
+    {
+        tabstrip.Add().Text("Slider")
+            .Selected(true)
+            .Content(@<text>  
+
+    <h1>Banner <a href="BannerAdd" class="addNewBtn">Add New</a></h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.BannerModel>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.Seq).Width(70);
+            columns.Bound(p => p.Name);
+            columns.Template(e => { }).ClientTemplate("<img src='" + "#=SubImageUrl#" + "' style=\"height: 50px;\"/>").Title("Picture");
+            columns.Bound(p => p.Link).Title("Link");
+            columns.Bound(p => p.LastAction).ClientTemplate(
+                "#if(LastAction!='5'){#" +
+                "<a class='gridBtn' href='BannerEdit?BannerId=#=BannerId#'><span class='fa fa-pencil' title='Edit' ></span></a>&nbsp;&nbsp;" +
+                "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-delete'  href=''><span class='fa fa-archive' title='Archive' ></span></a>" +
+                "#}#").Title("Action").Filterable(filter => filter.Enabled(false)).Width(200);
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        .Editable(editable => editable.DisplayDeleteConfirmation("Do you want to archive this banner?"))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("Banner_Read", "Admin"))
+            .Destroy(destroy => destroy.Action("Banner_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.BannerId);
+            })
+        )
+        .Events(events => events.DataBound("onDataBound").Change("onChange"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Filterable()
+        .Selectable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+
+        </text>);
+        tabstrip.Add().Text("Blog/Video/Deals")
+    .Content(@<text>
+
+    <h1>Blog / Videos/ Deals <a href="BVDAdd" class="addNewBtn">Add New</a></h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.BVDModel>()
+        .Name("gridBVD")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.Seq).Width(70);
+            columns.Bound(p => p.Type).ClientTemplate(
+                "#if(Type == 0){#" +
+                "Blog" +
+                "# } else if(Type == 1){#" +
+                "Video" +
+                "# } else if(Type == 2){#" +
+                "Deal" +
+                "# } else if(Type == 3){#" +
+                "Big Deal" +
+                "#}#").Title("Type").Filterable(filter => filter.Enabled(false)).Width(100);
+            columns.Bound(p => p.Title);
+            columns.Bound(p => p.Link).Title("Link");
+            columns.Template(e => { }).ClientTemplate("<img src='" + "#=SubImageUrl#" + "' style=\"height: 50px;\"/>").Title("Picture");
+            columns.Bound(p => p.LastAction).ClientTemplate(
+                "#if(LastAction!='5'){#" +
+                "<a class='gridBtn' href='BVDEdit?BVDId=#=BVDId#'><span class='fa fa-pencil' title='Edit' ></span></a>&nbsp;&nbsp;" +
+                "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-delete'  href=''><span class='fa fa-archive' title='Archive' ></span></a>" +
+                "#}#").Title("Action").Filterable(filter => filter.Enabled(false)).Width(200);
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        .Editable(editable => editable.DisplayDeleteConfirmation("Do you want to archive this Blog/Video/Deal?"))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("BVD_Read", "Admin"))
+            .Destroy(destroy => destroy.Action("BVD_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.BVDId);
+            })
+        )
+        .Events(events => events.DataBound("onDataBound").Change("onChange"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Filterable()
+        .Selectable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+
+        </text>);
+    })
+)
+</div>
+</div>
+<script type="text/javascript">
+    $(window).load(function () {
+        filtergrid();
+    });
+    var viewactive = 0;
+    function onDataBound(e) {
+        var data = this.dataSource.filter();
+        if (data != null) {
+            //console.log(data);
+            document.location.hash = "";
+            if (data.filters.length > 1) {
+                for (var i = 1; i < data.filters.length; i++) {
+                    console.log(data.filters[i].field + " " + data.filters[i].operator + " " + data.filters[i].value);
+                    insertParam(data.filters[i].field, data.filters[i].value);
+                }
+            }
+        }
+        $(".gridBtn").click(function () {
+            viewactive = 1;
+            setTimeout(function () {
+                viewactive = 0;
+            }, 100);
+        });
+    }
+    function onChange(e) {
+        setTimeout(function () {
+            if (viewactive == 0) {
+                //var data = this.select();
+                //console.log(data);
+                var grid = $("#grid").data("kendoGrid");
+                var selectedItem = grid.dataItem(grid.select());
+                //window.location = "BannerView?BannerId=" + selectedItem.BannerId;
+            }
+        }, 100);
+    }
+    function insertParam(key, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        //console.log(kvp);
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+
+            if (x[0] == key) {
+                x[1] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var array = { 'field': 'LastAction', 'operator': 'neq', 'value': '5' };
+        param.push(array);
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': 'contains', 'value': re[1] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+            var gridBVD = $('#gridBVD').data('kendoGrid');
+            gridBVD.dataSource.filter(param);
+            gridBVD.refresh();
+        }
+    }
+    //    function getQueryVariable(variable) {
+    //        var query = window.location.search.substring(1);
+    //        var vars = query.split("&");
+    //        for (var i = 0; i < vars.length; i++) {
+    //            var pair = vars[i].split("=");
+    //            if (pair[0] == variable) { return pair[1]; }
+    //        }
+    //        return (false);
+    //    }
+    function changeLastAction() {
+        var value = this.value(),
+		 	 grid = $("#grid").data("kendoGrid");
+
+        if (value) {
+            grid.dataSource.filter({ field: "LastAction", operator: "eq", value: value });
+        } else {
+            grid.dataSource.filter({});
+        }
+    }
+
+    function error_handler(e) { 
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Banner archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete Banner</div></div>';
+                }
+                else if (message == "11") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Blog/Video/Deal archived successfully</div></div>';
+                }
+                else if (message == "22") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete Blog/Video/Deal</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

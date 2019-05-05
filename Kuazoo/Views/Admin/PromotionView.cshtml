@@ -1,0 +1,47 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.Promotion
+@{
+    ViewBag.Title = "Promotion View";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(11);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Promotion">Promo Code</a> <span class="active"> / View Promotion Code</span>
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View Promotion Code</h1>
+    </div>
+    <div id="wrap">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.PromoCode)</div>
+                <div class="colright">@Model.PromoCode</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.PromoType)</div>
+                <div class="colright">@Model.PromoTypeStr</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.PromoValue)</div>
+                <div class="colright">@Model.PromoValue</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.ValidDate)</div>
+                    <div class="colright">@string.Format("{0:dd MMM yyyy}", Model.ValidDate) </div>
+            </div>
+            @*<div>
+                <div class="colleft">@Html.LabelFor(model => model.Flag)</div>
+                <div class="colright">@Model.Flag</div>
+            </div>*@
+    </div> 
+            <div class="wrapend">
+            <div class="colleft"></div>
+            <div class="colright"><a href="PromotionEdit?PromotionId=@Model.PromotionId" class="submitBtn">Edit</a>
+            <a href="Promotion" class="grayBtn">Back</a></div>
+        </div>
+</div>

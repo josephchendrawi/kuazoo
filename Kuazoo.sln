@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kuazoo", "Kuazoo\Kuazoo.csproj", "{B0FE3647-6035-46FE-9D39-AAE94767838D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KuazooLib", "KuazooLib\KuazooLib.csproj", "{59CEF7B8-ECD9-43E6-A35C-161A55EA72D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KuazooInterface", "KuazooInterface\KuazooInterface.csproj", "{B829697B-6426-471A-9A81-A5CFB05C0AD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacebookAPI", "facebook\FacebookAPI.csproj", "{1F538275-4C0C-4983-8D92-BFF2AA0E5FC1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0FE3647-6035-46FE-9D39-AAE94767838D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0FE3647-6035-46FE-9D39-AAE94767838D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0FE3647-6035-46FE-9D39-AAE94767838D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0FE3647-6035-46FE-9D39-AAE94767838D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59CEF7B8-ECD9-43E6-A35C-161A55EA72D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59CEF7B8-ECD9-43E6-A35C-161A55EA72D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59CEF7B8-ECD9-43E6-A35C-161A55EA72D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59CEF7B8-ECD9-43E6-A35C-161A55EA72D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B829697B-6426-471A-9A81-A5CFB05C0AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B829697B-6426-471A-9A81-A5CFB05C0AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B829697B-6426-471A-9A81-A5CFB05C0AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B829697B-6426-471A-9A81-A5CFB05C0AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F538275-4C0C-4983-8D92-BFF2AA0E5FC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F538275-4C0C-4983-8D92-BFF2AA0E5FC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F538275-4C0C-4983-8D92-BFF2AA0E5FC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F538275-4C0C-4983-8D92-BFF2AA0E5FC1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

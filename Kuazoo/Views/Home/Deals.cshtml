@@ -1,0 +1,1005 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItemShow
+@{
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_DetailLayout.cshtml";
+}
+
+@section AddToHeader{
+<link rel="canonical" href="@Kuazoo.Helper.SetUrl/Home/Deals/@Model.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")" />
+
+<meta property="og:title" content="@Model.Name" />
+<meta property="og:url" content="@Kuazoo.Helper.SetUrl/Home/Deals/@Model.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")" />
+<meta property="og:image" content="@Kuazoo.Helper.imagebaseURL.Substring(0, Kuazoo.Helper.imagebaseURL.Length - 1)/@Model.ImageName" />
+<meta property="og:description" content="@Model.ShortDesc" />
+}
+@section AddToHead{
+<link href="@Url.Content("~/Content/mightyslider.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/hkw.css")" rel="stylesheet" type="text/css" />
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml: true,
+            version: 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+</script>
+<script type="text/javascript"
+      src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDBe9tprDB4drAPp-O4-Ypcer1EOvUUvrQ&sensor=true">
+    </script>
+<script src="@Url.Content("~/Scripts/jquery.index.head.js")"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var myParam = location.search.split('d=')[1] ? location.search.split('d=')[1] : '1';
+        changehomenav(myParam);
+        $(document).tooltip({
+            track: true
+        });
+    });
+    function catChange(str) {
+        var url="@Url.Action("TheKuazooStore", "Home")";
+        if(str!=""){
+            url=url+"?c="+encodeURIComponent(str);
+        }
+        window.location.href=url;
+    }
+</script>
+}
+
+<link href="@Url.Content("~/Content/tooltip.css")" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/tooltip.js")" type="text/javascript"></script>
+<div class="loading bg"></div>
+<div class="loading indicator"><div></div></div>
+<div class="contentdeal">
+    @if (Model != null)
+    {
+        
+    @Html.HiddenFor(model => model.InventoryItemId)
+    @Html.HiddenFor(model => model.Name)
+    @Html.HiddenFor(model => model.Price)
+    @Html.HiddenFor(model => model.Discount)
+        if (Model.FlashDeal != null)
+        {
+        @Html.HiddenFor(model => model.FlashDeal.Discount)
+        @Html.HiddenFor(model => model.FlashDeal.FlashDealId)
+        }
+        if (Model.ImageUrl != null)
+        {
+		@Html.HiddenFor(model => model.ImageUrl)
+        }
+        if (Model.ImageName != null)
+        {
+         @Html.HiddenFor(model => model.ImageName)   
+        }
+        if (Model.Prize != null)
+        {
+        @Html.HiddenFor(model => model.Prize.Name)
+            if (Model.Prize.ImageUrl != null)
+            {
+            @Html.HiddenFor(model => model.Prize.ImageUrl)
+            }
+        }
+        @Html.HiddenFor(model => model.Variance)
+    <h2>@Model.Name</h2>
+    <h3 class="margintopbottom">@if (Model.ShortDesc != null && Model.ShortDesc != "")
+                                {@Model.ShortDesc}
+                                else
+                                { <text>&nbsp;</text> }</h3>
+                                if (Model.TypeName.ToLower().Equals("raffle"))
+                                {
+        <text>
+            <div class="contentdealwrap">
+                <div class="left">
+                @{decimal pricedis = Model.Price - (Model.Price * Model.Discount / 100);
+                  //pricedis=Math.Ceiling(pricedis*10)/10;
+                  }
+                    <div class="pricetitle">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                    <div class="space"></div>
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <input type="button" onclick="multiVariance()" class="btnBuy" value ="BUY NOW!" />
+                        }
+                        else
+                        {
+                    <input type="button" onclick="addToCart()" class="btnBuy" value ="BUY NOW!" />
+                        } 
+                    </div>
+                    <div class="space"></div>
+                    <div class="pricedetail">
+                        <div class="old">ORIGINAL<br />RM @Model.Price</div>
+                        <div class="curr">DISCOUNT <div class="big">@Model.Discount.ToString("N0")%</div></div>
+                    </div>
+                    <div class="space"></div>
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <button class="btnGift" onclick="multiVarianceGift()"><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                        else
+                        {
+                    <button class="btnGift" onclick="addToCartGift()"><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                    </div>
+                    <div class="space"></div>
+                    <div><button class="btnGift"  id="wishlistBtn" onclick="_addToWishList()"><span class="fa fa-heart"></span> ADD TO WISHLIST</button></div>
+                    <hr />
+                            @if (Model.Prize.GameType == null || Model.Prize.GameType == 0 || Model.Prize.GameType == 1)
+                            {
+                    <div>
+                        @{
+                                var widthbar = "width:" + Model.SalesVisualMeter + "%";
+                        }
+                        <div class="barbg"><div class="baractive" style="@widthbar"></div></div>
+                    </div>
+                    <div class="priceremain">@Model.Sales raffle tickets remaining!</div>
+                    <hr />
+                            }
+                    @*<div class="timeleft">
+                        <div class="timelefttext">TIME<br />LEFT</div>
+                        <div class="timeleftdetail">
+                            <div id="timeplace">countdownExpire</div>
+                            <script type="text/javascript">                                countdownExpire('@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(Model.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            <div id="timeextend">Time extended!</div>
+                        </div>
+                    </div>
+                    <hr />*@
+                    <div class="share">
+                        <div class="sharetext">SHARE</div>
+                        <div class="sharedetail">
+                             <span onclick="shareEmail()" class="fa fa-envelope emailicondeal"></span>   
+                             <span onclick="shareFB()" class="fa fa-facebook fbicondeal"></span>   
+                             <span onclick="shareTwitter()" class="fa fa-twitter twicondeal"></span>   
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@Model.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                             <span onclick="sharePin()" class="fa fa-pinterest pinicondeal"></span>   
+
+                       @*     <a onclick="shareEmail()"><img src="@Url.Content("~/Content/img/icon/icon-email.png")" /></a>
+                            <a onclick="shareFB()"><img src="@Url.Content("~/Content/img/icon/icon-fb.png")" /></a>
+                            <a onclick="shareTwitter()"><img src="@Url.Content("~/Content/img/icon/icon-twitter.png")" /></a>
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <a onclick="sharePin()"><img src="@Url.Content("~/Content/img/icon/icon-pinterest.png")" /></a>*@
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="reviews">
+                        <div class="reviewtext">REVIEWS</div>
+                        <div class="reviewdetail" id="reviewdetail">
+                            <div class="reviewcount"><div class="ratingStar"></div> @string.Format("{0:0.#}", Model.ReviewCount.Rating)/5</div>
+                            <div class="reviewdata"><a  onclick="reviewPopUp()">@Model.ReviewCount.ReviewCount Reviews</a></div>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
+                <div class="right">
+                    <div id="dealslide">@* class="mightyslider_modern_skin">*@
+		                @*<div class="frame">
+			                <div class="slide_element">
+                                @if(Model.ImageUrl != null)
+                                {
+				                    <div class="slide" data-mightyslider="cover: '@Model.ImageUrl'"></div>
+                                }
+                                @if (Model.SubImageUrl != null)
+                                {
+                                    foreach (var subimg in Model.SubImageUrl)
+                                    {
+				                    <div class="slide" data-mightyslider="cover: '@subimg'"></div>
+                                    }
+                                }
+			                </div>
+		                </div>*@
+                        
+                        <div class="boxraffle">
+                            <div class="boxrafflecontentwrap">
+                            <div class="boxrafflecontent">
+                                <div class="raflleticket">RM @Model.Price</div>
+                            </div>
+                            </div>
+                        </div>
+	                </div>
+                    @if (Model.Prize != null)
+                    {
+                    <div class="prizecontent">
+                        <div class="text">
+                            <div class="titledesc">Buy the deal and stand to get the surPRIZE</div>
+                            <div class="title">@Model.Prize.Name</div>
+                        </div>
+                        <div class="imglist">
+		                    <div class="mightyslider_carouselCoverFlow_skin clearfix" id="cover_flow">
+			                    <div class="frame" data-mightyslider="width: 478, height: 120">
+				                    <ul class="slide_element">
+                                    @if (Model.Prize.ImageUrl != null)
+                                    {
+				                        <div class="slide" data-mightyslider="cover: '@Model.Prize.ImageUrl'"></div>
+                                    }
+                                    @if (Model.Prize.SubImageUrl != null)
+                                    {
+                                        foreach (var subimg in Model.Prize.SubImageUrl)
+                                        {
+                                         <li class="slide" data-mightyslider="cover:'@subimg'"></li>
+                                        }
+                                    }
+                                    </ul>
+			                    </div>
+		                    </div>
+
+                        </div>
+                    </div>
+                    }
+                    <div class="tagplace">
+                        TAGS
+                        @if (Model.Tag != null)
+                        {
+                            foreach (var tag in Model.Tag)
+                            {
+                            <a onclick="catChange('@tag,')" style="cursor:pointer"><span>@tag</span>   </a>
+                            }
+                        }
+                    </div>
+        </text>
+                                }//kuazoo on
+                                else if (Model.SalesVisualMeter >= 100 || Model.Sales < 1 && Model.Prize.FreeDeal == false)
+                                {
+        <text>
+            <div class="contentdealwrap">
+                <div class="left">
+                @{decimal pricedis = Model.Price - (Model.Price * Model.Discount / 100);
+                  //pricedis=Math.Ceiling(pricedis*10)/10;
+                  }
+                    <div class="pricetitle">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                    <div class="space"></div>
+                    <div>
+                    <input type="button" class="btnBuy disabled" value ="BUY NOW!" />
+                    </div>
+                    <div class="space"></div>
+                    <div class="pricedetail">
+                        <div class="old">ORIGINAL<br />RM @Model.Price</div>
+                        <div class="curr">DISCOUNT <div class="big">@Model.Discount.ToString("N0")%</div></div>
+                    </div>
+                    <div class="space"></div>
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <button class="btnGift disabled" ><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                        else
+                        {
+                    <button class="btnGift disabled" ><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                    </div>
+                    <div class="space"></div>
+                    <div><button class="btnGift disabled"><span class="fa fa-heart"></span> ADD TO WISHLIST</button></div>
+                    <hr />
+                    <div>
+                        <div class="barbg"><div class="baractive" style="width:100%"></div></div>
+                    </div>
+                    <div class="priceremain">All deals to surPRIZE!</div>
+                    <hr />
+                    <div class="share">
+                        <div class="sharetext">SHARE</div>
+                        <div class="sharedetail">
+                             <span onclick="shareEmail()" class="fa fa-envelope emailicondeal"></span>   
+                             <span onclick="shareFB()" class="fa fa-facebook fbicondeal"></span>   
+                             <span onclick="shareTwitter()" class="fa fa-twitter twicondeal"></span>   
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                             <span onclick="sharePin()" class="fa fa-pinterest pinicondeal"></span>   
+
+                           @* <a onclick="shareEmail()"><img src="@Url.Content("~/Content/img/icon/icon-email.png")" /></a>
+                            <a onclick="shareFB()"><img src="@Url.Content("~/Content/img/icon/icon-fb.png")" /></a>
+                            <a onclick="shareTwitter()"><img src="@Url.Content("~/Content/img/icon/icon-twitter.png")" /></a>
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <a onclick="sharePin()"><img src="@Url.Content("~/Content/img/icon/icon-pinterest.png")" /></a>*@
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="reviews">
+                        <div class="reviewtext">REVIEWS</div>
+                        <div class="reviewdetail" id="reviewdetail">
+                            <div class="reviewcount"><div class="ratingStar"></div> @string.Format("{0:0.#}", Model.ReviewCount.Rating)/5</div>
+                            <div class="reviewdata"><a  onclick="reviewPopUp()">@Model.ReviewCount.ReviewCount Reviews</a></div>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
+                <div class="right">
+                    <div id="dealslide" class="mightyslider_modern_skin">
+		                <div class="frame">
+			                <div class="slide_element">
+                                @*@if (Model.ImageUrl != null)
+                                {
+				                    <div class="slide" data-mightyslider="cover: '@Model.ImageUrl'"></div>
+                                }*@
+                                @if (Model.SubImageUrl != null)
+                                {
+                                    foreach (var subimg in Model.SubImageUrl)
+                                    {
+				                    <div class="slide" data-mightyslider="cover: '@subimg'"></div>
+                                    }
+                                }
+			                </div>
+		                </div>
+                        
+                        <div class="kuazoobg"></div>
+                        <div class="kuazoobgwrap">
+                            <div class="kuazoobgcontent">
+                                <div class="boxTitle">KUAZOO!</div>
+                                <div class="boxSubtitle">DRAW IS ON!</div>
+                            </div>
+                        </div>
+	                </div>
+                    @if (Model.Prize != null)
+                    {
+                    <div class="prizecontent">
+                        <div class="text">
+                            <div class="titledesc">Buy the deal and stand to get the surPRIZE</div>
+                            <div class="title">@Model.Prize.Name</div>
+                        </div>
+                        <div class="imglist">
+		                    <div class="mightyslider_carouselCoverFlow_skin clearfix" id="cover_flow">
+			                    <div class="frame" data-mightyslider="width: 478, height: 120">
+				                    <ul class="slide_element">
+                                    @if (Model.Prize.ImageUrl != null)
+                                    {
+				                        <div class="slide" data-mightyslider="cover: '@Model.Prize.ImageUrl'"></div>
+                                    }
+                                    @if (Model.Prize.SubImageUrl != null)
+                                    {
+                                        foreach (var subimg in Model.Prize.SubImageUrl)
+                                        {
+                                         <li class="slide" data-mightyslider="cover:'@subimg'"></li>
+                                        }
+                                    }
+                                    </ul>
+			                    </div>
+		                    </div>
+
+                        </div>
+                    </div>
+                    }
+                    <div class="tagplace">
+                        TAGS
+                        @if (Model.Tag != null)
+                        {
+                            foreach (var tag in Model.Tag)
+                            {
+                            <a onclick="catChange('@tag,')" style="cursor:pointer"><span>@tag</span>   </a>
+                            }
+                        }
+                    </div>
+        </text>
+                                }
+                                else if (Model.FlashDeal != null)
+                                {
+        <text>
+            <div class="contentdealwrap">
+                <div class="left">
+                @{decimal pricedis = Model.Price - (Model.Price * (Model.Discount + Model.FlashDeal.Discount) / 100);
+                  //pricedis=Math.Ceiling(pricedis*10)/10;
+                  }
+                    <div class="pricetitle">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                    <div class="space"></div>
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <input type="button" onclick="multiVariance()" class="btnBuy" value ="BUY NOW!" />
+                        }
+                        else
+                        {
+                    <input type="button" onclick="addToCart()" class="btnBuy" value ="BUY NOW!" />
+                        } 
+                    </div>
+                    <div class="space"></div>
+                    <div class="pricedetail">
+                        <div class="old">ORIGINAL<br />RM @Model.Price</div>
+                        <div class="curr">DISCOUNT <div class="big">@((Model.Discount + Model.FlashDeal.Discount).ToString("N0"))%</div></div>
+                    </div>
+                    <div class="space"></div>
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <button class="btnGift" onclick="multiVarianceGift()"><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                        else
+                        {
+                    <button class="btnGift" onclick="addToCartGift()"><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                    </div>
+                    <div class="space"></div>
+                    <div><button class="btnGift"  id="wishlistBtn" onclick="_addToWishList()"><span class="fa fa-heart"></span> ADD TO WISHLIST</button></div>
+                    <hr />
+                            @if (Model.Prize.GameType == null || Model.Prize.GameType == 0 || Model.Prize.GameType == 1)
+                            {
+                    <div>
+                        @{
+                                var widthbar = "width:" + Model.SalesVisualMeter + "%";
+                        }
+                        <div class="barbg"><div class="baractive" style="@widthbar"></div></div>
+                    </div>
+                    <div class="priceremain">@Model.Sales deals to surPRIZE!</div>
+                    <hr />
+                            }
+                    @*<div class="timeleft">
+                        <div class="timelefttext">TIME<br />LEFT</div>
+                        <div class="timeleftdetail">
+                            <div id="timeplace">countdownExpire</div>
+                            <script type="text/javascript">                                countdownExpire('@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(Model.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            <div id="timeextend">Time extended!</div>
+                        </div>
+                    </div>
+                    <hr />*@
+                    <div class="share">
+                        <div class="sharetext">SHARE</div>
+                        <div class="sharedetail">
+                             <span onclick="shareEmail()" class="fa fa-envelope emailicondeal"></span>   
+                             <span onclick="shareFB()" class="fa fa-facebook fbicondeal"></span>   
+                             <span onclick="shareTwitter()" class="fa fa-twitter twicondeal"></span>   
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                             <span onclick="sharePin()" class="fa fa-pinterest pinicondeal"></span>   
+
+                           @* <a onclick="shareEmail()"><img src="@Url.Content("~/Content/img/icon/icon-email.png")" /></a>
+                            <a onclick="shareFB()"><img src="@Url.Content("~/Content/img/icon/icon-fb.png")" /></a>
+                            <a onclick="shareTwitter()"><img src="@Url.Content("~/Content/img/icon/icon-twitter.png")" /></a>
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <a onclick="sharePin()"><img src="@Url.Content("~/Content/img/icon/icon-pinterest.png")" /></a>*@
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="reviews">
+                        <div class="reviewtext">REVIEWS</div>
+                        <div class="reviewdetail" id="reviewdetail">
+                            <div class="reviewcount"><div class="ratingStar"></div> @string.Format("{0:0.#}", Model.ReviewCount.Rating)/5</div>
+                            <div class="reviewdata"><a  onclick="reviewPopUp()">@Model.ReviewCount.ReviewCount Reviews</a></div>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
+                <div class="right">
+                    <div id="dealslide" class="mightyslider_modern_skin">
+		                <div class="frame">
+			                <div class="slide_element">
+                               @* @if (Model.ImageUrl != null)
+                                {
+				                    <div class="slide" data-mightyslider="cover: '@Model.ImageUrl'"></div>
+                                }*@
+                                @if (Model.SubImageUrl != null)
+                                {
+                                    foreach (var subimg in Model.SubImageUrl)
+                                    {
+				                    <div class="slide" data-mightyslider="cover: '@subimg'"></div>
+                                    }
+                                }
+			                </div>
+		                </div>
+                        <div id="flashdealtimeplace">
+                        <div class="flashdealbg"></div>
+                        <div class="flashdealbgwrap">
+                        <div class="flashdealbgcontent">
+                            <div class="boxTitle">FLASH DEAL!</div>
+                            <div class="boxSubtitle">
+                                <div class="boxSubtitleleft small">FLASH DEAL ENDING IN</div>
+                                <div class="boxSubtitleright" id="flashdealtime"></div>
+                                <script type="text/javascript"> countdownStart('@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(Model.FlashDeal.EndTime, DateTimeKind.Utc))')</script>
+                            </div>
+                            <br />
+                            <div class="boxSubtitle">
+                                <div class="boxSubtitlehalf ori">
+                                    <div class="small">WAS</div>
+                                    <div class="percen">@Model.Discount.ToString("N0")%</div>
+                                    <div class="small">OFF</div>
+                                </div>
+                                <div class="boxSubtitlehalf dis">
+                                    <div class="small">NOW</div>
+                                    <div class="percen">@((Model.Discount + Model.FlashDeal.Discount).ToString("N0"))%</div>
+                                    <div class="small">OFF</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        </div>
+	                </div>
+                    @if (Model.Prize != null)
+                    {
+                    <div class="prizecontent">
+                        <div class="text">
+                            <div class="titledesc">Buy the deal and stand to get the surPRIZE</div>
+                            <div class="title">@Model.Prize.Name</div>
+                        </div>
+                        <div class="imglist">
+		                    <div class="mightyslider_carouselCoverFlow_skin clearfix" id="cover_flow">
+			                    <div class="frame" data-mightyslider="width: 478, height: 120">
+				                    <ul class="slide_element">
+                                    @if (Model.Prize.ImageUrl != null)
+                                    {
+				                        <div class="slide" data-mightyslider="cover: '@Model.Prize.ImageUrl'"></div>
+                                    }
+                                    @if (Model.Prize.SubImageUrl != null)
+                                    {
+                                        foreach (var subimg in Model.Prize.SubImageUrl)
+                                        {
+                                         <li class="slide" data-mightyslider="cover:'@subimg'"></li>
+                                        }
+                                    }
+                                    </ul>
+			                    </div>
+		                    </div>
+
+                        </div>
+                    </div>
+                    }
+                    <div class="tagplace">
+                        TAGS
+                        @if (Model.Tag != null)
+                        {
+                            foreach (var tag in Model.Tag)
+                            {
+                            <a onclick="catChange('@tag,')" style="cursor:pointer"><span>@tag</span>   </a>
+                            }
+                        }
+                    </div>
+        </text>
+                                }
+                                else
+                                {
+        <text>
+            <div class="contentdealwrap">
+                <div class="left">
+                @{decimal pricedis = Model.Price - (Model.Price * Model.Discount / 100);
+                  //pricedis=Math.Ceiling(pricedis*10)/10;
+                  }
+                  @if (Model.Prize.FreeDeal == false)
+                  {
+                    <div class="pricetitle">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                  }
+                  else
+                  {
+                    <div class="pricetitle">FREE</div>}
+                    <div class="space"></div>
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <input type="button" onclick="multiVariance()" class="btnBuy" value ="BUY NOW!" />
+                        }
+                        else
+                        {
+                    <input type="button" onclick="addToCart()" class="btnBuy" value ="BUY NOW!" />
+                        }                    
+                    </div>
+                    <div class="space"></div>
+                    @if (Model.Prize.FreeDeal == false)
+                    {
+                    <div class="pricedetail">
+                        <div class="old">ORIGINAL<br />RM @Model.Price</div>
+                        <div class="curr">DISCOUNT <div class="big">@Model.Discount.ToString("N0")%</div></div>
+                    </div>
+                    <div class="space"></div>
+                    }
+                    <div>
+                        @if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                    <button class="btnGift" onclick="multiVarianceGift()"><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                        else
+                        {
+                    <button class="btnGift" onclick="addToCartGift()"><span class="fa fa-gift"></span> GIVE AS GIFT</button>
+                        }
+                    </div>
+                    <div class="space"></div>
+                    <div><button class="btnGift"  id="wishlistBtn" onclick="_addToWishList()"><span class="fa fa-heart"></span> ADD TO WISHLIST</button></div>
+                    <hr />
+                    
+                    @if (Model.Prize.FreeDeal == false)
+                    {
+                        if (Model.Prize.GameType == null || Model.Prize.GameType == 0 || Model.Prize.GameType == 1)
+                        {
+                    <div>
+                        @{
+                            var widthbar = "width:" + Model.SalesVisualMeter + "%";
+                        }
+                        <div class="barbg"><div class="baractive" style="@widthbar"></div></div>
+                    </div>
+                    <div class="priceremain">@Model.Sales deals to surPRIZE!</div>
+                    <hr />
+                        }
+                    }
+                    @*<div class="timeleft">
+                        <div class="timelefttext">TIME<br />LEFT</div>
+                        <div class="timeleftdetail">
+                            <div id="timeplace">countdownExpire</div>
+                            <script type="text/javascript">  countdownExpire('@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(Model.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            <div id="timeextend">Time extended!</div>
+                        </div>
+                    </div>
+                    <hr />*@
+                    <div class="share">
+                        <div class="sharetext">SHARE</div>
+                        <div class="sharedetail">
+                             <span onclick="shareEmail()" class="fa fa-envelope emailicondeal"></span>   
+                             <span onclick="shareFB()" class="fa fa-facebook fbicondeal"></span>   
+                             <span onclick="shareTwitter()" class="fa fa-twitter twicondeal"></span>   
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                             <span onclick="sharePin()" class="fa fa-pinterest pinicondeal"></span>   
+
+                          @*  <a onclick="shareEmail()"><img src="@Url.Content("~/Content/img/icon/icon-email.png")" /></a>
+                            <a onclick="shareFB()"><img src="@Url.Content("~/Content/img/icon/icon-fb.png")" /></a>
+                            <a onclick="shareTwitter();"><img src="@Url.Content("~/Content/img/icon/icon-twitter.png")" /></a>
+                            <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@Model.Name&url=@Url.Content("~/Home/Deals")/@Model.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <a onclick="sharePin()"><img src="@Url.Content("~/Content/img/icon/icon-pinterest.png")" /></a>*@
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="reviews">
+                        <div class="reviewtext">REVIEWS</div>
+                        <div class="reviewdetail" id="reviewdetail">
+                            <div class="reviewcount"><div class="ratingStar"></div> @string.Format("{0:0.#}", Model.ReviewCount.Rating)/5</div>
+                            <div class="reviewdata"><a  onclick="reviewPopUp()">@Model.ReviewCount.ReviewCount Reviews</a></div>
+                        </div>
+                    </div>@*
+                    <div class="space"></div>
+                    <div><button class="btnGift" onclick="reviewPopUp()">WRITE A REVIEW</button></div>*@
+                    <hr />
+                </div>
+                <div class="right">
+                    <div id="dealslide" class="mightyslider_modern_skin">
+		                <div class="frame">
+			                <div class="slide_element">
+                                @*@if (Model.ImageUrl != null)
+                                {
+				                    <div class="slide" data-mightyslider="cover: '@Model.ImageUrl'"></div>
+                                }*@
+                                @if (Model.SubImageUrl != null)
+                                {
+                                    foreach (var subimg in Model.SubImageUrl)
+                                    {
+				                    <div class="slide" data-mightyslider="cover: '@subimg'"></div>
+                                    }
+                                }
+			                </div>
+		                </div>
+	                </div>
+                    @if (Model.Prize != null && Model.Prize.FreeDeal == false)
+                    {
+                        
+                    <div style="display:none;">
+                        <div id="tooltiptext" style="width: 200px;">
+                            Learn how to win surPRIZE in the 'surPRIZE and how to get it' tab below
+                        </div>
+                    </div>
+                    <div class="prizecontent">
+                        <div class="text">
+                            <div class="titledesc">Buy the deal and stand to get the surPRIZE</div>
+                            <div class="title">@Model.Prize.Name</div>
+
+                            <a onmouseover="tooltip.pop(this, '#tooltiptext')">How to get this</a>
+                        </div>
+                        <div class="imglist">
+		                    <div class="mightyslider_carouselCoverFlow_skin clearfix" id="cover_flow">
+			                    <div class="frame" data-mightyslider="width: 478, height: 120">
+				                    <ul class="slide_element">
+                                    @if (Model.Prize.ImageUrl != null)
+                                    {
+				                        <div class="slide" data-mightyslider="cover: '@Model.Prize.ImageUrl'"></div>
+                                    }
+                                    @if (Model.Prize.SubImageUrl != null)
+                                    {
+                                        foreach (var subimg in Model.Prize.SubImageUrl)
+                                        {
+                                         <li class="slide" data-mightyslider="cover:'@subimg'"></li>
+                                        }
+                                    }
+                                    </ul>
+			                    </div>
+		                    </div>
+
+                        </div>
+                    </div>
+                    }
+                    <div class="tagplace">
+                        TAGS
+                        @if (Model.Tag != null)
+                        {
+                            foreach (var tag in Model.Tag)
+                            {
+                            <a onclick="catChange('@tag,')" style="cursor:pointer"><span>@tag</span>   </a>
+                            }
+                        }
+                    </div>
+        </text>
+                                }
+    }
+                    <div class="detail">
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs">
+                          <li class="active"><a href="#generaldescriptions" data-toggle="tab">General</a></li>
+                          <li><a href="#productdetails" data-toggle="tab">Product Details</a></li>
+                          <li><a href="#location" onclick="locationstart(@Model.Latitude,@Model.Longitude)"data-toggle="tab">Retailer</a></li>
+                          @if (Model.Prize.FreeDeal == false)
+                          {
+                          <li><a href="#prize" data-toggle="tab">surPRIZE and how to get it</a></li>
+                          }
+                          <li><a href="#fineprint" data-toggle="tab">Fine Print</a></li>
+                          @*<li><a href="#howkuazooworks" data-toggle="tab">How Kuazoo Works</a></li>*@
+                        </ul>
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                          <div class="tab-pane fade in active" id="generaldescriptions">
+                          @if (Model.GeneralDescription != null)
+                          {
+                          @Html.Raw(Model.GeneralDescription)
+                          }
+                          </div>
+                          <div class="tab-pane fade" id="productdetails">
+                          @if (Model.Description != null)
+                          {
+                          @Html.Raw(Model.Description)
+                          }
+                          </div>
+                          <div class="tab-pane fade" id="location">
+                            @if (Model.MerchantDescription != null)
+                            {
+                            @Html.Raw(Model.MerchantDescription)
+                            }
+                            <br />
+                            @if (Model.MerchantSubImageUrl != null && Model.MerchantSubImageUrl.Count() > 0)
+                            {
+                                int imgi = 0;
+                                foreach (var vimg in Model.MerchantSubImageUrl)
+                                {
+                                    <img src="@vimg" class="imgt" alt="@Model.MerchantSubImageUrlLink[imgi]" title="@Model.MerchantSubImageUrlLink[imgi]" />
+                                    imgi++;
+                                }
+                            }
+                            @if (Model.MerchantDescription != null || Model.MerchantSubImageUrl.Count() > 0)
+                            {
+                            <hr />
+                            }
+                            <div class="locationwrap">
+                                <div id="map"></div>
+                                <script type="text/javascript">
+                                    $(function () {
+                                        initializeEditMap(@Model.Latitude,@Model.Longitude);
+                                    }); 
+                                </script> 
+                                <div id="mapdetail">
+                                    <div class="mapdetailtitle">@Model.MerchantName</div>
+                                    <div class="mapdetailaddress">
+                                        @if (Model.MerchantContactNumber != null && Model.MerchantContactNumber != "")
+                                        {
+                                            <span class="fa fa-phone" style="margin-right: 10px;"></span>@Model.MerchantContactNumber<br />
+                                        }
+                                        @if (Model.MerchantEmail != null && Model.MerchantEmail != "")
+                                        {
+                                            <span class="fa fa-envelope" style="margin-right: 10px;"></span>@Model.MerchantEmail<br />
+                                        }
+                                        @if (Model.MerchantWebsite != null && Model.MerchantWebsite != "")
+                                        {
+                                            <span class="fa fa-globe" style="margin-right: 10px;"></span>@Model.MerchantWebsite<br />
+                                        }
+                                        @if (Model.MerchantFacebook != null && Model.MerchantFacebook != "")
+                                        {
+                                            <span class="fa fa-facebook-square" style="margin-right: 10px;"></span>@Model.MerchantFacebook<br />
+                                        }
+                                        <span class="fa fa-map-marker" style="margin-right: 10px;"></span>
+                                        @if (Model.AddressLine1 != null && Model.AddressLine1 != "")
+                                        {
+                                        <text>@Model.AddressLine1,</text>
+                                        }
+                                        @if (Model.MerchantCityName != null && Model.MerchantCityName != "")
+                                        {
+                                        <text>@Model.MerchantCityName,</text>
+                                        }
+                                        @if (Model.PostCode != null && Model.PostCode != "")
+                                        {
+                                        <text>@Model.PostCode,</text>
+                                        }
+                                        @if (Model.MerchantCountryName != null && Model.MerchantCountryName != "")
+                                        {
+                                        <text>@Model.MerchantCountryName</text>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                          <div class="tab-pane fade" id="prize">
+                                @if (Model.Prize != null)
+                                {
+                                    @*<span>Description</span><br />
+                                    @Model.Prize.Description<br /><br />
+                                    <span>Terms</span><br />
+                                    @Model.Prize.Terms<br /><br />
+                                    <span>How to Redeem</span><br />
+                                    @Model.Prize.Detail<br /><br />*@
+                                    if (Model.Prize.Description.ToLower().IndexOf("term") > 0)
+                                    {
+                                        @Html.Raw(Model.Prize.Description.Substring(0, Model.Prize.Description.ToLower().IndexOf("term")))
+                                        <p>
+                                        <br>
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(Model.Prize.Description)
+                                    }
+                                }
+                                
+                                <h3>surPRIZE and how to get it</h3>
+                                <p>
+
+                                </p><ul>
+                                <li>The surPRIZE is a prize which every buyer who purchases a product or service on Kuazoo.com is eligible to win if/when the overall number of transactions bought relating to the specific deal reaches the minimum subscription level</li>
+                                <li>The minimum number of transactions required to be bought in order to activate the surPRIZE is highlighted on the main deal page</li>
+                                <li>The buyer will be asked whether he/she would like to participate in a short skill-based game called ‘Spot The Object’ or the ‘PreDetermined Winning Position’ game after he/she completes the checkout process</li>
+                                <li>Only if the buyer agrees to play the ‘Spot the Object’ game or the ‘Pre-Determined Winning Position’ game, will he/she be entered into the competition to win the surPRIZE</li>
+                                <li>The winner of the surPRIZE will be determined when all the buyers voluntarily entering the competition after purchasing the product or service have agreed to and completed the skill-based games</li>
+                                <li>The winner will be determined by the Kuazoo officials based on the following guidelines: </li><ul>
+                                <li>Spot The Object – The most accurate answer received. In case of a tie, Kuazoo officials will use the fastest time as the criteria to break the tie</li>
+                                <li>Pre-Determined Winning Position – The person who made the purchase at the pre-determined winning position, which is chosen by the Kuazoo officials before the specific deal is advertised on the Kuazoo.com website. If the person who bought the deal at the pre-determined winning position opts not to participate in winning the prize then the next closest person higher than the pre-determined position will be awarded the prize</li>
+                                <li>The winner will be announced within 48 hours after all competition entries have been completed. </li>
+                                <li>The winner of the surPRIZE will be informed via email and will be placed in the Winners’ Circle section of Kuazoo.com. This will be done within 48 hours after all competition entries have been completed</li>
+                                </ul></ul>
+                                <p>
+                                <br>
+                                </p><h3>Redemption of surPRIZE</h3>
+                                <p>
+                                </p><ul>
+                                <li>The winner of the surPRIZE will be asked to contact Kuazoo Customer Service to arrange the date and time to redeem the prize</li>
+                                <li>Each winner will be required to visit the Kuazoo offices to redeem the prize with the official email notification and ID as proof</li>
+                                <li>Each winner will be required to provide basic information i.e. Name and Address Location to be published in the Winners’ Circle section of Kuazoo.com</li>
+                                <li>Each winner will be required to provide a photo of themselves to be published on the Winners’ Circle section of Kuazoo.com</li>
+                                <li>Each winner will be required to take an official photograph receiving the prize from Kuazoo officials </li>
+                                <li>Failure to comply with any of the above redemption conditions will give Kuazoo Sdn Bhd the right to withdraw the award of the prize to the winner of the surPRIZE</li> 
+                                    </ul>
+
+
+                          </div>
+                          <div class="tab-pane fade" id="fineprint">
+                          @if (Model.Terms != null)
+                          {
+                          @Html.Raw(Model.Terms)
+                          }
+                          </div>
+                          <div class="tab-pane fade" id="howkuazooworks">
+                          @Html.Raw(Kuazoo.Helper.howkuazoowork)
+                          </div>
+                        </div>
+                    </div>
+                    
+                    @if (Model.SalesVisualMeter >= 100 || Model.Sales < 1 && Model.Prize.FreeDeal == false)
+                    {
+                    <div class="buyplace"><input type="button" class="btnBuy disabled" value ="BUY NOW!" /></div>
+                    }
+                    else
+                    {
+                        if (Model.Variance != null && Model.Variance != string.Empty)
+                        {
+                            <div class="buyplace"><input type="button" onclick="multiVariance()"  class="btnBuy" value ="BUY NOW!" /></div>
+                        }
+                        else
+                        {
+                            <div class="buyplace"><input type="button"  onclick="addToCart()" class="btnBuy" value ="BUY NOW!" /></div>
+                        }
+                    }
+                </div>
+            </div>
+</div>
+@{
+    bool defaultvar = false;
+    string defaultvarstr = "";
+    decimal disbeforeflash = 0;
+}
+@if (Model.Variance != null && Model.Variance != string.Empty)
+{
+    string[] vari = Model.Variance.Split('|');
+    if (vari.Count() == 1)
+    {
+        string[] vari2 = vari.First().Split('`');
+        if (Model.Price == decimal.Parse(vari2[1]) && Model.Discount == decimal.Parse(vari2[2]))
+        {
+            defaultvarstr = vari.First();
+            defaultvar = true;
+        }
+    }
+<div id="varianceList" class="variancewrap" style="display:none">
+    @foreach (var v in vari)
+    {
+        string[] vari2 = v.Split('`');
+        string price = "RM" + vari2[1];
+        string disc = decimal.Parse(vari2[2]).ToString("N0") + "%";
+        //string discprice = "RM" + (Math.Ceiling((decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100))*10)/10).ToString("N2");
+        string discprice = "RM" + Kuazoo.Helper.DecimalPlace(decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100));
+        <div class="row">
+            <div class="col-sm-5"><h3>@vari2[0]</h3></div>
+            <div class="col-sm-2"><div class="price">@price</div></div>
+            <div class="col-sm-2" style="padding:0px">
+                <div class="discprice">
+                    @if(Model.FlashDeal != null){
+                        disbeforeflash = decimal.Parse(vari2[2]) - Model.FlashDeal.Discount;
+                        <span class="disc"><span style="text-decoration:line-through;font-size:16px;color:#999">@disbeforeflash.ToString("N0")%</span> @disc</span>
+                    }else{
+                        <span class="disc">@disc</span>
+                    }
+                    <br />@discprice
+                </div>
+            </div>
+            <div class="col-sm-3">
+                @if (int.Parse(vari2[3]) > 0)
+                {
+                <div class="buyplace"><input type="button"  onclick="addToCartVari('@v')" class="btnBuy" value ="BUY" /></div>
+                }
+                else
+                {
+                <div class="buyplace"><input type="button"  onclick="addToCartVari('@v')" class="btnBuy disabled" disabled="disabled" value ="BUY" /></div>
+                }
+            </div>
+        </div>
+    }
+</div>
+<div id="varianceListGift" class="variancewrap" style="display:none">
+    @foreach (var v in vari)
+    {
+        string[] vari2 = v.Split('`');
+        string price = "RM" + vari2[1];
+        string disc = decimal.Parse(vari2[2]).ToString("N0") + "%";
+        //string discprice = "RM" + (Math.Ceiling((decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100))*10)/10).ToString("N2");
+        string discprice = "RM" + Kuazoo.Helper.DecimalPlace(decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100));
+        <div class="row">
+            <div class="col-sm-5"><h3>@vari2[0]</h3></div>
+            <div class="col-sm-2"><div class="price">@price</div></div>
+            <div class="col-sm-2" style="padding:0px">
+                <div class="discprice">
+                    @if(Model.FlashDeal != null){
+                        disbeforeflash = decimal.Parse(vari2[2]) - Model.FlashDeal.Discount;
+                        <span class="disc"><span style="text-decoration:line-through;font-size:16px;color:#999">@disbeforeflash.ToString("N0")%</span> @disc</span>
+                    }else{
+                        <span class="disc">@disc</span>
+                    }
+                    <br />@discprice
+                </div>
+            </div>
+            <div class="col-sm-3">
+                @if (int.Parse(vari2[3]) > 0)
+                {
+                <div class="buyplace"><input type="button"  onclick="addToCartGiftVari('@v')" class="btnBuy" value ="BUY" /></div>
+                }
+                else
+                {
+                <div class="buyplace"><input type="button"  onclick="addToCartGiftVari('@v')" class="btnBuy disabled" disabled="disabled" value ="BUY" /></div>
+                }
+            </div>
+        </div>
+    }
+</div>
+}
+<div id="msgDialog" title="Information"></div>
+<input type="hidden" id="emailMsg" value="" />
+<input type="hidden" id="reviewMsg" value="0" />
+@if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+{
+<input type="hidden" id="isAu" value="0" />
+}
+else
+{
+<input type="hidden" id="isAu" value="1" />
+}
+<input type="hidden" id="imagebaseURL" value="@Kuazoo.Helper.imagebaseURL" />
+<input type="hidden" id="_defaultvar" value="@defaultvar" />
+<input type="hidden" id="_defaultvarstr" value="@defaultvarstr" />
+<input type="hidden" id="_url" value="@Kuazoo.Helper.SetUrl" />
+@section AddToFooter
+{
+<script src="@Url.Content("~/Scripts/jquery.easing.1.3.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.mobile.just-touch.js")"></script>
+<script src="@Url.Content("~/Scripts/mightyslider.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+<script type="text/javascript" async src="http://assets.pinterest.com/js/pinit.js"></script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.deals.js?v3")"></script>
+
+}

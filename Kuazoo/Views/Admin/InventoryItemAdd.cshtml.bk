@@ -1,0 +1,392 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItem
+@{
+    ViewBag.Title = "Inventory Item Add";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(2);
+
+        $.post('TagList', function (obj) {
+            var listItems = "";
+            for (var i = 0; i < obj.length; i++) {
+                listItems += "<option value='" + obj[i].TagId + "'>" + obj[i].TagName + "</option>";
+            }
+            $("#InventoryItemTagDropDown").html(listItems);
+            $("#InventoryItemTagDropDown").chosen({ no_results_text: "Oops, nothing found!", max_selected_options: 5 });
+            $("#InventoryItemTagDropDown").trigger("liszt:updated");
+        });
+
+        pricediscount();
+        $("#Price").keyup(function () {
+            pricediscount();
+        });
+        $("#Discount").keyup(function () {
+            pricediscount();
+        });
+        document.getElementById("imageUpload").onchange = function () {
+            document.getElementById("uploadFile").value = this.value;
+        };
+        document.getElementById("imageUploadPrize").onchange = function () {
+            document.getElementById("uploadFilePrize").value = this.value;
+        };
+        document.getElementById("imagefile").onchange = function () {
+            document.getElementById("imagefiletitle").value = this.value;
+        };
+        $("#btnFirst").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+            var myTab = tabstrip.tabGroup.children("li").eq(1);
+            tabstrip.select(myTab);
+            $("._first").css("display", "none");
+            $("._second").css("display", "block");
+        });
+        $("#btnPrev").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+            var myTab = tabstrip.tabGroup.children("li").eq(0);
+            tabstrip.select(myTab);
+            $("._first").css("display", "block");
+            $("._second").css("display", "none");
+        });
+    });
+    function tabOnSelect(e) {
+        var tab = $(e.item).find("> .k-link").text();
+        //alert(text);
+        if (tab == "Info") {
+            $("._first").css("display", "block");
+            $("._second").css("display", "none");
+        }
+        else {
+            $("._first").css("display", "none");
+            $("._second").css("display", "block");
+        }
+    }
+    function pricediscount(){
+        var price = $("#Price").val();
+        var discount = $("#Discount").val();
+        if(price.length<1)price=0;
+        if(discount.length<1)discount=0;
+        var discountprice = price - (price*discount/100);
+        $("#discountprice").val(discountprice);
+    }
+    function UpdateConf(i) {
+        $("#_submit").val(i);
+        return true;
+    }
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="InventoryItem">Inventory Item</a> <span class="active"> / Add Inventory Item</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New inventory item successfully created</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Inventory Item</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Add Inventory Item</h1>
+    </div>
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @(Html.Kendo().TabStrip()
+                    .Name("tabstrip")
+                    .Events(events=>events.Select("tabOnSelect"))
+                    .Items(tabstrip =>
+                    {
+                        tabstrip.Add().Text("Info")
+                            .Selected(true)
+                            .Content(@<text>     
+    <div id="wrap">
+        <div class="colright">
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MerchantId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().ComboBoxFor(model => model.MerchantId)
+                                            .Value("")
+                                            .Text("")
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .Placeholder("--Select Merchant--")
+                                            .DataTextField("Name")
+                                            .DataValueField("MerchantId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("MerchantList", "Admin");
+                                                });
+                                            })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.MerchantId)
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Name)</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.InventoryItemTypeId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().DropDownListFor(model => model.InventoryItemTypeId)
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .OptionLabel("--Select Inventory Item Type--")
+                                            .DataTextField("InventoryItemTypeName")
+                                            .DataValueField("InventoryItemTypeId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("InventoryItemTypeList", "Admin");
+                                                });
+                                            })
+                                        )
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.Description)</div>
+                    <div class="colright">@Html.TextAreaFor(model => model.Description, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Description)</div>
+                </div>
+                <div>
+                    <div class="colleft">Tag</div>
+                    <div class="colright" style="color:#8e8071">
+                        <select data-placeholder="" multiple id="InventoryItemTagDropDown" name="InventoryItemTagDropDown" class="long w400">
+                            <option></option>
+                        </select>
+                    </div>
+                </div>     
+                <div>
+                    <div class="colleft" style="vertical-align:top">Main Image</div>
+                    <div class="colright" style="display:table;width:150px;">
+                         @*<input type="file" id="imageUpload" name="imageUpload" class="fileupload" />*@
+                         <input id="uploadFile" placeholder="Choose File" readonly="readonly" class="file-upload-text" />
+                         <div class="file-upload">
+                            <span>Browse</span>
+	                        <input id="imageUpload" type="file" name="imageUpload" />
+                        </div>
+                    </div>
+                </div> 
+                 
+                <div>
+                    <div class="colleft" style="vertical-align:top">Sub Image</div>
+                        <input type="hidden" id="strSubImage" name="strSubImage" value="" />
+                        <input type="hidden" id="countSubImage" name="countSubImage" value="0" />
+                    <div id="subimagelist" class="colright imgplace">
+                    </div>
+                    <div class="colright" style="display:table;width:150px;">
+                         <input id="imagefiletitle" placeholder="Choose File" readonly="readonly" class="file-upload-text" />
+                         <div class="file-upload">
+                            <span>Browse</span>
+	                        <input id="imagefile" type="file" name="imagefile" />
+                        </div>
+                    </div>
+                    <div class="colright" style="display:table;width:150px;">
+                        <input type="button" value="Upload" class="submitBtn" id="btnUploadSubImage" />
+                    </div>
+                </div>                
+                @*<div>
+                    <div class="colleft">@Html.LabelFor(model => model.Keyword)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Keyword)@Html.ValidationMessageFor(model => model.Keyword)</div>
+                </div>   *@  
+            </div>
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Price)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Price, new { @class = "medium", autocomplete = "off" })@Html.ValidationMessageFor(model => model.Price)</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Discount)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Discount, new { @class = "medium", maxlength = "3", autocomplete = "off" }) % @Html.ValidationMessageFor(model => model.Discount)</div>
+                </div>   
+                <div>
+                    <div class="colleft">Discounted Price</div>
+                    <div class="colright"><input type="text" id="discountprice" name="discountprice" readonly="readonly" class="medium" /></div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.ExpireDate)</div>
+                    <div class="colright">
+                    @(Html.Kendo().DatePickerFor(model => model.ExpireDate)
+                        .HtmlAttributes(new { @class = "w200" })
+                        .Value(DateTime.Now)
+                        .Format("dd MMM yyyy")
+                    )
+                    @Html.ValidationMessageFor(model => model.ExpireDate)
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MaximumSales)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.MaximumSales, new { @class = "medium" })@Html.ValidationMessageFor(model => model.MaximumSales)</div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.PublishDate)</div>
+                    <div class="colright">
+                    @(Html.Kendo().DateTimePickerFor(model => model.PublishDate)
+                        .HtmlAttributes(new { @class = "w200" })
+                        .Value(DateTime.Now)
+                        .Format("dd MMM yyyy hh:mm tt")
+                    )
+                    @Html.ValidationMessageFor(model => model.PublishDate)
+                    </div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MinimumTarget)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.MinimumTarget, new { @class = "medium" })@Html.ValidationMessageFor(model => model.MinimumTarget)</div>
+                </div>  
+            </div>
+        </div>
+    </div>
+                            </text>);
+
+                        tabstrip.Add().Text("Prize")
+                            .Content(@<text>
+    <div id="wrap">
+    <div class="colright">
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Name)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Prize.Name)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.SponsorName)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.SponsorName, new { @class = "long" })@Html.ValidationMessageFor(model => model.Prize.SponsorName)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Price)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.Price, new { @class = "medium" })@Html.ValidationMessageFor(model => model.Prize.Price)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Description)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Description, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Description)</div>
+        </div>
+    </div>
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Terms)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Terms, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Terms)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Detail)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Detail, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Detail)</div>
+        </div>
+        <div>
+            <div class="colleft" style="vertical-align:top">Image</div>
+            <div class="colright" style="display:table;width:150px;">
+                    <input id="uploadFilePrize" placeholder="Choose File" readonly="readonly" class="file-upload-text" />
+                    <div class="file-upload">
+                    <span>Browse</span>
+	                <input id="imageUploadPrize" type="file" name="imageUploadPrize" />
+                </div>
+            </div>
+        </div> 
+    </div>
+    </div>
+    </div>
+                            </text>);
+
+                    })
+                                    )
+                 
+            <div class="wrapend">
+                <div class="colleft"><input type="hidden" value="0" id="_submit" name="_submit"/></div>
+                <div class="colright">
+                    <div class="_first">
+                        <input type="button" value="Next" class="grayBtn" id="btnFirst" />
+                    </div>
+                    <div class="_second" style="display:none">
+                        <input type="button" value="Back" class="grayBtn" id="btnPrev" />
+                        <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf(0)"/>
+                    </div>
+                </div>
+            </div>   
+        }
+</div>
+
+<script src="@Url.Content("~/Scripts/jquery-ui-1.9.2.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.fileupload.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.fileupload-ui.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.iframe-transport.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    var jqXHRData;
+    $(document).ready(function () {
+        $("#MerchantId").data("kendoComboBox").input.focus();
+        initUpload();
+        $("#btnUploadSubImage").on('click', function () {
+            //console.log('start');
+            if (jqXHRData) {
+                //console.log('not null');
+                jqXHRData.submit();
+            }
+        });
+    });
+
+    function deleteSubImg(data) {
+        var spli = data.split("|");
+        $("#subimg" + spli[1]).css("display", "none");
+        if (spli[0] != "X") {
+            var flag = $("#flagDeleteSubImage").val();
+            if (flag != "") {
+                flag = flag + "," + spli[0];
+            }
+            else {
+                flag = spli[0];
+            }
+            $("#flagDeleteSubImage").val(flag);
+        }
+        var current = $("#strSubImage").val();
+        current = current.replace(spli[2], '');
+        $("#strSubImage").val(current);
+    }
+    function initUpload() {
+        'use strict';
+        $('#imagefile').fileupload({
+            url: '/Admin/InventoryUploadImage',
+            dateType: 'json',
+            add: function (e, data) {
+                jqXHRData = data
+            },
+            done: function (event, data) {
+                //console.log(data);
+                if (data.result.isUpload) {
+                    var count = parseInt($("#countSubImage").val());
+                    var html = '<div id="subimg' + count + '" class="imgsub"><a  class="fancybox" style="float:left" href="' + data.result.imageurl + '"><img src="' + data.result.imageurl + '" class="imgThumb" /></a>';
+                    var str = "'X|" + count + "|" + data.result.imagename + "'";
+                    html += '<div class="deleteIcon" onclick="deleteSubImg(' + str + ')"></div></div>';
+                    count = count + 1;
+                    $("#countSubImage").val(count);
+                    //console.log(html);
+                    $("#subimagelist").append(html);
+                    var img = $("#strSubImage").val();
+                    if (img != "") {
+                        img = img + "|" + data.result.imagename;
+                    }
+                    else {
+                        img = data.result.imagename;
+                    }
+                    $("#strSubImage").val(img);
+                    document.getElementById("imagefiletitle").value = "";
+                }
+                else {
+                    console.log(data.result.message);
+                }
+            },
+            fail: function (event, data) {
+                if (data.files[0].error) {
+                    alert(data.files[0].error);
+                }
+            }
+        });
+    }
+</script>

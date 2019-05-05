@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+
+    <link href="@Url.Content("~/Content/dataviz/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/dataviz/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/web/kendo.common.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/web/kendo.rtl.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/web/kendo.default.min.css")">
+    
+    <link rel="stylesheet" href="@Url.Content("~/Content/chosen.css")">
+    <link href="@Url.Content("~/Content/customKendo.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/Admin.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/font-awesome.css")" rel="stylesheet" type="text/css" />
+
+    <script src="@Url.Content("~/Scripts/kendo/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/console.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/prettify.min.js")"></script>
+    
+    <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/jquery-ui-1.10.4.css")">
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+    
+    <script type="text/javascript">
+        function changeverticalnav(i) {
+            var list = document.getElementById('verticalnav').children[0];
+            list.children[i].classList.add("active");
+        }
+    </script>
+</head>
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+  m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-55914843-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+<body>
+    <div class="page">
+        <div id="header">
+            <div id="title">KUAZOO</div>
+            <div id="headernotif">
+                <div class="headernotifwrap"><a href="@Url.Action("Transaction", "Admin")#ProcessStatus=eq=No&PaymentStatus=eq=Success"><div class="badge2">@{var count2 = new com.kuazoo.TransactionService().GetTransactionStatusCount().Result;<text>@count2</text>}</div> NEW ORDERS</a></div>
+                <div class="headernotifwrap"><a href="@Url.Action("ExtractData","Admin")">EXTRACT DATA</a></div>
+                <div class="headernotifwrap"><a href="@Url.Action("MinimumTarget","Admin")">MINIMUM TARGET <div class="badge _minimumtarget">@{var count = new com.kuazoo.TransactionService().GetMinimumTargetCount().Result;<text>@count</text>}</div></a></div>
+                <div class="headernotifwrap"><a href="@Url.Action("KPointSetting", "Admin")">Setting</a></div>
+                <div class="headernotifwrap">@Kuazoo.Helper.currAdminName, <a href="@Url.Action("LogOff","Admin")">Log Out</a></div>
+            </div>
+        </div>
+        <div id="bodywrap">
+            <div id="leftwrap">
+                <div id="verticalnav">
+                    <ul>
+                        <li><a href="@Url.Action("Index", "Admin")"><div class="vicon vdashboard"></div> Dashboard</a></li>
+                        <li><a href="@Url.Action("KPointSetting", "Admin")"><div class="vicon vdashboard"></div> K-Point Setting</a></li>
+                        <li><a href="@Url.Action("Static", "Admin")"><div class="vicon vdashboard"></div> Static Setting</a></li>
+                        <li><a href="@Url.Action("Admin", "Admin")"><div class="vicon vdashboard"></div> Admin Setting</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="rightwrap">
+                @RenderBody()
+            </div>
+        </div>
+        <div id="footer">
+        footer
+        </div>
+    </div>
+</body>
+</html>

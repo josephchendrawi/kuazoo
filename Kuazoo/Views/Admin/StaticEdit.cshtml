@@ -1,0 +1,72 @@
+﻿@model com.kuazoo.Models.StaticModel
+@{
+    ViewBag.Title = "Static Setting Edit";
+    Layout = "~/Views/Shared/_AdminSettingLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(2);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Static">Static Setting</a> <span class="active"> / Edit Static Setting</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Static Setting updated successfully</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update New Static Setting</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Edit Static Setting</h1>
+    </div>
+        @using (Html.BeginForm())
+        {
+            @Html.HiddenFor(model => model.StaticId)
+    <div id="wrap">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                <div class="colright">@Model.Name</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Description)</div>
+                <div class="colright">@Html.TextAreaFor(model => model.Description, new { @class = "full textarea" })@Html.ValidationMessageFor(model => model.Description)</div>
+            </div>
+    </div>  
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf()"/>
+                    <a href="Static"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>  
+        }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Description").focus();
+    });
+    function UpdateConf() {
+        var r = confirm("Confirm update Static Setting details?");
+        if (r == true) {
+            $("#Description").val(encodeURI($("#Description").val()));
+            return true;
+        }
+        else return false;
+    }
+</script>

@@ -1,0 +1,1063 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItemVM
+@{
+    ViewBag.Title = "Featured";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+@section AddToHeader{
+    <link rel="canonical" href="@Kuazoo.Helper.SetUrl/Home/FeaturedDeal" />
+}
+
+@section AddToHead{
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml: true,
+            version: 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+</script>
+    <script src="@Url.Content("~/Scripts/jquery.index.head.js")"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        changehomenav(0);
+    });
+</script>
+}
+
+@*<div class="banner">
+    <div class="sidelogo">FLASH<BR /><span>DEAL!</span></div><div class="sidelogoshape"></div>
+    <div class="bannertext">
+        <div class="bannerTitle">When deals go cheaper for a flashing moment!</div>
+        <a href="@Url.Action("FlashDeals", "Home")"><div class="bannerSubtitle">What is a Flash Deal anyway?</div></a>
+    </div>
+</div>*@
+
+@*<h2>Featured Deals</h2><br />*@
+
+<div id="breadcrumbs">
+    <div class="mainwrap">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+    if (ViewBag.msg == "1g")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Game played successfully.</div></div>
+    }
+    else if (ViewBag.msg == "3g")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Game played unsuccessful.</div></div>
+    }
+}
+    </div>
+</div>
+
+<div class="loading bg"></div>
+<div class="loading indicator"><div></div></div>
+<div class="content">
+@foreach (var v in Model.item)
+{
+    var whrow = "whrow" + v.InventoryItemId;
+    var InventoryItemId = "InventoryItemId" + v.InventoryItemId;
+    var Name = "Name" + v.InventoryItemId;
+    var Price = "Price" + v.InventoryItemId;
+    var Discount = "Discount" + v.InventoryItemId;
+    var ImageUrl = "ImageUrl" + v.InventoryItemId;
+    var Prize_Name = "Prize_Name" + v.InventoryItemId;
+    var Prize_ImageUrl = "Prize_ImageUrl" + v.InventoryItemId;
+    var FlashDeal_Discount = "FlashDeal_Discount" + v.InventoryItemId;
+    var FlashDeal_FlashDealId = "FlashDeal_FlashDealId" + v.InventoryItemId;
+    var Variance = "Variance" + v.InventoryItemId;
+    var VarianceDefault = "VarianceDefault" + v.InventoryItemId;
+    var VarianceDefaultStr = "VarianceDefaultStr" + v.InventoryItemId;
+    
+    var imgid = "img-" + v.ImageId;
+    if (v.FeatureSeq == 1 || v.FeatureSeq == 4)
+    {
+        if (v.TypeName.ToLower().Equals("raffle"))
+        {
+                <div class="dealbox feature">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxraffle">
+                        <div class="boxrafflecontent">
+                            <div class="raflleticket">RM @v.Price</div>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        <div class="boxsocialraf">
+                        @{
+                        var strinv = "inventoryimgname" + v.InventoryItemId;
+                        var strname = "inventoryname" + v.InventoryItemId;
+                        var strurl = "inventoryurl" + v.InventoryItemId;
+                        var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfeature">
+                    <div class="boxfeaturewrap">
+                            @Html.Raw(v.FeaturedText)
+                    </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                            <div class="boxoffbig2"><span class="boxoffmedium">RM</span>@v.Price</div>
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="pricedisc">RAFFLE TICKET</span>
+                            </div>
+                            @if(v.Prize.GameType == null || v.Prize.GameType ==0 || v.Prize.GameType == 1){
+                            <div>
+                                @{
+                             var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales raffle tickets remaining!</div>
+                                }
+                        </div>
+                        <div class="boxfeaturebuy">
+                        @if (v.Variance != null && v.Variance != string.Empty)
+                        {
+                            <div><input type="button" class="btnBuy" onclick="multiVariance(@v.InventoryItemId)" value ="BUY NOW" /></div>
+                        }
+                        else
+                        {
+                            <div><input type="button" class="btnBuy" onclick="addToCart(@v.InventoryItemId)" value ="BUY NOW" /></div>
+                        }
+                        </div>
+                    </div>
+                </div>
+        }//kuazoo on
+        else if (v.SalesVisualMeter >= 100 || v.Sales < 1 && v.Prize.FreeDeal==false)
+        {
+                <div class="dealbox feature">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if(v.Name.Length>55){<text>@v.Name.Substring(0,55)...</text>}else{<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent feature">
+                        <div class="boxkuazoo">
+                            <div class="boxkuazoobg"></div>
+                            <div class="boxcontentwrap">
+                                <div class="boxTitle">KUAZOO!</div>
+                                <div class="boxSubtitle">DRAW IS ON!</div>
+                            </div>
+                            @if (v.Prize != null)
+                            {
+                            <div class="boxcontentprizetemp"></div>
+                            }
+                        </div>
+                        <img data-original="@v.ImageUrl" class="@imgid lazy" />
+                        <script type="text/javascript">                            adjustImage('@imgid');</script>
+                        <div class="boxsocialbg"></div>
+                        <div class="boxsocial">
+                        @{
+                            var strinv = "inventoryimgname" + v.InventoryItemId;
+                            var strname = "inventoryname" + v.InventoryItemId;
+                            var strurl = "inventoryurl" + v.InventoryItemId;
+                            var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfeature">
+                    <div class="boxfeaturewrap">
+                            @Html.Raw(v.FeaturedText)
+                    </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                                @if (v.Discount > 0)
+                                {
+                                    decimal pricedis = v.Price - (v.Price * v.Discount / 100);
+                            <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                            <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                }
+                                else
+                                {
+                            <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                }
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="boxdisc">@v.Discount.ToString("N0")% OFF</span>
+                            </div>
+                            <div>
+                                <div class="boxbarbg"><div class="boxbaractive" style="width:100%"></div></div>
+                            </div>
+                            <div class="boxtext">All deal sold!</div>
+                        </div>
+                        <div class="boxfeaturebuy">
+                            <div><input type="button" class="btnBuy disabled" value ="BUY NOW" /></div>
+                        </div>
+                    </div>
+                </div>
+        }
+        else if (v.FlashDeal != null)
+        {
+                <div class="dealbox feature">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if(v.Name.Length>55){<text>@v.Name.Substring(0,55)...</text>}else{<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent">
+                    @{
+                        var fld = "boxflashdeal" + v.FlashDeal.FlashDealId;   
+                        }
+                        <div class="boxflashdeal" id="@fld">
+                            <div class="boxflashdealbg"></div>
+                            <div class="boxcontentwrap">
+                                <div class="boxTitle">FLASH DEAL!</div>
+                                <div class="boxSubtitle">
+                                    <div class="boxSubtitleleft small">FLASH DEAL ENDING IN</div>
+                                    @{
+                        var countdo = "countdown" + v.FlashDeal.FlashDealId;   
+                                     }
+                                    <div class="boxSubtitleright" id="@countdo"></div>
+                                    <script type="text/javascript">                                        countdownStart('@v.FlashDeal.FlashDealId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.FlashDeal.EndTime, DateTimeKind.Utc))')</script>
+                                </div>
+                                <div class="boxSubtitle">
+                                    <div class="boxSubtitlehalf ori">
+                                        <div class="small">WAS</div>
+                                        <div class="percen">@v.Discount.ToString("N0")%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                    <div class="boxSubtitlehalf dis">
+                                        <div class="small">NOW</div>
+                                        <div class="percen">@((v.Discount + v.FlashDeal.Discount).ToString("N0"))%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (v.Prize != null)
+                            {
+                            <div class="boxcontentprizetemp"></div>
+                            }
+                        </div>
+                        <img data-original="@v.ImageUrl" class="@imgid lazy" />
+                        <script type="text/javascript">                            adjustImage('@imgid');</script>
+                        <div class="boxsocial">
+                        @{
+                            var strinv = "inventoryimgname" + v.InventoryItemId;
+                            var strname = "inventoryname" + v.InventoryItemId;
+                            var strurl = "inventoryurl" + v.InventoryItemId;
+                            var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfeature">
+                    <div class="boxfeaturewrap">
+                            @Html.Raw(v.FeaturedText)
+                    </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                                @if (v.FlashDeal.Discount > 0)
+                                {
+                                    decimal pricedis = v.Price - (v.Price * (v.Discount + v.FlashDeal.Discount) / 100);
+                            <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                            <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                }
+                                else
+                                {
+                            <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                }
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="boxdisc">@((v.Discount + v.FlashDeal.Discount).ToString("N0"))% OFF</span>
+                            </div>
+                            @if(v.Prize.GameType == null || v.Prize.GameType ==0 || v.Prize.GameType == 1){
+                            <div>
+                                @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales deals to surPRIZE!</div>
+                                }
+                        </div>
+                        <div class="boxfeaturebuy">
+                        @if (v.Variance != null && v.Variance != string.Empty)
+                        {
+                            <div><input type="button" class="btnBuy" onclick="multiVariance(@v.InventoryItemId)" value ="BUY NOW" /></div>
+                        }
+                        else
+                        {
+                            <div><input type="button" class="btnBuy" onclick="addToCart(@v.InventoryItemId)" value ="BUY NOW" /></div>
+                        }
+                        </div>
+                    </div>
+                </div>
+        }
+        else
+        {
+                <div class="dealbox feature">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if(v.Name.Length>55){<text>@v.Name.Substring(0,55)...</text>}else{<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null && v.Prize.FreeDeal==false)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent">
+                        <img data-original="@v.ImageUrl" class="@imgid lazy" />
+                        <script type="text/javascript">                            adjustImage('@imgid');</script>
+                        <div class="boxsocialbg"></div>
+                        <div class="boxsocial">
+                        @{
+                        var strinv = "inventoryimgname" + v.InventoryItemId;
+                        var strname = "inventoryname" + v.InventoryItemId;
+                        var strurl = "inventoryurl" + v.InventoryItemId;
+                        var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfeature">
+                    <div class="boxfeaturewrap">
+                            @Html.Raw(v.FeaturedText)
+                    </div>
+                    </div>
+                    <div class="boxfooter">
+                        @if(v.Prize.FreeDeal==false){
+                            <div class="boxoff">
+                                    @if (v.Discount > 0)
+                                    {
+                                        decimal pricedis = v.Price - (v.Price * v.Discount / 100);
+                                <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                                <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                    else
+                                    {
+                                <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                            </div>
+                            <div class="boxprice">
+                                <div>
+                                    <span class="boxdisc">@v.Discount.ToString("N0")% OFF</span>
+                                </div>
+                                @if(v.Prize.GameType == null || v.Prize.GameType ==0 || v.Prize.GameType == 1)
+                                {
+                                <div>
+                                    @{
+                                    var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                    }
+                                    <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                                </div>
+                                <div class="boxtext">@v.Sales deals to surPRIZE!</div>
+                                    }
+                            </div>
+                        }
+                        else
+                        {
+                        <div class="boxoff">
+                            <div class="boxoffbig">FREE</div>
+                        </div>
+                        <div class="boxprice">
+                        </div>
+                        }
+                        <div class="boxfeaturebuy">
+                        @if (v.Variance != null && v.Variance != string.Empty)
+                        {
+                            <div><input type="button" class="btnBuy" onclick="multiVariance(@v.InventoryItemId)" value ="BUY NOW" /></div>
+                        }
+                        else
+                        {
+                            <div><input type="button" class="btnBuy" onclick="addToCart(@v.InventoryItemId)" value ="BUY NOW" /></div>
+                        }
+                        </div>
+                    </div>
+                </div>
+        }
+    }
+    else
+    {
+        if (v.TypeName.ToLower().Equals("raffle"))
+        {
+               <div class="dealbox">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxraffle">
+                        <div class="boxrafflecontent">
+                            <div class="raflleticket">RM @v.Price</div>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        <div class="boxsocialraf">
+                        @{
+                        var strinv = "inventoryimgname" + v.InventoryItemId;
+                        var strname = "inventoryname" + v.InventoryItemId;
+                        var strurl = "inventoryurl" + v.InventoryItemId;
+                        var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                            <div class="boxoffbig2"><span class="boxoffmedium">RM</span>@v.Price</div>
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="pricedisc">RAFFLE TICKET</span>
+                            </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                            <div>
+                                @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales raffle tickets remaining!</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+        }//kuazoo on
+        else if (v.SalesVisualMeter >= 100 || v.Sales < 1)
+        {
+                <div class="dealbox">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if (v.Name.Length > 55)
+                                                    {<text>@v.Name.Substring(0, 55)...</text>}
+                                                    else
+                                                    {<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent">
+                        <div class="boxkuazoo">
+                            <div class="boxkuazoobg"></div>
+                            <div class="boxcontentwrap">
+                                <div class="boxTitle">KUAZOO!</div>
+                                <div class="boxSubtitle">DRAW IS ON!</div>
+                            </div>
+                            @if (v.Prize != null)
+                            {
+                            <div class="boxcontentprizetemp"></div>
+                            }
+                        </div>
+                        <img data-original="@v.ImageUrl" class="@imgid lazy" />
+                        <script type="text/javascript">                            adjustImage('@imgid');</script>
+                        <div class="boxsocialbg"></div>
+                        <div class="boxsocial">
+                        @{
+                            var strinv = "inventoryimgname" + v.InventoryItemId;
+                            var strname = "inventoryname" + v.InventoryItemId;
+                            var strurl = "inventoryurl" + v.InventoryItemId;
+                            var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                                @if (v.Discount > 0)
+                                {
+                                    decimal pricedis = v.Price - (v.Price * v.Discount / 100);
+                            <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                                    if (Kuazoo.Helper.DecimalPlace(pricedis).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                }
+                                else
+                                {
+                                    if (Kuazoo.Helper.DecimalPlace(v.Price).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                }
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="boxdisc">@v.Discount.ToString("N0")% OFF</span>
+                            </div>
+                            <div>
+                                <div class="boxbarbg"><div class="boxbaractive" style="width:100%"></div></div>
+                            </div>
+                            <div class="boxtext">All deal sold!</div>
+                        </div>
+                    </div>
+                </div>
+        }
+        else if (v.FlashDeal != null)
+        {
+                <div class="dealbox">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if (v.Name.Length > 55)
+                                                    {<text>@v.Name.Substring(0, 55)...</text>}
+                                                    else
+                                                    {<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent">
+                    @{
+                        var fld = "boxflashdeal" + v.FlashDeal.FlashDealId;   
+                        }
+                        <div class="boxflashdeal" id="@fld">
+                            <div class="boxflashdealbg"></div>
+                            <div class="boxcontentwrap">
+                                <div class="boxTitle">FLASH DEAL!</div>
+                                <div class="boxSubtitle">
+                                    <div class="boxSubtitleleft small">FLASH DEAL ENDING IN</div>
+                                    @{
+                        var countdo = "countdown" + v.FlashDeal.FlashDealId;   
+                                     }
+                                    <div class="boxSubtitleright" id="@countdo"></div>
+                                    <script type="text/javascript">                                        countdownStart('@v.FlashDeal.FlashDealId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.FlashDeal.EndTime, DateTimeKind.Utc))')</script>
+                                </div>
+                                <div class="boxSubtitle">
+                                    <div class="boxSubtitlehalf ori">
+                                        <div class="small">WAS</div>
+                                        <div class="percen">@v.Discount.ToString("N0")%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                    <div class="boxSubtitlehalf dis">
+                                        <div class="small">NOW</div>
+                                        <div class="percen">@((v.Discount + v.FlashDeal.Discount).ToString("N0"))%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (v.Prize != null)
+                            {
+                            <div class="boxcontentprizetemp"></div>
+                            }
+                        </div>
+                        <img data-original="@v.ImageUrl" class="@imgid lazy" />
+                        <script type="text/javascript">                            adjustImage('@imgid');</script>
+                        <div class="boxsocialbg"></div>
+                        <div class="boxsocial">
+                        @{
+                            var strinv = "inventoryimgname" + v.InventoryItemId;
+                            var strname = "inventoryname" + v.InventoryItemId;
+                            var strurl = "inventoryurl" + v.InventoryItemId;
+                            var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                                @if (v.FlashDeal.Discount > 0)
+                                {
+                                    decimal pricedis = v.Price - (v.Price * (v.Discount + v.FlashDeal.Discount) / 100);
+                            <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                                    if (Kuazoo.Helper.DecimalPlace(pricedis).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                }
+                                else
+                                {
+                                    if (Kuazoo.Helper.DecimalPlace(v.Price).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                }
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="boxdisc">@((v.Discount + v.FlashDeal.Discount).ToString("N0"))% OFF</span>
+                            </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                            <div>
+                                @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales deals to surPRIZE!</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+        }
+        else
+        {
+                <div class="dealbox">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 0 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if (v.Name.Length > 55)
+                                                    {<text>@v.Name.Substring(0, 55)...</text>}
+                                                    else
+                                                    {<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent">
+                        <img data-original="@v.ImageUrl" class="@imgid lazy" />
+                        <script type="text/javascript">                            adjustImage('@imgid');</script>
+                        <div class="boxsocialbg"></div>
+                        <div class="boxsocial">
+                        @{
+                        var strinv = "inventoryimgname" + v.InventoryItemId;
+                        var strname = "inventoryname" + v.InventoryItemId;
+                        var strurl = "inventoryurl" + v.InventoryItemId;
+                        var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")" />
+                             @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                             {
+                             <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                             <script type="text/javascript">
+                                 if(checkWishlist(@v.InventoryItemId)==true){
+                                    $("#@strinvfav").addClass("active");
+                                 }
+                             </script>  
+                             }
+                             else
+                             {
+                                 var activestr = "";
+                                 if (v.Wishlist) { activestr = "active"; }
+                                <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                             }
+                             <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                             <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                             <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                             <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                                @if (v.Discount > 0)
+                                {
+                                    decimal pricedis = v.Price - (v.Price * v.Discount / 100);
+                            <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                                    if (Kuazoo.Helper.DecimalPlace(pricedis).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                }
+                                else
+                                {
+                                    if (Kuazoo.Helper.DecimalPlace(v.Price).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                }
+                        </div>
+                        <div class="boxprice">
+                            <div>
+                                <span class="boxdisc">@v.Discount.ToString("N0")% OFF</span>
+                            </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                            <div>
+                                @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales deals to surPRIZE!</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+        }
+    }
+    <text>
+    <input id="@InventoryItemId" type="hidden" value="@v.InventoryItemId">
+    <input id="@Name"  type="hidden" value="@v.Name">
+    <input id="@Price"  type="hidden" value="@v.Price">
+    <input id="@Discount" type="hidden" value="@v.Discount">
+    <input id="@ImageUrl" type="hidden" value="@v.ImageUrl">
+    <input id="@Prize_Name"  type="hidden" value="@v.Prize.Name">
+    <input id="@Prize_ImageUrl"  type="hidden" value="@v.Prize.ImageUrl"> 
+    <input id="@Variance" type="hidden" value="@v.Variance" />
+    </text>
+    bool defaultvar = false;
+    string defaultvarstr = ""; ;
+    decimal disbeforeflash = 0;
+    if (v.Variance != null && v.Variance != string.Empty)
+    {
+        string[] vari = v.Variance.Split('|');
+        if (vari.Count() == 1)
+        {
+            string[] vari2 = vari.First().Split('`');
+            if (v.Price == decimal.Parse(vari2[1]) && v.Discount == decimal.Parse(vari2[2]))
+            {
+                defaultvarstr = vari.First();
+                defaultvar = true;
+            }
+        }
+        <text>
+    <input id="@VarianceDefault" type="hidden" value="@defaultvar" />
+    <input id="@VarianceDefaultStr" type="hidden" value="@defaultvarstr" />
+        </text>
+        string varilist = "varianceList" + v.InventoryItemId;
+    <div id="@varilist" class="variancewrap" style="display:none">
+        @foreach (var v1 in vari)
+        {
+            string[] vari2 = v1.Split('`');
+            string price = "RM" + vari2[1];
+            string disc = decimal.Parse(vari2[2]).ToString("N0") + "%";
+            //string discprice = "RM" + (Math.Ceiling((decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100)) * 10) / 10).ToString("N2");
+            string discprice = "RM" + (decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100)).ToString("N0");
+            <div class="row">
+                <div class="col-sm-5"><h3>@vari2[0]</h3></div>
+                <div class="col-sm-2"><div class="price">@price</div></div>
+                <div class="col-sm-2" style="padding:0px">
+                    <div class="discprice">
+                        @if(v.FlashDeal != null){
+                            disbeforeflash = decimal.Parse(vari2[2]) - v.FlashDeal.Discount;
+                            <span class="disc"><span style="text-decoration:line-through;font-size:16px;color:#999">@disbeforeflash.ToString("N0")%</span> @disc</span>
+                        }else{
+                            <span class="disc">@disc</span>
+                        }
+                        <br />@discprice
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    @if (int.Parse(vari2[3]) > 0)
+                    {
+                        <div class="buyplace"><input type="button"  onclick="addToCartVari('@v1','@v.InventoryItemId')" class="btnBuy" value ="BUY" /></div>
+                    }
+                    else
+                    {
+                        <div class="buyplace"><input type="button"  onclick="addToCartVari('@v1','@v.InventoryItemId')" class="btnBuy disabled" disabled="disabled" value ="BUY" /></div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    }
+
+
+}
+</div>
+@*<div class="citycontent">
+    <div class="citytitle">BROWSE BY CITY</div>
+    <div class="citylistwrap">
+        <div class="cityitem"><a href="@Url.Action("FeaturedDeal", "Home", new { id = 0 })" class="@if (ViewBag.cityid == 0)
+                                                                                                   {<text>active</text>}">All</a></div>
+        @foreach (var v2 in Kuazoo.Helper.GetListCity())
+        {
+            <div class="cityitem"><a href="@Url.Action("FeaturedDeal", "Home", new { id = v2.Value })" class="@if (ViewBag.cityid == v2.Value)
+                                                                                                              {<text>active</text>}">@v2.Key</a></div>
+        }
+    </div>
+</div>*@
+
+<input type="hidden" id="twitterChoose" value="" />
+<input type="hidden" id="childChoose" value="0" />
+<input type="hidden" id="emailMsg" value="" />
+@if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+{
+<input type="hidden" id="isAu" value="0" />
+}
+else
+{
+<input type="hidden" id="isAu" value="1" />
+}
+
+<input type="hidden" id="imagebaseURL" value="@Kuazoo.Helper.imagebaseURL" />
+<input type="hidden" id="_url" value="@Kuazoo.Helper.SetUrl" />
+@section AddToFooter{
+<script src="@Url.Content("~/Scripts/jquery.easing.1.3.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.mobile.just-touch.js")"></script>
+<script src="@Url.Content("~/Scripts/mightyslider.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+<script type="text/javascript" async src="http://assets.pinterest.com/js/pinit.js"></script>
+ <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.index.js?v2")"></script>
+
+}

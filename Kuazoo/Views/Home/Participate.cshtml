@@ -1,0 +1,38 @@
+﻿@model com.kuazoo.Models.GameModelFinish
+@{
+    ViewBag.Title = "Participate";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/checkout.css")" rel="stylesheet" type="text/css" />
+}
+
+<div id="gamefinish">
+    <div class="gtitle">Thank You for Participating</div>
+
+    <div class="gprizeimg">
+        <img src="@Model.PrizeImageUrl" />
+    </div>
+    <div class="gprizedetail">@Model.PrizeName</div>
+    <div class="gfooter2">
+        <div> You will be notified when you win the <span class="gsur">surPRIZE</span>.</div>
+        <div class="gbutton">
+            <button class="btnGame" onclick="continueshop()">CONTINUE SHOPPING</button>
+            <button class="btnGame" onclick="purchase()">VIEW MY PURCHASE</button>
+        </div>
+    </div>
+</div>
+@section AddToFooter
+{
+<script type="text/javascript">
+    $(document).ready(function () {
+    
+    });
+    function continueshop() {
+        window.location="@Url.Action("Index","Home")";
+    }
+    function purchase() {
+        window.location="@Url.Action("MyPurchases","Profile")";
+    }
+</script>
+}

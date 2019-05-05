@@ -1,0 +1,356 @@
+﻿
+@font-face {
+	font-family: 'BrushScriptStd';
+    src: url('fonts/BrushScriptStd.eot'); /* IE9 Compat Modes */
+    src: url('fonts/BrushScriptStd.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/BrushScriptStd.ttf') format("truetype");
+}
+
+@font-face {
+	font-family: 'OpenSans';
+    src: url('fonts/OpenSans-Regular.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Regular.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansBold';
+    src: url('fonts/OpenSans-Bold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Bold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansSemiBold';
+    src: url('fonts/OpenSans-Semibold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Semibold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Semibold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansLight';
+    src: url('fonts/OpenSans-Light.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Light.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Light.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansItalic';
+	src: url('fonts/OpenSans-Italic.ttf') format("truetype");
+    src: url('fonts/OpenSans-Italic.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Italic.ttf') format("truetype");
+}
+.careers
+{
+    width:100%;
+    text-align:center;
+}
+.careers h3
+{
+    font-size: 18px;
+    font-family: OpenSans;
+    color: #999999;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+.careers p
+{
+    font-size: 16px;
+    font-family: OpenSans;
+    color: #333333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+.careers p.title {
+font-size: 22px;
+font-family: OpenSansBold;
+color: #007fb0;
+}
+.careers .row
+{
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+.careers .left
+{
+    font-size: 22px;
+    font-family: OpenSansLight;
+    color: #666666;
+    text-align:left;
+}
+.careers .right
+{
+    text-align:left;
+}
+.careers .panel-default
+{
+    border:0px;
+    border-radius:0px;
+    -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, .05); 
+    box-shadow: 0 0px 0px rgba(0, 0, 0, .05); 
+    margin-bottom:0px;
+    border-top: 1px solid #cccccc;
+}
+.careers .panel-default > .panel-heading
+{
+    font-size:14px;
+    font-family: OpenSans;
+    color: #428bca;
+    background-color: #eeeeee;
+    border: none;
+    border: 0px;
+    border-radius:0px;
+}
+.careers .right .panel-default:last-child 
+{
+    border-bottom: 1px solid #cccccc;
+}
+.careers .panel-body
+{
+    background-color: #eeeeee;
+    font-size:14px;
+    font-family:OpenSans;
+}
+.careers .angle
+{
+    float: right;
+    font-size: 22px;
+    cursor:pointer;
+}
+.careers .hrline
+{
+    margin-top: 40px;
+    margin-bottom: 40px;
+    border: 0;
+    border-top: 1px solid #999999;
+}
+
+.contactus
+{
+    display: inline-block;
+    width:100%;
+    text-align: center;
+}
+.contactus .box
+{
+    display: inline-block;
+    margin-right: 40px;
+    margin-left:40px;
+    width: 20%;
+}
+.contactus .box .boxicon
+{
+    display: inline-table;
+}
+.contactus .box .boxicon span
+{
+    font-size: 26px;
+    color: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 80px;
+    text-align: center;
+    vertical-align: middle;
+    display: table-cell;
+    background: #0080b1; /* Old browsers */
+    background: -moz-linear-gradient(top,  #0080b1 0%, #126584 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#0080b1), color-stop(100%,#126584)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #0080b1 0%,#126584 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #0080b1 0%,#126584 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #0080b1 0%,#126584 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #0080b1 0%,#126584 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0080b1', endColorstr='#126584',GradientType=0 ); /* IE6-9 */
+
+}
+.contactus .box .text1
+{
+    font-family:OpenSans;
+    font-size:16px;
+    color:#333333;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.contactus .box .text2
+{
+    font-family:OpenSansLight;
+    font-size:16px;
+    color:#007fb0;
+}
+.hkw
+{
+    font-family:OpenSans;
+    font-size:16px;
+    color:#333333;
+    border-top:1px solid #999999;
+}
+.hkw:last-child
+{
+    border-bottom:1px solid #999999;
+    padding-bottom:40px;
+}
+.hkw .title
+{
+    font-family:OpenSansLight;
+    font-size:22px;
+    color:#007fb0;
+}
+.careers .center
+{
+    text-align:center;
+}
+.hkw .hkwicon
+{
+    display: inline-table;
+    margin-top:20px;
+}
+.hkw .hkwicon span
+{
+    font-size: 62px;
+    color: white;
+    color:#0080b1;
+  background: -webkit-linear-gradient(#0080b1, #126584);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hkw .hkwicon .iconkuazoopoint
+{
+    background:url(img/icon/icon-kuazoopoints.png)no-repeat;
+    background-size:100% 100%;
+    height:48px;
+    width:97px;   
+}
+
+.abouthead
+{
+    margin-top:40px;
+    margin-bottom:40px;
+    width:100%;
+    display:inline-block;
+    color:White;
+    font-size:18px;
+    font-family:OpenSans;
+    background: #0080b1; /* Old browsers */
+    background: -moz-linear-gradient(top,  #0080b1 0%, #126584 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#0080b1), color-stop(100%,#126584)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #0080b1 0%,#126584 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #0080b1 0%,#126584 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #0080b1 0%,#126584 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #0080b1 0%,#126584 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0080b1', endColorstr='#126584',GradientType=0 ); /* IE6-9 */
+}
+
+.abouthead .content
+{
+    padding-top: 40px;
+    padding-bottom: 40px;
+    display:inline-table;
+}
+.abouthead .mascottext
+{
+    display:table-cell;
+    height:217px;
+    vertical-align:middle;
+}
+.abouthead .mascoticon
+{
+    background:url(img/kuazoo-mascot.png)no-repeat;
+    background-size:100% 100%;
+    height:218px;
+    width:217px;  
+    display:inline-block;
+}
+.abouticon
+{
+    display:inline-block;
+    margin-top:40px;
+}
+.abouticon.balloon
+{
+    background:url(img/about-balloon.png)no-repeat;
+    background-size:100% 100%;
+    height:68px;
+    width:77px;  
+}
+.abouticon.map
+{
+    background:url(img/about-map.png)no-repeat;
+    background-size:100% 100%;
+    height:81px;
+    width:135px;  
+}
+.abouticon.article
+{
+    background:url(img/about/article.png)no-repeat;
+    background-size:100% 100%;
+    width:35px;
+    height:41px;  
+}
+.abouticon.bulb
+{
+    background:url(img/about/bulb.png)no-repeat;
+    background-size:100% 100%;
+    width:27px;
+    height:40px;  
+}
+.abouticon.bullhorn
+{
+    background:url(img/about/bullhorn.png)no-repeat;
+    background-size:100% 100%;
+    width:47px;
+    height:40px;  
+}
+.abouticon.comment
+{
+    background:url(img/about/comment.png)no-repeat;
+    background-size:100% 100%;
+    width:46px;
+    height:40px;  
+}
+.abouticon.genuine
+{
+    background:url(img/about/genuine.png)no-repeat;
+    background-size:100% 100%;
+    width:40px;
+    height:41px;  
+}
+.abouticon.present
+{
+    background:url(img/about/present.png)no-repeat;
+    background-size:100% 100%;
+    width:44px;
+    height:39px;  
+}
+.abouticon.star
+{
+    background:url(img/about/star.png)no-repeat;
+    background-size:100% 100%;
+    width:42px;
+    height:40px;  
+}
+.abouticon.shipping
+{
+    background:url(img/about/shipping.png)no-repeat;
+    background-size:100% 100%;
+    width:51px;
+    height:43px;  
+}
+.abouticon.monkey
+{
+    background:url(img/about/monkey.png)no-repeat;
+    background-size:100% 100%;
+    width:76px;
+    height:40px;  
+}
+.abouticon.flash
+{
+    background:url(img/about/flash.png)no-repeat;
+    background-size:100% 100%;
+    width:24px;
+    height:46px;  
+}
+.policy
+{  
+text-align: justify;
+}
+.policy ul
+{
+    font-size: 16px;
+    font-family:OpenSans;
+}

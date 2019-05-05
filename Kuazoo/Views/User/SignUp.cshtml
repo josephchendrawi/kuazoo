@@ -1,0 +1,96 @@
+﻿@model com.kuazoo.Models.RegisterModel
+@{
+    ViewBag.Title = "SignUp";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+<div id="fb-root"></div>
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml      : true,
+            version    : 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+    function FBlogin() {
+        var url = "https://www.facebook.com/dialog/oauth?client_id=@Kuazoo.Helper.SetFacebookId" +
+                    "&redirect_uri=@Kuazoo.Helper.SetUrl/User/FacebookRedirect?returnUrl=" + $('#returnUrl').val() +
+                    "&response_type=token" +
+                    "&scope=email,public_profile,user_birthday";
+        window.location.href = url;
+    };
+</script>
+<h2>Sign Up</h2>
+
+<div class="notifwrap">
+    @{
+        if (ViewBag.result != null)
+        {
+            if (ViewBag.result == "1")
+            {
+                <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully created</div></div>
+                
+            }
+            else if (ViewBag.result == "3")
+            {
+                <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create</div></div>
+            }
+            else
+            {
+                <div class="notif cerror"><div class="notifwrap error"><strong>Warning:</strong> @ViewBag.result</div></div>
+            }
+        }
+    }
+</div>
+<div class="loginwrap">
+<div class="logincontent">
+    @*<div class="margintop40">
+        <button class="btnFacebook" onclick="FBlogin()"><div class="facebook"></div>Sign up with Facebook</button>
+    </div>
+    <div class="loginhr"><div><span>OR</span></div></div>*@
+    
+    @using (Html.BeginForm())
+    {
+    @Html.AntiForgeryToken()
+    <div class="loginrow">
+        <div class="logintext width200">First Name</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.FirstName, new { @class = "txtInput" })<br />@Html.ValidationMessageFor(model => model.FirstName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Last Name</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.LastName, new { @class = "txtInput" })<br />@Html.ValidationMessageFor(model => model.LastName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Email</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.Email, new { @class = "txtInput" })<br />@Html.ValidationMessageFor(model => model.Email)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Password</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.Password, new { @class = "txtInput", type = "password" })<br />@Html.ValidationMessageFor(model => model.Password)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Confirm Password</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.ConfirmPassword, new { @class = "txtInput", type = "password" })<br />@Html.ValidationMessageFor(model => model.ConfirmPassword)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200"></div>
+        <div class="logininput terms">By click Sign Up, you confirm that you accept our <a href="#">Terms of use</a> and <a href="#">Privacy Policy</a>.</div>
+    </div>
+    @*<div class="loginrow">
+        <div class="logintext width200"></div>
+        <div class="logininput">@Html.CheckBoxFor(model => model.VerifyEmail) <label class="VerifyEmail" for="VerifyEmail">Verify Email</label></div>
+    </div>*@
+    <div class="loginrow">
+        <div class="logintext width200"></div>
+        <div class="logininput"><button class="btnInput" type="submit">Sign Up</button></div>
+    </div>
+    }
+</div>
+</div>

@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "KUAZOO";
+    Layout = "~/Views/Shared/_EmptyLayoutCS.cshtml";
+}
+
+<div class="csbg">
+    <div class="cswrap">
+        <div class="cslogo"></div>
+        <div class="cstitle">COMING SOON</div>
+        <br />
+        <div class="subtitle">Stay ahead and be the first to know</div>
+        <div class="margtop"><input type="text" id="txtEmail" name="txtEmail" class="txtCs" placeholder="Enter Your Email Here" /></div>
+        <div class="margtop"><button onclick="keepMe()" class="btnCs">KEEP ME INFORMED!</button></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+	function validateEmail(email){
+		var x=email.indexOf('@@');
+		var y=email.lastIndexOf('.');
+		if(x==-1 || y==-1 || (x+2)>=y){
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+    function keepMe() {
+        $("#txtEmail").css("border","none");
+        var email = $("#txtEmail").val();
+        if(email!="" && validateEmail(email)){
+            $("#txtEmail").val("");
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CommingSoon", "Home")",
+                data: {email:email},
+                dataType:"json",
+                success:function(data){
+                //console.log(data);
+                }
+            });
+        }
+        else{
+            $("#txtEmail").css("border","1px solid red");
+            $("#txtEmail").focus();
+        }
+    }
+</script>

@@ -1,0 +1,220 @@
+﻿@model com.kuazoo.Models.ProductModel.Product
+@{
+    ViewBag.Title = "Product";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(2);
+    });
+</script>
+<div id="main">
+<div id="mainwrap">
+    <h1>Product <a href="ProductAdd" class="addNewBtn">Add New</a></h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.ProductModel.Product>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.ProductId).Hidden(true);
+            columns.Bound(p => p.Name);
+            columns.Bound(p => p.MerchantName).Title("Merchant");
+            columns.Bound(p => p.CountryName).Title("Country");
+            columns.Bound(p => p.StateName).Title("State");
+            columns.Bound(p => p.CityName).Title("City");
+            columns.Bound(p => p.ExpireDate).Format("{0:dd MMM yyyy}").Title("Expiry Date");
+            columns.Bound(p => p.Flag).ClientTemplate(
+                "#if(Flag!='5'){#" +
+                "<a class='normalBtn' href='ProductEdit?ProductId=#=ProductId#'>Edit</a>&nbsp;&nbsp;" +
+                "<a class='normalBtn k-button-icontext k-grid-delete'  href=''>Archive</a>" +
+                "#}#").Title("Action");
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        @*.ToolBar(toolbar =>
+        {
+            toolbar.Template(@<text>
+                @(Html.Kendo().DropDownList()
+                    .Name("flag")
+                    .OptionLabel("All")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .AutoBind(false)
+                    .Events(e => e.Change("changeFlag"))
+                    .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                            Text = "Created",
+                            Value = "1"
+                        },
+                        new SelectListItem() {
+                            Text = "Updated",
+                            Value = "3"
+                        },
+                        new SelectListItem() {
+                            Text = "Deleted",
+                            Value = "5"
+                        }
+                    })
+                )
+                    
+            </text>);
+        })*@
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("Product_Read", "Admin"))
+            .Destroy(destroy => destroy.Action("Product_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.ProductId);
+            })
+            .Filter(filter=>filter.Add(p=>p.Flag).IsNotEqualTo("5"))
+        )
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .ClientDetailTemplateId("template")
+        .Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+        <div>
+        <script id="template" type="text/kendo-tmpl">
+            @(Html.Kendo().Grid<com.kuazoo.Models.ProductModel.ProductTag>()
+                    .Name("grid_#=ProductId#")
+                    .Columns(columns =>
+                    {
+                        columns.ForeignKey(p => p.TagName, (System.Collections.IEnumerable)ViewData["taglist"], "TagName", "TagName").Title("Tag");
+                        columns.Command(command => { command.Edit(); command.Destroy(); });
+                    })
+                    .ToolBar(toolbar =>
+                    {
+                        toolbar.Create();
+                    })
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .PageSize(5)
+                        .Events(events => events.Error("error_handlerDetail"))
+                        .Read(read => read.Action("ProductTag_Read", "Home", new { ProductId = "#=ProductId#" }))
+                        .Update(update => update.Action("ProductTag_Update", "Home", new { ProductId = "#=ProductId#" }))
+                        .Destroy(update => update.Action("ProductTag_Destroy", "Home"))
+                        .Create(update => update.Action("ProductTag_Create", "Home", new { ProductId = "#=ProductId#" }))
+                        .Model(model =>
+                        {
+                            model.Id(p => p.ProductTagId);
+                            model.Field(p => p.ProductTagId).Editable(false);
+                            model.Field(p => p.TagId).DefaultValue(1);
+                        })
+                    )
+                    .Editable(editable => editable.Mode(GridEditMode.InLine))
+                    .Pageable(page => page
+                        .Refresh(true)
+                        .PageSizes(true)
+                    )
+                    .ToClientTemplate()
+            )
+        </script>
+        </div>
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    function changeFlag() {
+        var value = this.value(),
+		 	 grid = $("#grid").data("kendoGrid");
+
+        if (value) {
+            grid.dataSource.filter({ field: "Flag", operator: "eq", value: value });
+        } else {
+            grid.dataSource.filter({});
+        }
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        if (this == "1") {
+                            message = "Success Delete";
+                        }
+                        else if (this == "2") {
+                            message = "Failed Delete";
+                        }
+                        else {
+                            message = this;
+                        }
+                    });
+                }
+            });
+            alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+    function error_handlerDetail(e) {
+        if (e.errors) {
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        if (this == "1") {
+                            message = "Success Insert Tag";
+                        }
+                        else if (this == "2") {
+                            message = "Success Update Tag";
+                        }
+                        else if (this == "3") {
+                            message = "Failed Insert Tag";
+                        }
+                        else if (this == "4") {
+                            message = "Failed Update Tag";
+                        }
+                        else if (this == "5") {
+                            message = "Success Delete Tag";
+                        }
+                        else if (this == "6") {
+                            message = "Failed Delete Tag";
+                        }
+                        else {
+                            message = this;
+                        }
+                    });
+                }
+            });
+            alert(message);
+            try {
+                var entityGrid = $("#grid").data("kendoGrid");
+                var selectedItem = entityGrid.dataItem(entityGrid.select());
+                //alert(selectedItem.ProductId);
+                //console.log(selectedItem.ProductId);
+                var grid = $('#grid_' + selectedItem.ProductId).data('kendoGrid');
+                grid.dataSource.read();
+                grid.refresh();
+
+                location.reload();
+            }
+            catch (err) {
+                var grid = $('#grid').data('kendoGrid');
+                grid.dataSource.read();
+                grid.refresh();
+            }
+        }
+    }
+</script>

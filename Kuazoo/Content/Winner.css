@@ -1,0 +1,156 @@
+﻿
+@font-face {
+	font-family: 'BrushScriptStd';
+	src: url('fonts/BrushScriptStd.otf') format("truetype");
+}
+
+@font-face {
+	font-family: 'OpenSans';
+	src: url('fonts/OpenSans-Regular.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansBold';
+	src: url('fonts/OpenSans-Bold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansSemiBold';
+	src: url('fonts/OpenSans-Semibold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansLight';
+	src: url('fonts/OpenSans-Light.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansItalic';
+	src: url('fonts/OpenSans-Italic.ttf') format("truetype");
+}
+
+.winners
+{
+    font-family:OpenSans;
+    font-size:14px;
+    color:#333333;
+    min-height:400px;
+}
+.winners .sortdate
+{
+    text-align:right;
+}
+.winners .sortdate .active
+{
+    background:#0080b1;
+    color:#ffffff;
+}
+.winners hr
+{
+    border-top:1px solid #ccc;
+}
+
+.winners .subtitle
+{
+    font-size:16px;
+    color:#0080b1;
+    font-family:OpenSans;
+}
+.winners .wincontent
+{
+    display:inline-block;
+    margin-top:20px;
+}
+.winners .box
+{
+    width:290px;
+    height:420px;
+    border:1px solid #cccccc;
+    /*box-shadow: 0px 0px 10px -2px #ab8b6e;*/
+    box-shadow:0px 0px 12px 0px rgba(171,139,110,0.4);
+    float:left;
+    background:#ffffff;
+    margin:0px 10px 30px 10px;
+}
+.winners .box .boxheader
+{
+    height:210px;
+    width:100%;
+}
+    .winners .box .boxheader .boxtitle
+    {
+        padding-top:10px;
+        font-size:14px;
+        font-family:OpenSans;
+        color:#d60c7d;
+        text-align:center;
+    }
+        .winners .box .boxheader .boxtitle span
+        {
+            font-family:OpenSansBold;
+        }
+    .winners .box .boxheader .boximg
+    {
+        margin-top:10px;
+        margin-bottom:15px;
+        margin-left:10px;
+        margin-right:10px;
+        height:135px;
+        position:relative;
+        overflow:hidden;
+        text-align:center;
+    }
+        .winners .box .boxheader .boximg img
+        {
+            height:100%;
+        }
+.winners .box .boxdetail
+{
+    height:152px;
+    width:100%;
+    background:#b2cdcd;
+    display:inline-table;
+}
+    .winners .box .boxdetail .boxdetailtext
+    {
+        display:table-cell;
+        padding:20px;
+        text-align:center;
+        vertical-align:middle;
+        font-family:OpenSansSemiBold;
+        font-size:16px;
+        color:#ffffff;
+    }
+        .winners .box .boxdetail .boxdetailtext span
+        {
+            font-family:OpenSansItalic;
+            font-size:14px;
+            color:#ffffff;
+        }
+    .winners .box .boxdetail .boxdetailimg
+    {
+        display:table-cell;
+        padding:20px 20px 20px 0px;
+        width:112px;
+    }
+        .winners .box .boxdetail .boxdetailimg img
+        {
+            width:112px;
+            height:112px;
+            border-radius:56px;
+        }
+.winners .box .boxfooter
+{
+    height:58px;
+    width:100%;
+    display:inline-table;
+}
+    .winners .box .boxfooterwrap
+    {
+        height:100%;
+        width:100%;
+        display:table-cell;
+        text-align:center;
+        vertical-align:middle;
+    }
+.winners .winfooter
+{
+    text-align:center;
+    margin-bottom:40px;
+}

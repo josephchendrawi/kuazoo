@@ -1,0 +1,6 @@
+﻿@model com.kuazoo.Models.TransactionModel.TransactionStatusDrop
+@(Html.Kendo().DropDownListFor(m => m)
+        .DataTextField("Name")
+        .DataValueField("Id")
+        .BindTo((System.Collections.IEnumerable)ViewData["statuslist"])
+)

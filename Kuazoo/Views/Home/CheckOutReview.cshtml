@@ -1,0 +1,419 @@
+﻿@model com.kuazoo.Models.BillModel.Bill
+@{
+    ViewBag.Title = "CheckOut";
+    Layout = "~/Views/Shared/_CheckOutLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/checkout.css")" rel="stylesheet" type="text/css" />
+      
+<script type="text/javascript">
+    var subtotal = 0;
+    var total = 0;
+    $(document).ready(function () {
+        @if(Model !=null && Model.MOLUrl!=null){
+            <text>
+//              window.location.href="@Html.Raw(Model.MOLUrl)";
+            addToTransaction({id:@Model.TransactionId});
+            $.fancybox.open({
+                href :"@Html.Raw(Model.MOLUrl)",
+                type: 'iframe',
+                padding: 0,
+                maxWidth : 700,
+				closeClick : false,
+                closeBtn : false,
+                afterClose : function(){
+                    var paymenterr = $("#paymenterr").val();
+                    if(paymenterr=="5"){
+                        bootbox.alert("Payment unsuccessful, please try again.");
+                    }
+                    else{
+                        window.location="@Url.Action("CheckOutFinal", "Home")";
+                    }
+                }
+            });
+                </text>
+        }
+        var obj = getCart();
+        var items = obj.items;
+        var order = "";
+        for (var i = 0; i < items.length; i++) {
+        if(i==0){
+            if(items[i].variance!=""){
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckVarianceLimit", "Home")",
+                data: {id:items[i].id,variance:items[i].variance},
+                dataType:"json",
+                success:function(data){
+                if(data.success==false){
+                    bootbox.alert("The item is currently sold out.",function(){
+                    window.location="@Url.Action("Index", "Home")";
+                    });
+                }
+                }
+            });
+            }
+            else{
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckVarianceLimit", "Home")",
+                data: {id:items[i].id,variance:"default"},
+                dataType:"json",
+                success:function(data){
+                if(data.success==false){
+                    bootbox.alert("The item is currently sold out.",function(){
+                    window.location="@Url.Action("Index", "Home")";
+                    });
+                }
+                }
+            });
+            }
+        }
+            var price = parseFloat(items[i].price);
+            var disprice = price - (price * items[i].dis / 100);
+            //disprice = Math.ceil(disprice*10)/10;
+            disprice = Math.round(disprice*1000)/1000;
+            disprice = disprice.toFixed(2);
+            disprice = disprice * items[i].qty;
+            var html = '<tr>';
+            html += '<td class="sub1"><div class="imageplace"><div class="image1"><img src="' + items[i].imageurl + '" /></div>';
+            html += '<div class="image2"><div>SurPRIZE</div><img src="' + items[i].prizeimageurl + '" /></div></div></td>';
+            html += '<td class="sub2 imagetext">' + items[i].name + ' <br /><span>' + items[i].prize + '</span><br/>';
+            var vari = items[i].variance.split('`');
+            html+= 'Select: ' + vari[0] +'<br/>';
+            html += 'Qty: ' + items[i].qty + '<br/>Price: RM ' + disprice.toFixed(2) + '</td></tr>';
+            
+            //html += '<td class="center"> <input id="cartqty' + items[i].id + '" class="numeric" onkeyup="updateQty(this,' + items[i].id + ')" onchange="updateQty(this,' + items[i].id + ')" type="number" value="' + items[i].qty + '" min="1" step="1"/></td>';
+            //html += '<td class="center" id="dis' + items[i].id + '" data-value=' + items[i].dis + '> RM ' + items[i].dis + '%<br/>(RM ' + price + ')</td>';
+            //html += '<td class="right" id="disprice' + items[i].id + '" data-value=' + items[i].price + ' data-curvalue='+disprice+'> RM ' + disprice + '</td></tr>';
+            var d1 = document.getElementById("checkoutplace");
+            d1.insertAdjacentHTML('beforeBegin', html);
+            adjustImage();
+            subtotal = subtotal + disprice;
+            order += '{"id":"' + items[i].id + '","variance":"'+items[i].variance+'","qty":"' + items[i].qty + '","flashid":"' + items[i].flashid + '","discount":"' + items[i].dis + '","price":"' + disprice + '"},';
+        }
+        total = subtotal;
+        $("#subtotal").html("RM " + subtotal.toFixed(2));
+        $("#total").html("RM " + total.toFixed(2));
+
+        $("#Order").val(order);
+
+        var ship = getShipping();
+        if (ship != "") {
+            $("#Shipping").val(JSON.stringify(ship));
+            var result = "";
+
+            result += "<strong>SHIPPING ADDRESS</strong><br/>";
+            result += ship.fn + " " + ship.ln + "<br/>" + ship.ad1 + ", " + ship.ad2 + "<br/>";
+            result += ship.city + "<br/>" + ship.state + ", " + ship.zip + "<br/>" + ship.country;
+            if(ship.rcemail != ""){
+                result += "<br/><br/>" + ship.rcemail;
+            }
+
+            if (ship.gift == 1) {
+            var note = "";
+                note += "<strong>GIFT NOTE</strong><br/>";
+                note += "\"" + ship.note + "\"";
+            $("#shippingnote").html(note);
+            }
+            else{
+                $("#shiprownote").remove();
+            }
+            $("#shippingaddress").html(result);
+        }
+        var bill = getBilling();
+        if (bill != "") {
+            $("#Billing").val(JSON.stringify(bill));
+            //var payment = "";
+            var billing = "";
+
+            //payment = "<strong>PAYMENT METHOD</strong><br/>";
+            //payment += "<div class='shiprow2'><div class='shipleft'><div class='payment " + bill.payment + "'></div></div>";
+//            if (bill.payment != "ipay88") {
+//                if (bill.month < 10) { bill.month = "0" + bill.month };
+//                payment += "<div class='shipright'>";
+//                payment += "Last 4: " + bill.cc.substr(bill.cc.length - 4) + "<br/>";
+//                payment += "Exp: " + bill.month + "/" + bill.year.substr(bill.year.length - 2) + "</div></div>";
+//            }
+
+            billing += "<strong>BILLING ADDRESS</strong><br/>";
+            billing += bill.fn + " " + bill.ln + "<br/>" + bill.ad1 + ", " + bill.ad2 + "<br/>";
+            billing += bill.city + "<br/>" + bill.state + ", " + bill.zip + "<br/>" + bill.country;
+            billing += "<br/><br/>" + bill.email;
+
+            //$("#payment").html(payment);
+            $("#billing").html(billing);
+        }
+        $("#KPoint").val(0);
+        var kpoint = getKPoint();
+        if (kpoint != "") {
+            var _kpv = kpoint.point;
+            _kpoint = kpoint.point;
+            if(_kpv<100){
+                _kpoint=0;
+                _kpv=0;
+            }
+            else{
+                _kpv=_kpv/100;
+            }
+            $("#KPoint").val(_kpoint);
+            $("#usedkpoint").prop("checked", true);
+            $("#kpoint").html("-RM " + _kpv.toFixed(2));
+            total = subtotal - _kpv;
+            if(kpoint.point == 0){
+                $("#checkoutplace").hide();
+            }
+            $("#total").html("RM " + total.toFixed(2));
+        }
+        $("#TransactionId").val(0);
+        var trans = getTransaction();
+        if (trans != "") {
+            var traid =trans.id;
+            $("#TransactionId").val(traid);
+        }
+        $("#PromotionId").val(0);
+        $("#PromotionType").val(0);
+        $("#PromotionValue").val(0);
+        var promodata = getPromotion();
+        if (promodata != "") {
+            $("#PromotionId").val(promodata.id);
+            $("#PromotionType").val(promodata.type);
+            $("#PromotionValue").val(promodata.value);
+            if (promodata.type == 1) {
+                promotion = subtotal * promodata.value / 100;
+            }
+            else {
+                promotion = promodata.value;
+            }
+            $("#promo").html("-RM " + parseFloat(promotion).toFixed(2));
+            var _kpv = _kpoint;
+            if(_kpv<100){
+                _kpv=0;
+            }
+            else{
+                _kpv=_kpv/100;
+            }
+
+            total = subtotal - _kpv - promotion;
+            $("#total").html("RM " + total.toFixed(2));
+            
+            //check promo code active
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckOutPromotionCode","Home")",
+                data: {id:promodata.code, tId:$("#TransactionId").val()},
+                dataType:"json",
+                success:function(data){
+                    bootbox.alert(data.error,function(){
+                        deletePromo();
+                    });
+                }
+            });
+        }
+        else{
+            $('#promotab').hide();
+        }
+        $("#PaymentType").val(2);
+    });
+    function deletePromo(){
+        clearPromotion();
+        $("#promo").html("-RM 0.00");
+        $("#PromotionId").val(0);
+        $("#PromotionType").val(0);
+        $("#PromotionValue").val(0);
+        var _kpv =_kpoint;
+        if(_kpv<100){
+            _kpv=0;
+        }
+        else{
+            _kpv = _kpv/100;
+        }
+        total = subtotal - _kpv;
+        $("#total").html("RM " + total.toFixed(2));
+    }
+    function EditShipping() {
+        window.location="@Url.Action("CheckOutShip", "Home")";
+    }
+    function EditBilling() {
+        window.location="@Url.Action("CheckOutBill", "Home")";
+    }
+    function paymentchange(i){
+       $("#PaymentType").val(i); 
+        if(i==1){
+            /*bootbox.alert("MOLCash is a new payment system. If you encounter difficulties at your local 7 Eleven, please contact Kuazoo customer service for assistance.",function(){
+                //$("#payment2").prop("checked","checked");
+                //$("#PaymentType").val(2); 
+            });*/
+            $("#molwarn").show();
+        }
+    }
+    function howmolpay(){
+    $.fancybox.open({
+            href: '@Url.Action("HowMOLPayCashWork", "Home")',
+            type: 'iframe',
+            width: 640,
+            padding:0
+        });
+    }
+    function adjustImage() {
+        $(".image1 img").on('load', function () {
+            var conHeight = 80;
+            var imgHeight = $(".image1 img").height();
+            if (imgHeight > 0) {
+                var gap = (imgHeight - conHeight) / 2;
+                $(".image1 img").css("margin-top", -gap);
+            }
+        });
+
+    }
+</script>
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+}
+
+<h2>Check Out</h2>
+<div id="msgresult">
+@*@if (ViewBag.err != null)
+{
+    if (ViewBag.err == "5")
+    {
+        <div id="breadcrumbs">
+        <div class="mainwrap">
+            <div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> Payment Failed. Please tried again</div></div>
+        </div>
+        </div>
+    }
+}*@
+</div>
+<input type="hidden" id="paymenterr" value="" />
+<div class="checkoutbrumb">
+    <div class="checkouts"><div class="cart cart0 cartactive"><span class="fa fa-shopping-cart"></span></div></div>
+    <div class="checkouts2"><div class="cart cart1 cartactive"><div class="icon1"></div>Shipping</div></div>
+    <div class="checkouts3"><div class="cart cart2 cartactive"><div class="icon2"></div>Payment & Confirm Order</div></div>
+</div>
+
+<div class="checkoutcontent"  style="display:inline-table">
+    <div class="shipcontent">
+        <div class="shipheader">REVIEW YOUR ORDER</div>
+        <div class="shipdata">
+           <div class="shiprow" style="border-bottom:1px solid #cccccc">
+                <div class="shipcol2" style="vertical-align:top">
+                    <strong>SELECT PAYMENT</strong>
+                </div>
+                <div class="shipcol2">
+                    <input type="radio" name="payment" value="1" id="payment1" style="height:41px;" onchange="paymentchange(1)"/>
+                    &nbsp;
+                        <label for="payment1">
+                            <span class="payment molpaycash"></span>
+                        </label>
+
+                        <div id="molwarn" class="molwarn">
+                            MOLCash is a new payment system. If you encounter difficulties at your local 7 Eleven, please contact Kuazoo customer service for assistance.
+                        </div>
+
+                        <div class="howmol" onclick="howmolpay()"><span class="fa fa-question-circle"></span> How does MOLPay CASH works</div>
+                        <br />
+                    <input type="radio" name="payment" value="2" id="payment2"style="height:41px;" checked="checked" onchange="paymentchange(2)"/>
+                    &nbsp;
+                        <label for="payment2" class="lblpayment">
+                            <span class="payment maybank2u"></span>
+                            <span class="payment hongleong"></span>
+                            <span class="payment cimb"></span>
+                            <span class="payment rhb"></span>
+                            <span class="payment amonline"></span>
+                            <span class="payment affinbank"></span>
+                        </label>
+                    <input type="radio" name="payment" value="3" id="payment3"style="height:41px;" onchange="paymentchange(3)"/>
+                    &nbsp;
+                        <label for="payment3">
+                            <span class="payment creditcard"></span>
+                        </label>
+                </div>
+            </div>
+           <div class="shiprow" id="shiprownote" style="border-bottom:1px solid #cccccc">
+                <div class="shipcol2" id="shippingnote">
+                </div>
+                <div class="shipcol4 right">
+                    <button class="btnEdit" onclick="EditShipping()">Edit</button>
+                </div>
+            </div>
+           <div class="shiprow" style="border-bottom:1px solid #cccccc">
+                <div class="shipcol2" id="shippingaddress">
+                </div>
+                <div class="shipcol4 right">
+                    <button class="btnEdit" onclick="EditShipping()">Edit</button>
+                </div>
+            </div>
+           <div class="shiprow" style="border-bottom:1px solid #cccccc">
+                <div class="shipcol2" id="billing">
+                   
+                </div>
+                <div class="shipcol4 right">
+                    <button class="btnEdit" onclick="EditShipping()">Edit</button>
+                </div>
+            </div>
+        </div>    
+    @using (Html.BeginForm())
+    {
+    @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Order)
+        @Html.HiddenFor(model => model.Billing)
+        @Html.HiddenFor(model => model.Shipping)
+        @Html.HiddenFor(model => model.PromotionId)
+        @Html.HiddenFor(model => model.PromotionType)
+        @Html.HiddenFor(model => model.PromotionValue)
+        @Html.HiddenFor(model => model.KPoint)
+        @Html.HiddenFor(model => model.TransactionId)
+        @Html.HiddenFor(model => model.PaymentType)
+        <div class="shipdata">
+            <div class="shiprow right">
+                <button class="btnApply" type="submit" >PLACE ORDER</button>
+            </div>
+        </div>
+    }
+    </div>
+    <div class="shiplist">
+        <div class="checkoutcontent">
+            <table cellpadding="0" cellspacing="0" border="0">
+            @if (Request.IsAuthenticated)
+            {
+                <tr id="checkoutplace">
+                    @if (@Kuazoo.Helper.currKPoint > 0)
+                    {
+                    <td class="left yourkpoint">K-Point Balance : <span>@Kuazoo.Helper.currKPoint</span>
+                        <br /><input type="checkbox" id="usedkpoint" disabled="disabled" onchange="usedkpointchange(this)" /><label for="usedkpoint"> Use K-Point</label>
+                    </td>
+                    <td class="right enteramount" id="kpoint">
+                     </td>
+                    }
+                </tr>
+            }
+                <tr id="promotab">
+                    <td  class="sub1 left pad0">Promo Used</td>
+                    <td id="promo" class="sub2 right pad0">-RM 0.00</td>
+                </tr>
+                <tr>
+                    <td  class="sub1 left pad0">Item Subtotal</td>
+                    <td id="subtotal" class="sub2 right pad0"></td>
+                </tr>
+                <tr>
+                    <td class="sub1 left">Shipping</td>
+                    <td class="sub2 right">FREE</td>
+                </tr>
+                <tr>
+                    <td class="total1 left">TOTAL</td>
+                    <td id="total" class="total2 right"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+@section AddToFooter
+{
+<script src="@Url.Content("~/Scripts/jquery.easing.1.3.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.mobile.just-touch.js")"></script>
+<script src="@Url.Content("~/Scripts/mightyslider.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+ <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+}

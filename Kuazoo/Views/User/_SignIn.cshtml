@@ -1,0 +1,23 @@
+﻿@model com.kuazoo.Models.LogOnModel
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "signinForm" }))
+{
+@Html.AntiForgeryToken()
+<input type="hidden" name="returnUrl" id="returnUrl" />
+<div class="loginrow">
+    <div class="logintext width150">Email</div>
+    <div class="logininput">@Html.TextBoxFor(model => model.UserName, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.UserName)</div>
+</div>
+<div class="loginrow">
+    <div class="logintext width150">Password</div>
+    <div class="logininput">@Html.PasswordFor(model => model.Password, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.Password)</div>
+</div>
+<div class="loginrow">
+    <div class="logintext width150"></div>
+    <div class="logininput">@Html.CheckBoxFor(model => model.RememberMe) <label class="rememberme" for="RememberMe">Stay signed in</label></div>
+</div>
+<div class="loginrow">
+    <div class="logintext width150"></div>
+    <div class="logininput"><button class="btnInput" type="submit">Log In</button></div>
+</div>
+}

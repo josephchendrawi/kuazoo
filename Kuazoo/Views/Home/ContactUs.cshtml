@@ -1,0 +1,34 @@
+﻿@{
+    ViewBag.Title = "Contact Us";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/careers.css")" rel="stylesheet" type="text/css" />
+}
+
+
+<div class="content careers" style="min-height:400px;">
+<h2>Contact Us</h2>
+<h3>Your feedback is valuable to Kuazoo. If you have any questions or are facing any problems regarding your order, please contact Customer Service on:</h3>
+
+@*<p><strong>Kuazoo Sdn Bhd</strong><br />29 Jalan Setiakasih 7 Bukit Damansara WP 50490, Selangor, Kuala Lumpur</p>*@
+<div class="hrline"></div>
+<div class="contactus">
+    <div class="box">
+        <div class="boxicon"><span class="fa fa-envelope"></span></div>
+        <div class="text1">EMAIL</div>
+        <div class="text2"><a href="mailto:customerservice@kuazoo.com">customerservice@kuazoo.com</a><br />&nbsp;</div>
+    </div>
+    <div class="box">
+        <div class="boxicon"><span class="fa fa-phone"></span></div>
+        <div class="text1">PHONE</div>
+        <div class="text2">+603-20274708<br />&nbsp;</div>
+    </div>
+    <div class="box">
+        <div style="height:80px;"></div>
+        <div class="text1">KUAZOO SDN BHD</div>
+        <div class="text2">(CO. NO. 1085870-M)<br />&nbsp;</div>
+    </div>
+</div>
+</div>
+

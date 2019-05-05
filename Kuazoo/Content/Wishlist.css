@@ -1,0 +1,489 @@
+﻿
+@font-face {
+	font-family: 'BrushScriptStd';
+	src: url('fonts/BrushScriptStd.otf') format("truetype");
+}
+
+@font-face {
+	font-family: 'OpenSans';
+	src: url('fonts/OpenSans-Regular.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansBold';
+	src: url('fonts/OpenSans-Bold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansSemiBold';
+	src: url('fonts/OpenSans-Semibold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansLight';
+	src: url('fonts/OpenSans-Light.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansItalic';
+	src: url('fonts/OpenSans-Italic.ttf') format("truetype");
+}
+.whwrap
+{
+    display:inline-table;
+    width:100%;
+}
+.whrow
+{
+    padding-top:20px;
+    padding-bottom:20px;
+    display:inline-table;
+    width:100%;
+    border-bottom:1px solid #cccccc;
+}
+.whwrap .whrow:first-child
+{
+    padding-top:10px;
+}
+.whwrap .whrow:last-child
+{
+    border-bottom:0px;
+    padding-bottom:10px;
+}
+.whrow .whboxcontent
+{
+    display:table-cell;
+    width: 448px;
+    height: 295px;
+    position: relative;
+}
+    .whrow .whboxcontent .whboxcontentimg
+    {
+        width: 448px;
+        height: 295px;
+        overflow: hidden;
+        position: absolute;
+    }
+    .whrow .whboxcontent .whboxcontentimg img
+    {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+.whrow .whboxraffle
+{
+    display:table-cell;
+    width: 448px;
+    height: 295px;
+    background: url('img/rafflebg.png')no-repeat;
+    background-size: 100% 100%;
+    position:relative;
+}
+    .whrow .whboxraffle .whboxrafflecontent
+    {
+        width: 271px;
+        position:absolute;
+        top:81px;
+        left:5px;
+    }
+        .whrow .whboxraffle .whboxrafflecontent .whraflleticket
+        {
+            background:url('img/raffleticket.png')no-repeat;
+            background-size:100% 100%;
+            width:263px;
+            height:133px;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding-left: 40px;
+            font-family:OpenSansBold;
+            color:#432b11;
+            font-size:50px;
+        }
+.whrow .whboxkuazoo
+{
+    position: absolute;
+    z-index: 1;
+    top:0px;
+    left:0px;
+    height: 295px;
+    width: 100%;
+    display: table;
+}
+    .whrow .whboxkuazoo .whboxkuazoobg
+    {
+        position: absolute;
+        z-index: 1;
+        background: #0093c9;
+        height: 100%;
+        width: 100%;
+        opacity: 0.85;
+    }
+    .whrow .whboxkuazoo .whboxcontentwrap
+    {
+        display: table-cell;
+        vertical-align:middle;
+        text-align:center;
+    }
+        .whrow .whboxkuazoo .whboxcontentwrap .whboxTitle
+        {
+            z-index:2;
+            position:relative;
+            font-size:44px;
+            color:White;
+            font-family:OpenSansBold;
+        }
+        .whrow .whboxkuazoo .whboxcontentwrap .whboxSubtitle
+        {
+            z-index:2;
+            position:relative;
+            font-size:12px;
+            color:White;
+            font-family:OpenSansSemiBold;
+            letter-spacing:4px;
+        }
+    .whrow .whboxkuazoo .whboxcontentprizetemp
+    {
+        width:170px;  
+    }
+.whrow .whboxflashdeal
+{
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 295px;
+    display: table;
+}
+    .whrow .whboxflashdeal .whboxflashdealbg
+    {
+        position: absolute;
+        z-index: 1;
+        background: #000000;
+        height: 100%;
+        width: 100%;
+        opacity: 0.75;
+    }
+    .whrow .whboxflashdeal .whboxcontentwrap
+    {
+        display: table-cell;
+        vertical-align:middle;
+        text-align:center;
+    }
+        .whrow .whboxflashdeal .whboxcontentwrap .whboxTitle
+        {
+            z-index:2;
+            position:relative;
+            font-size:44px;
+            color:#d60c7d;
+            font-family:OpenSansBold;
+        }
+        .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle
+        {
+            z-index:2;
+            position:relative;
+            font-size:44px;
+            color:White;
+            font-family:OpenSansSemiBold;
+            letter-spacing:4px;
+            display: inline-table;
+        }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .whboxSubtitleleft
+            {
+                width:115px;
+                display:table-cell;
+                vertical-align: middle;   
+            }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .whboxSubtitleright
+            {
+                display:table-cell;    
+            }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .whboxSubtitlehalf
+            {
+                width:49%;
+                display:table-cell;
+                vertical-align: middle;   
+            }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .small
+            {
+                font-size:12px;
+                font-family:OpenSansSemiBold;
+                letter-spacing:3px;
+                text-transform:uppercase;
+            }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .percen
+            {
+                line-height:44px;
+            }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .ori
+            {
+                color:Gray;
+            }
+            .whrow .whboxflashdeal .whboxcontentwrap .whboxSubtitle .dis
+            {
+                color:white;
+            }
+    .whrow .whboxflashdeal .whboxcontentprizetemp
+    {
+        width:170px;  
+    }
+.whrow .whboxprize
+{
+    width: 170px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+    .whrow .whboxprize .whboxprizeribbon
+    {
+            width:150px;
+        height:224px;
+        position:absolute;
+        top:-2px;
+        left:10px;
+        background:white;
+		-webkit-filter: drop-shadow(0 3px 5px rgba(0,0,0,.2));
+		-moz-filter: drop-shadow(0 3px 5px rgba(0,0,0,.2));
+		-ms-filter: drop-shadow(0 3px 5px rgba(0,0,0,.2));
+		-o-filter: drop-shadow(0 3px 5px rgba(0,0,0,.2));
+		filter: drop-shadow(0 3px 5px rgba(0,0,0,.2));
+        z-index:10;
+        text-align:center;
+        padding:10px;
+    }
+        .whrow .whboxprize .whboxprizeribbon:after
+        {
+            content:'';
+            border-left: 75px solid transparent;
+            border-top: 50px solid #ffffff;
+            border-right: 75px solid transparent;
+            position:absolute;
+            top:224px;
+            left:0px;
+            z-index:-1;
+        }
+        .whrow .whboxprize .whboxprizeribbon .whboxprizetitle
+        {
+            font-size:14px;
+            font-family:OpenSansBold;
+            color:#d60c7d;
+            padding-top:10px;
+            padding-bottom:10px;
+        }
+        .whrow .whboxprize .whboxprizeribbon .whboxprizeimg
+        {
+            height:130px;
+            position:relative;
+            overflow:hidden;
+        }
+            .whrow .whboxprize .whboxprizeribbon .whboxprizeimg img
+            {
+                width:100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                margin: auto;
+            }
+        .whrow .whboxprize .whboxprizeribbon .whboxprizedetail
+        {
+            font-size:14px;
+            font-family:OpenSans;
+            color:#333333;
+            text-align:center;
+        }
+.whrow .whboxtext
+{
+    display:table-cell;
+    padding-left: 10px;
+}
+.whrow .whboxtext .whboxtitle
+{
+    font-size: 16px;
+    font-family: OpenSansBold;
+    color: #333333;
+    vertical-align: middle;
+}
+.whrow .whboxtext .whboxsurtitle
+{
+    font-size: 14px;
+    font-family: OpenSansBold;
+    color: #d60c7d;
+}
+.whrow .whboxtext .whboxprice
+{
+    display:inline-table;
+    width:100%;
+    margin-top: 5px;
+}
+    .whrow .whboxtext .whboxprice .whboxoff
+    {
+        display: table-cell;
+        text-align: center;
+        min-width: 124px;
+        vertical-align: middle;
+        border-right: 1px solid #cccccc;
+    }
+        .whrow .whboxtext .whboxprice .whboxoff .boxoffbig
+        {
+            font-size: 50px;
+            font-family: OpenSansSemiBold;
+            color: #333333;
+            line-height: 40px;
+        }
+        
+        .whrow .whboxtext .whboxprice .whboxoff .boxoffbig2
+        {
+            font-size:50px;
+            font-family:OpenSansSemiBold;
+            color:#333333;
+            line-height:45px;
+        }
+            .whrow .whboxtext .whboxprice .whboxoff .boxoffmedium
+            {
+                font-size:20px;
+                font-family:OpenSansSemiBold;
+                color:#333333;
+                line-height:normal;
+                vertical-align:top;
+            }
+        .whrow .whboxtext .whboxprice .whboxoff .boxoffsmall
+        {
+            font-size: 12px;
+            font-family: OpenSans;
+            color: #333333;
+            letter-spacing: 5px;
+            padding-bottom: 10px;
+        }
+    .whrow .whboxtext .whboxprice .whboxprice
+    {
+        display:table-cell;
+        border-right: 1px solid #cccccc;
+        text-align:center;
+        vertical-align: middle;
+    }
+        .whrow .whboxtext .whboxprice .whboxprice .priceori
+        {
+            font-size: 16px;
+            font-family: OpenSans;
+            color: #999999;
+            text-decoration: line-through;
+        }
+        .whrow .whboxtext .whboxprice .whboxprice .pricedisc
+        {
+            font-size: 20px;
+            font-family: OpenSansSemiBold;
+            color: #0093c9;
+        }
+    .whrow .whboxtext .whboxprice .whboxbuy
+    {
+        display:table-cell;
+        text-align:center;
+        vertical-align: middle;
+        padding-left: 10px;
+    }
+        .whrow .whboxtext .whboxprice .whboxbuy .btnBuywh
+        {
+            font-size: 20px;
+            font-family: OpenSansSemiBold;
+            color: #ffffff;
+            border-radius: 2px;
+            background:#ed6a4b;
+            background: -webkit-linear-gradient(#ed6a4b, #cb4828); /* For Safari 5.1 to 6.0 */
+            background: -o-linear-gradient(#ed6a4b, #cb4828); /* For Opera 11.1 to 12.0 */
+            background: -moz-linear-gradient(#ed6a4b, #cb4828); /* For Firefox 3.6 to 15 */
+            background: linear-gradient(#ed6a4b, #cb4828); /* Standard syntax (must be last) */
+            width: 75px;
+            border: 0px;
+        }
+        .whrow .whboxtext .whboxprice .whboxbuy .btnBuywh.disabled
+        {
+            font-size: 20px;
+            font-family: OpenSansSemiBold;
+            color: #ffffff;
+            border-radius: 2px;
+            background:#dddddd;
+            width: 75px;
+            border: 0px;
+        }
+    .whrow .whboxtext .whboxbar
+    {
+        padding-top:10px;
+        padding-bottom:10px;
+        border-top:1px solid #cccccc;
+        text-align: center;
+    }
+        .whrow .whboxtext .whboxbar .whboxbarbg
+        {
+            width: 100%;
+            height: 10px;
+            background: #cccccc;
+            border-radius: 5px;
+        }
+            .whrow .whboxtext .whboxbar .whboxbarbg .boxbaractive
+            {
+                width:0;
+                height:10px;
+                background:url('img/boxbar.jpg')no-repeat;
+                background-size:100% 100%;
+                border-radius:5px;
+            }
+        .whrow .whboxtext .whboxbar .whboxbartext
+        {
+            font-size:14px;
+            font-family:OpenSans;
+            color:#333333;
+            text-align: center;
+        }
+    .whrow .whboxtext .whtimeleft
+    {
+        display:table;
+        width:100%;
+        padding-top:10px;
+        padding-bottom:10px;
+        border-top:1px solid #cccccc;
+        text-align: center;
+    }
+        .whrow .whboxtext .whtimeleft .whtimelefttext
+        {
+            display: table-cell;
+            font-size: 14px;
+            font-family: OpenSans;
+            color: #333333;
+            width: 120px;
+            text-align: right;
+            vertical-align:middle;
+        }
+        .whrow .whboxtext .whtimeleft .whtimeleftdetail
+        {
+            display: table-cell;
+            padding-left:10px;
+            text-align: left;
+        }
+            .whrow .whboxtext .whtimeleft .whtimeleftdetail .whtimeplace
+            {
+                width: 100%;
+                font-size: 44px;
+                font-family: OpenSans;
+                color: #333333;
+            }
+            .whrow .whboxtext .whtimeleft .whtimeleftdetail .whtimeplace .small
+            {
+                font-size: 12px;
+                font-family: OpenSans;
+                color: #333333;
+            }
+    .whrow .whboxtext .whaction
+    {
+        padding-top:10px;
+        padding-bottom:10px;
+        border-top:1px solid #cccccc;
+        text-align: right;
+    }
+        .whrow .whboxtext .whaction .btnRemovewh
+        {
+            font-size: 14px;
+            font-family: OpenSansSemiBold;
+            color: #333333;
+            border-radius: 2px;
+            background:#ffffff;
+            border: 1px solid #cccccc;
+        }
+        
+        

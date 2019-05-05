@@ -1,0 +1,86 @@
+﻿@model com.kuazoo.Models.GameModelFinish
+@{
+    ViewBag.Title = "Game";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/checkout.css")" rel="stylesheet" type="text/css" />
+}
+
+<div id="gamefinish">
+    <div class="gtitle">Done! Your coordinates have been recorded for a chance to win the <span>surPRIZE</span>. 
+    Thank You for Participating</div>
+
+    <div class="gprizeimg">
+        <img src="@Model.PrizeImageUrl" />
+    </div>
+    <div class="gprizedetail">@Model.PrizeName</div>
+    <div class="gfooter2">
+        <div> You will also be on our winners circle page if you win the <span class="gsur">surPRIZE</span>.</div>
+        <div class="gbutton">
+            <button class="btnGame" onclick="continueshop()">CONTINUE SHOPPING</button>
+            <button class="btnGame" onclick="purchase()">VIEW MY PURCHASE</button>
+            @*<button class="btnGift" onclick="reviewPopUp('@Model.InventoryItemId')">WRITE A REVIEW</button>*@
+        </div>
+    </div>
+</div>
+@if (Model.AttemptLeft > 0)
+{
+<div id="gameplace" style="display:none">
+    <div class="gtitle">Play a game to win the <span>surPRIZE</span></div>
+    <div class="gprizeimg">
+        <img src="@Model.PrizeImageUrl" />
+    </div>
+    <div class="gprizedetail">@Model.PrizeName</div>
+    <div class="gfooter">
+        <div>You have @Model.AttemptLeft remaining game left, do you want to play again?</div>
+        <div class="gbutton">
+            <button class="btnGame" onclick="gameplay('@Model.OrderNo')">YES!</button>
+            <button class="btnGameClose" onclick="gamecancel()">NO!</button>
+        </div>
+    </div>
+</div>
+}
+@section AddToFooter
+{
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+<script type="text/javascript">
+    $(document).ready(function () {
+    @if(Model.AttemptLeft >0){
+    <text>
+        $.fancybox.open({
+            href :"#gameplace",
+            width : 700,
+            closeClick:false,
+			closeBtn  : false,
+            padding:0,
+            helpers     : { 
+                        overlay : {closeClick: false}
+                        }
+        });
+    </text>
+    }
+    });
+    function continueshop() {
+        window.location="@Url.Action("Index","Home")";
+    }
+    function purchase() {
+        window.location="@Url.Action("MyPurchases","Profile")";
+    }
+    function gameplay(id){
+        window.location="@Url.Action("Game","Home")/"+id;
+    }
+    function gamecancel(){
+        $.fancybox.close();
+    }
+    function reviewPopUp(id){
+        $.fancybox.open({
+            href: '@Url.Action("Review", "Home")/'+id,
+            type: 'iframe',
+            padding: 0,
+            width:658
+        });
+    }
+</script>
+}

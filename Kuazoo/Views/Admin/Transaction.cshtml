@@ -1,0 +1,267 @@
+﻿@model com.kuazoo.Models.TransactionModel.TransactionDetail3
+@{
+    ViewBag.Title = "Transaction";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(9);
+        $(document).tooltip();
+    });
+</script>
+<div id="msgresult">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        @if (ViewBag.msg == "11")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully extracted</div></div>
+        }
+        else if (ViewBag.msg == "3")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed to extract</div></div>
+        }
+        else if (ViewBag.msg == "21")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully  extracted</div></div>
+        }
+        else if (ViewBag.msg == "23")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed to extract</div></div>
+        }
+        else if (ViewBag.msg == "31")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully processed and extracted</div></div>
+        }
+        else if (ViewBag.msg == "33")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed to processed or extract</div></div>
+        }
+        else if (ViewBag.msg == "41")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully processed</div></div>
+        }
+        else if (ViewBag.msg == "43")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed to processed</div></div>
+        }
+    </div>
+</div>
+}
+</div>
+<div id="mainlist">
+<div id="mainwrap">
+    <h1>Transaction 
+    </h1>
+    <div style="text-align:right; margin-top:-50px;">
+    @using (Html.BeginForm(null, null, FormMethod.Post))
+    {
+        @Html.HiddenFor(model => model.TransactionSelected);
+        <div style="display:inline-table; text-align:left">
+            @(Html.Kendo().DropDownListFor(model => model.DropdownType)
+                .HtmlAttributes(new { @class = "kendoDropdown w200" })
+                .OptionLabel("--Select--")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                            Text = "Extract All",
+                            Value = "1"
+                        },
+                        new SelectListItem() {
+                            Text = "Extract Selected",
+                            Value = "2"
+                        },
+                        new SelectListItem() {
+                            Text = "Process and extract",
+                            Value = "3"
+                        },
+                        new SelectListItem() {
+                            Text = "Mark as Processed",
+                            Value = "4"
+                        }
+                    })
+            )&nbsp;
+            <input type="submit" value="Submit" id="btnSubmit" class="submitBtn" onclick="submit()" />
+        </div>
+    }
+    </div>
+    <div class="gridlist"  id="TransactionGrid">
+
+    @(Html.Kendo().Grid<com.kuazoo.Models.TransactionModel.TransactionDetail3>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.ProcessStatus).Title("Processed").Filterable(fil => fil.UI("processstatusFilter"));
+            columns.Bound(p => p.ProcessDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Processed Date");
+            columns.Bound(p => p.TransactionId).Title("Trx ID");
+            columns.Bound(p => p.OrderId).Title("Order No.");
+            columns.Bound(p => p.TransactionDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Trx Date");
+            columns.Bound(p => p.MerchantName).Title("Merchant");
+            columns.Bound(p => p.CustomerEmail).Title("Member");
+            columns.Bound(p => p.InventoryItemName).Title("Deal Name");
+            columns.Bound(p => p.Variance).Title("Variance");
+            columns.Bound(p => p.Gift).Title("Gift");
+            columns.Bound(p => p.OrderCompletion).Title("Order Completion").Filterable(fil => fil.UI("orderstatusFilter"));
+            columns.Bound(p => p.PaymentStatus).Title("Payment Status").Filterable(fil => fil.UI("paymentstatusFilter"));
+            columns.Bound(p => p.PaymentDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Payment Date");
+        })
+        .Editable(editable => editable.DisplayDeleteConfirmation("Do you want to suspend this TransactionDetail?"))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("TransactionDetail2_Read", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.TransactionId);
+            })
+        )
+        .Events(events => events.DataBound("onDataBound").Change("onChange"))
+            //.Filterable(filterable => filterable
+            //    .Extra(false)
+            //        .Operators(operators => operators
+            //        .ForString(str => str.Clear()
+            //            .Contains("Contains")
+            //        ))
+            //)
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Selectable(selectable => selectable
+        .Mode(GridSelectionMode.Multiple))
+        .Filterable()
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(false))
+    )
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    $(window).load(function () {
+        filtergrid();
+    });
+    var viewactive = 0;
+    function onDataBound(e) {
+    }
+    function onChange(e){
+        var selected = $.map(this.select(), function (item) {
+            //console.log($(item).find('td:nth-child(3)').text());
+           // return $(item).text();
+            return $(item).find('td:nth-child(3)').text();
+        });
+        //console.log(selected);
+        var slt ="";
+        for(var i =0; i<selected.length;i++){
+            var str = selected[i];
+            var res = str.split("KZ-");
+            slt+=res[0]+",";
+        }
+        $("#TransactionSelected").val(slt);
+    }
+    function insertParam(key,op, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+            if (x[0] == key) {
+                x[1] = op;
+                x[2] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, op,value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': re[1], 'value': re[2] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+        }
+    }
+    function orderstatusFilter(element) {
+        element.kendoDropDownList({
+            dataSource: {
+                transport: {
+                    read: "@Url.Action("Transaction_StatusList")"
+                }
+            },
+            optionLabel: "--Select Value--"
+        });
+    }
+    function processstatusFilter(element) {
+        element.kendoDropDownList({
+            dataSource: {
+                transport: {
+                    read: "@Url.Action("Process_StatusList")"
+                }
+            },
+            optionLabel: "--Select Value--"
+        });
+    }
+    function paymentstatusFilter(element) {
+        element.kendoDropDownList({
+            dataSource: {
+                transport: {
+                    read: "@Url.Action("Payment_StatusList")"
+                }
+            },
+            optionLabel: "--Select Value--"
+        });
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Transaction suspended successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Suspend</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>
+<script type="text/javascript">
+</script>

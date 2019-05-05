@@ -1,0 +1,394 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItem
+@{
+    ViewBag.Title = "Inventory Item View";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(3);
+        $('.fancybox').fancybox();
+
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="InventoryItem">Inventory Item</a> <span class="active"> / View Inventory Item</span>
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View Inventory Item</h1>
+    </div>
+            @(Html.Kendo().TabStrip()
+                    .Name("tabstrip")
+                    .Items(tabstrip =>
+                    {
+                        tabstrip.Add().Text("Info")
+                            .Selected(true)
+                            .Content(@<text>         
+            @Html.HiddenFor(model => model.InventoryItemId) 
+    <div id="wrap">
+        <div class="colright">
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MerchantId)</div>
+                    <div class="colright">@Model.MerchantName</div>
+                </div>
+                <div>
+                    <div class="colleft">Merchant City</div>
+                    <div class="colright">@Model.MerchantCityName</div>
+                </div>
+                <div>
+                    <div class="colleft">City</div>
+                    <div class="colright">@Model.City.CityName</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                    <div class="colright">@Model.Name</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.ShortDesc)</div>
+                    <div class="colright">@Model.ShortDesc</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.InventoryItemTypeId)</div>
+                    <div class="colright">@Model.InventoryItemTypeName</div>
+                </div>  
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.GeneralDescription)</div>
+                    <div class="colright">@Model.GeneralDescription</div>
+                </div>
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.Description)</div>
+                    <div class="colright">@Model.Description</div>
+                </div>
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.Terms)</div>
+                    <div class="colright">@Model.Terms</div>
+                </div>
+                <div>
+                    <div class="colleft">Tag</div>
+                    <div class="colright">@Model.TagName</div>
+                </div>     
+                <div>
+                    <div class="colleft" style="vertical-align:top">Main Image</div>
+                    <div class="colright">
+                        @if (Model.ImageUrl != null && Model.ImageUrl != "")
+                        {
+                        <a class="fancybox" style="float:left" href="@Model.ImageUrl"><img src="@Model.ImageUrl" class="imgThumb" /></a>
+                        }
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft" style="vertical-align:top">Sub Image</div>
+                    <div class="colright">
+                        @{
+                            var listsuburl = Model.SubImageUrl.Split('|');
+                        }
+                        @for (int i = 0; i < listsuburl.Count(); i++)
+                        {
+                            if (listsuburl[i] != "")
+                            {
+                            <a class="fancybox" style="float:left" href="@listsuburl[i]"><img src="@listsuburl[i]" class="imgThumb" /></a>
+                            }
+                        }
+                    </div>
+                </div>
+                @*<div>
+                    <div class="colleft">@Html.LabelFor(model => model.Keyword)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Keyword)@Html.ValidationMessageFor(model => model.Keyword)</div>
+                </div>   *@  
+            </div>
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Price)</div>
+                    <div class="colright">@Model.Price</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Discount)</div>
+                    <div class="colright">@Model.Discount % </div>
+                </div>   
+                <div>
+                    <div class="colleft">Discounted Price</div>
+                    <div class="colright">@{var diprice = Model.Price - (Model.Price * Model.Discount / 100); 
+                                            //diprice = Math.Ceiling(diprice);
+                                            <text>@diprice.ToString("N2")
+                                            </text>}</div>
+                </div>   
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MaximumSales)</div>
+                    <div class="colright">@Model.MaximumSales</div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MinimumTarget)</div>
+                    <div class="colright">@Model.MinimumTarget</div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.RemainSales)</div>
+                    <div class="colright">@Model.RemainSales</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Margin)</div>
+                    <div class="colright">@Model.Margin</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.ExpireDate)</div>
+                    <div class="colright">@string.Format("{0:dd MMM yyyy}", Model.ExpireDate) </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.PublishDate)</div>
+                    <div class="colright">@string.Format("{0:dd MMM yyyy hh:mm tt}", Model.PublishDate)</div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.PrizeId)</div>
+                    <div class="colright">@Model.PrizeName</div>
+                </div>  
+               @* <div>
+                    <div class="colleft">Variance</div>
+                    <div class="colright">
+                        <div id="listVariance">
+                            @if(Model!=null && Model.Variance!=null){
+                                var variance = Model.Variance.Split('|');
+                                for (int i = 0; i < variance.Count(); i++)
+                                {
+                                    if(variance[i]!=""){
+                                        var variance2 = variance[i].Split(',');
+
+                                        var disprice = decimal.Parse(variance2[1]) - (decimal.Parse(variance2[1]) * decimal.Parse(variance2[2]) / 100);
+                                        disprice = Math.Ceiling(disprice);
+                                    <div>@variance2[0] - RM @variance2[1]  @variance2[2]% (RM @disprice)</div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>*@
+               @* <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Featured)</div>
+                    <div class="colright">@Model.Featured</div>
+                </div> *@
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.SalesVisualMeter)</div>
+                    <div class="colright">@Model.SalesVisualMeter %</div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Flag)</div>
+                    <div class="colright">@Model.Flag</div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Priority)</div>
+                    <div class="colright">@Model.Priority</div>
+                </div> 
+            </div>
+        </div>
+    </div>
+                            </text>);
+                        tabstrip.Add().Text("Variance")
+                     .Content(@<text>
+                              <div id="wrap">
+                                <div class="colright">
+                                    <div class="listVariance head">
+                                        <div class="col2">Name</div>
+                                        <div class="col2">Price</div>
+                                        <div class="col2">Discount</div>
+                                        <div class="col2">Discount Price</div>
+                                        <div class="col2">Margin</div>
+                                        <div class="col2">Available Limit</div>
+                                        <div class="col2">Remaining Limit</div>
+                                    </div>
+                                    <div id="listVariance" class="listVariance">
+                                        @if (Model != null && Model.Variance != null)
+                                        {
+                                            var variance = Model.Variance.Split('|');
+                                            for (int i = 0; i < variance.Count(); i++)
+                                            {
+                                                if (variance[i] != "")
+                                                {
+                                                    var variance2 = variance[i].Split(',');
+                                                    var disprice = decimal.Parse(variance2[1]) - (decimal.Parse(variance2[1]) * decimal.Parse(variance2[2]) / 100);
+                                                    //disprice = Math.Ceiling(disprice * 10) / 10;
+                                                    <div id="data-@variance2[0].Replace(" ", "-")" class="rowl">
+                                                        <div class="col2">@variance2[0]</div>
+                                                        <div class="col2">RM @variance2[1]</div>
+                                                        <div class="col2">@variance2[2]%</div>
+                                                        <div class="col2">RM @disprice.ToString("N2")</div>
+                                                        <div class="col2">@variance2[3]</div>
+                                                        <div class="col2">@variance2[4]</div>
+                                                        <div class="col2">@variance2[5]</div>
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                </div>
+                            </text>);
+                      @*  tabstrip.Add().Text("Prize")
+                            .Content(@<text>
+    <div id="wrap">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Name)</div>
+            <div class="colright">@{if (Model.Prize != null)
+                                    {<text>@Model.Prize.Name</text>}}</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.SponsorName)</div>
+            <div class="colright">@{if (Model.Prize != null)
+                                    {<text>@Model.Prize.SponsorName</text>}}</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Price)</div>
+            <div class="colright">@{if (Model.Prize != null)
+                                    {<text>@Model.Prize.Price</text>}}</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Description)</div>
+            <div class="colright">@{if (Model.Prize != null)
+                                    {<text>@Model.Prize.Description</text>}}</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Terms)</div>
+            <div class="colright">@{if (Model.Prize != null)
+                                    {<text>@Model.Prize.Terms</text>}}</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Detail)</div>
+            <div class="colright">@{if (Model.Prize != null)
+                                    {<text>@Model.Prize.Detail</text>}}</div>
+        </div>
+        <div>
+            <div class="colleft" style="vertical-align:top">Main Image</div>
+            <div class="colright">
+                @if (Model.Prize.ImageUrl != null && Model.Prize.ImageUrl != "")
+                {
+                <a class="fancybox" style="float:left" href="@Model.Prize.ImageUrl"><img src="@Model.Prize.ImageUrl" class="imgThumb" /></a>
+                }
+            </div>
+        </div>  
+        <div>
+            <div class="colleft" style="vertical-align:top">Sub Image</div>
+            <div class="colright">
+                @{
+                    var listsuburl = Model.Prize.SubImageUrl.Split('|');
+                }
+                @for (int i = 0; i < listsuburl.Count(); i++)
+                {
+                    if(listsuburl[i]!="")
+                    {
+                    <a class="fancybox" style="float:left" href="@listsuburl[i]"><img src="@listsuburl[i]" class="imgThumb" /></a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+                            
+                            </text>);*@
+
+                        tabstrip.Add().Text("Flash Deal")
+                            .Content(@<text>
+                             <div id="wrap">
+                                <div class="colleft">
+                                    <div class="gridlist">
+                                    @(Html.Kendo().Grid<com.kuazoo.Models.InventoryItemModel.FlashDeal>()
+                                        .Name("grid")
+                                        .Columns(columns =>
+                                        {
+                                            columns.Bound(p => p.FlashDealId).Hidden(true);
+                                            columns.Bound(p => p.Flag).Title("Status").ClientTemplate("#if(Flag==true){#<div class='roundActive'></div>#}else{#<div class='roundInactive'></div>#}#").Width(70);
+                                            //columns.Bound(p => p.StartTimes).Format("{0:dd MMM yyyy hh:mm tt}").Title("Start");
+                                            //columns.Bound(p => p.EndTime).Format("{0:dd MMM yyyy hh:mm tt}").Title("End");
+                                            columns.Bound(p => p.StartTimeStr).Title("Start");
+                                            columns.Bound(p => p.EndTimeStr).Title("End");
+                                            columns.Bound(p => p.Discount).ClientTemplate("#=Discount# %").Title("Flash Discount");
+                                        })
+                                        .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(10)
+                                            .Events(events => events.Error("error_handler"))
+                                            .Read(read => read.Action("FlashDealInventory_Read", "Admin", new { InventoryItemId = Model.InventoryItemId }))
+                                            .Model(model =>
+                                            {
+                                                model.Id(p => p.FlashDealId);
+                                            })
+                                        )
+                                        .Filterable(filterable => filterable
+                                            .Extra(false)
+                                                .Operators(operators => operators
+                                                .ForString(str => str.Clear()
+                                                    .StartsWith("Starts with")
+                                                    .Contains("Contains")
+                                                ))
+                                        )
+                                        .Pageable(page => page
+                                            .Refresh(true)
+                                            .PageSizes(true)
+                                        )
+                                        .Filterable()
+                                        .Scrollable(scr => scr.Height(280))
+                                        .Sortable(sortable => sortable
+                                            .AllowUnsort(true)
+                                            .SortMode(GridSortMode.MultipleColumn))
+                                            //.Groupable()
+                                        .Resizable(resize => resize.Columns(true))
+                                        .Reorderable(reorder => reorder.Columns(true))
+                                    )
+                                    </div>
+                                </div>
+                                
+                            </div>
+
+                            </text>);
+
+                    })
+                                    )
+                 
+        <div class="wrapend">
+            <div class="colleft"></div>
+            
+        @if (ViewBag.PrizeId != null && ViewBag.PrizeId != 0)
+        {
+            <div class="colright"><a href="InventoryItemEdit?InventoryItemId=@Model.InventoryItemId&PrizeId=@ViewBag.PrizeId" class="submitBtn">Edit</a>
+            <a href="PrizeView?PrizeId=@ViewBag.PrizeId" class="grayBtn">Back</a></div>
+        }
+        else
+        {
+            <div class="colright"><a href="InventoryItemEdit?InventoryItemId=@Model.InventoryItemId" class="submitBtn">Edit</a>
+            <a href="InventoryItem" class="grayBtn">Back</a></div>
+        }
+        </div> 
+</div>
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Flash Deal archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

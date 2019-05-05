@@ -1,0 +1,657 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItem
+@{
+    ViewBag.Title = "Inventory Item Add";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.fancybox').fancybox();
+        changeverticalnav(2);
+
+        $.post('TagList', function (obj) {
+            var listItems = "";
+            for (var i = 0; i < obj.length; i++) {
+                listItems += "<option value='" + obj[i].TagId + "'>" + obj[i].TagName + "</option>";
+            }
+            $("#InventoryItemTagDropDown").html(listItems);
+            $("#InventoryItemTagDropDown").chosen({ no_results_text: "Oops, nothing found!", max_selected_options: 5 });
+            $("#InventoryItemTagDropDown").trigger("liszt:updated");
+        });
+
+        pricediscount();
+        $("#Price").keyup(function () {
+            pricediscount();
+        });
+        $("#Discount").keyup(function () {
+            pricediscount();
+        });
+        $("#btnFirst").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+            var myTab = tabstrip.tabGroup.children("li").eq(1);
+            tabstrip.select(myTab);
+            $("._first").css("display", "none");
+            $("._second").css("display", "block");
+        });
+        $("#btnPrev").click(function (e) {
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+            var myTab = tabstrip.tabGroup.children("li").eq(0);
+            tabstrip.select(myTab);
+            $("._first").css("display", "block");
+            $("._second").css("display", "none");
+        });
+    });
+    function tabOnSelect(e) {
+        var tab = $(e.item).find("> .k-link").text();
+        //alert(text);
+        if (tab == "Info") {
+            $("._first").css("display", "block");
+            $("._second").css("display", "none");
+        }
+        else {
+            $("._first").css("display", "none");
+            $("._second").css("display", "block");
+        }
+    }
+    function pricediscount(){
+        var price = $("#Price").val();
+        var discount = $("#Discount").val();
+        if(price.length<1)price=0;
+        if(discount.length<1)discount=0;
+        var discountprice = price - (price*discount/100);
+        $("#discountprice").val(discountprice);
+    }
+    function UpdateConf(i) {
+        $("#_submit").val(i);
+        return true;
+    }
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="InventoryItem">Inventory Item</a> <span class="active"> / Add Inventory Item</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New inventory item successfully created</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Inventory Item</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Add Inventory Item</h1>
+<input type="hidden" value="" id="tempChoose" name="tempChoose"/>
+<input type="hidden" value="" id="tempChooseName" name="tempChooseName"/>
+<input type="hidden" value="" id="tempChooseUrl" name="tempChooseUrl"/>
+<input type="hidden" value="" id="tempChooseDraft" name="tempChooseDraft"/>
+    </div>
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @(Html.Kendo().TabStrip()
+                    .Name("tabstrip")
+                    .Events(events => events.Select("tabOnSelect"))
+                    .Items(tabstrip =>
+                    {
+                        tabstrip.Add().Text("Info")
+                            .Selected(true)
+                            .Content(@<text>     
+    <div id="wrap">
+        <div class="colright">
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MerchantId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().ComboBoxFor(model => model.MerchantId)
+                                            .Value("")
+                                            .Text("")
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .Placeholder("--Select Merchant--")
+                                            .DataTextField("Name")
+                                            .DataValueField("MerchantId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("MerchantList", "Admin");
+                                                });
+                                            })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.MerchantId)
+                    </div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Name)</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.InventoryItemTypeId)</div>
+                    <div class="colright">
+                                        @(Html.Kendo().DropDownListFor(model => model.InventoryItemTypeId)
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .OptionLabel("--Select Inventory Item Type--")
+                                            .DataTextField("InventoryItemTypeName")
+                                            .DataValueField("InventoryItemTypeId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("InventoryItemTypeList", "Admin");
+                                                });
+                                            })
+                                        )
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft" style="vertical-align:top">@Html.LabelFor(model => model.Description)</div>
+                    <div class="colright">@Html.TextAreaFor(model => model.Description, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Description)</div>
+                </div>
+                <div>
+                    <div class="colleft">Tag</div>
+                    <div class="colright" style="color:#8e8071">
+                        <select data-placeholder="" multiple id="InventoryItemTagDropDown" name="InventoryItemTagDropDown" class="long w400">
+                            <option></option>
+                        </select>
+                    </div>
+                </div>     
+                <div>
+                    <div class="colleft" style="vertical-align:top">Main Image</div>
+                    @Html.HiddenFor(model => model.ImageId)
+                    @Html.HiddenFor(model => model.ImageName)
+                    @Html.HiddenFor(model => model.ImageUrl)
+                    <div class="colright"  id="mainimageplace">
+                        @if (Model != null && Model.ImageId != null)
+                        {
+                            <a  class="fancybox" style="float:left" href="@Model.ImageUrl">
+                                <img src="@Model.ImageUrl" class="imgThumb" />
+                            </a> 
+                            <div class="deleteIcon" onclick="deleteImg()"></div>                       
+                        }
+                    </div>
+                    <div class="colright" style="display:table;width:150px;">
+                        <input id="mainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                    </div>
+                </div> 
+                <div>
+                    <div class="colleft" style="vertical-align:top">Sub Image</div>
+                    @Html.HiddenFor(model => model.SubImageId)
+                    @Html.HiddenFor(model => model.SubImageName)
+                    @Html.HiddenFor(model => model.SubImageUrl)
+                    <div class="colright"  id="subimageplace">
+                        @if (Model != null && Model.SubImageId != null)
+                        {
+                            var imgid = Model.SubImageId.Split(',');
+                            var imgname = Model.SubImageName.Split('|');
+                            var imgurl = Model.SubImageUrl.Split('|');
+                            for (int i = 0; i < imgid.Count(); i++)
+                            {
+                                var str = "subimg" + imgid[i];
+                                <div id="@str">
+                                    <a  class="fancybox" style="float:left" href="@imgurl[i]">
+                                        <img src="@imgurl[i]" class="imgThumb" />
+                                    </a>    
+                                    <div class="deleteIcon" onclick="deleteSubImg(@imgid[i],'@imgname[i]','@imgurl[i]')"></div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="colright" style="display:table;width:150px;">
+                        <input id="subImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                    </div>
+                </div> 
+                 
+            </div>
+            <div class="colhalf">
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Price)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Price, new { @class = "medium", autocomplete = "off" })@Html.ValidationMessageFor(model => model.Price)</div>
+                </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.Discount)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.Discount, new { @class = "medium", maxlength = "3", autocomplete = "off" }) % @Html.ValidationMessageFor(model => model.Discount)</div>
+                </div>   
+                <div>
+                    <div class="colleft">Discounted Price</div>
+                    <div class="colright"><input type="text" id="discountprice" name="discountprice" readonly="readonly" class="medium" /></div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.ExpireDate)</div>
+                    <div class="colright">
+                    @(Html.Kendo().DatePickerFor(model => model.ExpireDate)
+                        .HtmlAttributes(new { @class = "w200" })
+                        .Value(DateTime.Now)
+                        .Format("dd MMM yyyy")
+                    )
+                    @Html.ValidationMessageFor(model => model.ExpireDate)
+                    </div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MaximumSales)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.MaximumSales, new { @class = "medium" })@Html.ValidationMessageFor(model => model.MaximumSales)</div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.PublishDate)</div>
+                    <div class="colright">
+                    @(Html.Kendo().DateTimePickerFor(model => model.PublishDate)
+                        .HtmlAttributes(new { @class = "w200" })
+                        .Value(DateTime.Now)
+                        .Format("dd MMM yyyy hh:mm tt")
+                    )
+                    @Html.ValidationMessageFor(model => model.PublishDate)
+                    </div>
+                </div> 
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.MinimumTarget)</div>
+                    <div class="colright">@Html.TextBoxFor(model => model.MinimumTarget, new { @class = "medium" })@Html.ValidationMessageFor(model => model.MinimumTarget)</div>
+                </div>  
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.SalesVisualMeter)</div>
+                    <div class="colright">
+                            @(Html.Kendo().SliderFor(model=>model.SalesVisualMeter)
+                                  .Min(0)
+                                  .Max(100)
+                                  .SmallStep(1)
+                                  .LargeStep(10)
+                                  .TickPlacement(SliderTickPlacement.BottomRight)
+                            )                    
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+                            </text>);
+
+                        tabstrip.Add().Text("Prize")
+                            .Content(@<text>
+    <div id="wrap">
+    <div class="colright">
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Name)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.Name, new { @class = "long" })@Html.ValidationMessageFor(model => model.Prize.Name)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.SponsorName)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.SponsorName, new { @class = "long" })@Html.ValidationMessageFor(model => model.Prize.SponsorName)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Price)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Prize.Price, new { @class = "medium" })@Html.ValidationMessageFor(model => model.Prize.Price)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Description)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Description, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Description)</div>
+        </div>
+    </div>
+    <div class="colhalf">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Terms)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Terms, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Terms)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Prize.Detail)</div>
+            <div class="colright">@Html.TextAreaFor(model => model.Prize.Detail, new { @class = "long textarea" })@Html.ValidationMessageFor(model => model.Prize.Detail)</div>
+        </div>
+        <div>
+            <div class="colleft" style="vertical-align:top">Main Image</div>
+            @Html.HiddenFor(model => model.Prize.ImageId)
+            @Html.HiddenFor(model => model.Prize.ImageName)
+            @Html.HiddenFor(model => model.Prize.ImageUrl)
+            <div class="colright"  id="prizemainimageplace">
+                @if (Model != null && Model.Prize != null && Model.Prize.ImageId != null)
+                {
+                    <a  class="fancybox" style="float:left" href="@Model.Prize.ImageUrl">
+                        <img src="@Model.Prize.ImageUrl" class="imgThumb" />
+                    </a>                        
+                    <div class="deleteIcon" onclick="deleteImgPrize()"></div>        
+                }
+            </div>
+            <div class="colright" style="display:table;width:150px;">
+                <input id="prizemainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+            </div>
+        </div> 
+        <div>
+            <div class="colleft" style="vertical-align:top">Sub Image</div>
+            @Html.HiddenFor(model => model.Prize.SubImageId)
+            @Html.HiddenFor(model => model.Prize.SubImageName)
+            @Html.HiddenFor(model => model.Prize.SubImageUrl)
+            <div class="colright"  id="prizesubimageplace">
+                @if (Model != null && Model.Prize != null && Model.Prize.SubImageId != null)
+                {
+                    var imgid = Model.Prize.SubImageId.Split(',');
+                    var imgname = Model.Prize.SubImageName.Split('|');
+                    var imgurl = Model.Prize.SubImageUrl.Split('|');
+                    for (int i = 0; i < imgid.Count(); i++)
+                    {
+                        var str = "subimgprize" + imgid[i];
+                        <div id="@str">
+                            <a  class="fancybox" style="float:left" href="@imgurl[i]">
+                                <img src="@imgurl[i]" class="imgThumb" />
+                            </a>    
+                            <div class="deleteIcon" onclick="deleteSubImgPrize(@imgid[i],'@imgname[i]','@imgurl[i]')"></div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="colright" style="display:table;width:150px;">
+                <input id="prizesubImagebtn" type="button" value="Add Image" class="submitBtn"/>
+            </div>
+        </div> 
+    </div>
+    </div>
+    </div>
+                            </text>);
+
+                     @*   tabstrip.Add().Text("Flash Deal")
+                            .Content(@<text>
+                            @Html.HiddenFor(model=>model.FlashDealDraft.Discount)
+                            @Html.HiddenFor(model => model.FlashDealDraft.StartTime)
+                            @Html.HiddenFor(model => model.FlashDealDraft.EndTime)
+                            <input type="hidden" id="flashdealcount" value="0" />
+                             <div id="wrap">
+                                <div class="colleft">
+                                    <div class="colleft">
+                                        <h2>Unsaved Flash Deals</h2>
+                                    </div>
+                                    <div class="colleft colborder">
+                                        <div class="colleft colheaderwrap">
+                                            <div class="colfour colheader">Discount</div>
+                                            <div class="colfour colheader">Start Time</div>
+                                            <div class="colfour colheader">End Time</div>
+                                            <div class="colfour colheader">Action</div>
+                                        </div>
+                                        <div  id="flashdealplace">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div>
+                                    <div class="colleft">Discount</div>
+                                    <div class="colright"><input type="input" id="flashdealdiscount" class="medium" maxlength="3" autocomplete = "off" />%<span id="flashdealdiscounterr" class="field-validation-error"></span></div>
+                                </div>
+                                <div>
+                                    <div class="colleft">Start Time</div>
+                                    <div class="colright">
+                                        @(Html.Kendo().DateTimePicker()
+                                            .Name("flashdealstarttime")
+                                            .Value(DateTime.Now)
+                                            .Format("dd MMM yyyy hh:mm tt")
+                                        )
+                                        <span id="flashdealstarttimeerr" class="field-validation-error"></span></div>
+                                </div>
+                                <div>
+                                    <div class="colleft">End Time</div>
+                                    <div class="colright">
+                                        @(Html.Kendo().DateTimePicker()
+                                            .Name("flashdealendtime")
+                                            .Value(DateTime.Now)
+                                            .Format("dd MMM yyyy hh:mm tt")
+                                        )
+                                        <span id="flashdealendtimeerr" class="field-validation-error"></span></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft"></div>
+                                <div class="colright">
+                                    <input type="button" value="Add New" class="submitBtn" onclick="flashdealAdd()"/>
+                                </div>
+                            </div>   
+
+                            </text>);*@
+
+                    })
+                                                                                                                                                                                                                                            )
+                 
+            <div class="wrapend">
+                <div class="colleft"><input type="hidden" value="0" id="_submit" name="_submit"/></div>
+                <div class="colright">
+                    <div class="_first">
+                        <input type="button" value="Next" class="grayBtn" id="btnFirst" />
+                    </div>
+                    <div class="_second" style="display:none">
+                        <input type="button" value="Back" class="grayBtn" id="btnPrev" />
+                        <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf(0)"/>
+                    </div>
+                </div>
+            </div>   
+        }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#MerchantId").data("kendoComboBox").input.focus();
+        $("#mainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<a  class="fancybox" style="float:left" href="' + $("#tempChooseUrl").val() + '"><img src="' + $("#tempChooseUrl").val() + '" class="imgThumb" /></a>';
+                        html += '<div class="deleteIcon" onclick="deleteImg()"></div>';
+                        $("#mainimageplace").html(html);
+                        $("#ImageId").val($("#tempChoose").val());
+                        $("#ImageName").val($("#tempChooseName").val());
+                        $("#ImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+        $("#subImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageListMulti", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var ch = $("#tempChoose").val().split('|');
+                        var chi = $("#tempChooseName").val().split('|');
+                        var chu = $("#tempChooseUrl").val().split('|');
+                        var html = "";
+                        for (var i = 0; i < ch.length; i++) {
+                            if (ch[i] != '') {
+                                html += '<div id="subimg' + ch[i] + '"><a  class="fancybox" style="float:left" href="' + chu[i] + '"><img src="' + chu[i] + '" class="imgThumb" /></a>';
+                                var cho = ch[i] + ",'" + chi[i] + "','" + chu[i] + "'";
+                                html += ' <div class="deleteIcon" onclick="deleteSubImg(' + cho + ')"></div></div>';
+                                $("#SubImageId").val($("#SubImageId").val() + "," + ch[i]);
+                                $("#SubImageName").val($("#SubImageName").val() + "|" + chi[i]);
+                                $("#SubImageUrl").val($("#SubImageUrl").val() + "|" + chu[i]);
+                            }
+                        }
+                        $("#subimageplace").append(html);
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+
+        $("#prizemainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<a  class="fancybox" style="float:left" href="' + $("#tempChooseUrl").val() + '"><img src="' + $("#tempChooseUrl").val() + '" class="imgThumb" /></a>';
+                        html += '<div class="deleteIcon" onclick="deleteImgPrize()"></div>';
+                        $("#prizemainimageplace").html(html);
+                        $("#Prize_ImageId").val($("#tempChoose").val());
+                        $("#Prize_ImageName").val($("#tempChooseName").val());
+                        $("#Prize_ImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+        $("#prizesubImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageListMulti", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var ch = $("#tempChoose").val().split('|');
+                        var chi = $("#tempChooseName").val().split('|');
+                        var chu = $("#tempChooseUrl").val().split('|');
+                        var html = "";
+                        for (var i = 0; i < ch.length; i++) {
+                            if (ch[i] != '') {
+                                html += '<div id="subimgprize' + ch[i] + '"><a  class="fancybox" style="float:left" href="' + chu[i] + '"><img src="' + chu[i] + '" class="imgThumb" /></a>';
+                                var cho = ch[i] + ",'" + chi[i] + "','" + chu[i] + "'";
+                                html += ' <div class="deleteIcon" onclick="deleteSubImgPrize(' + cho + ')"></div></div>';
+                                $("#Prize_SubImageId").val($("#Prize_SubImageId").val() + "," + ch[i]);
+                                $("#Prize_SubImageName").val($("#Prize_SubImageName").val() + "|" + chi[i]);
+                                $("#Prize_SubImageUrl").val($("#Prize_SubImageUrl").val() + "|" + chu[i]);
+                            }
+                        }
+                        $("#prizesubimageplace").append(html);
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+    });
+
+    function deleteImg() {
+        $("#mainimageplace").html("");
+        $("#ImageId").val(0);
+        $("#ImageName").val("");
+        $("#ImageUrl").val("");
+    }
+    function deleteSubImg(id, name, url) {
+        $("#subimg" + id).remove();
+        var current = $("#SubImageId").val();
+        current = current.replace(id, '');
+        $("#SubImageId").val(current);
+        var currentname = $("#SubImageName").val();
+        currentname = currentname.replace(name, '');
+        $("#SubImageName").val(currentname);
+        var currenturl = $("#SubImageUrl").val();
+        currenturl = currenturl.replace(url, '');
+        $("#SubImageUrl").val(currenturl);
+    }
+
+    function deleteImgPrize() {
+        $("#prizemainimageplace").html("");
+        $("#Prize_ImageId").val(0);
+        $("#Prize_ImageName").val("");
+        $("#Prize_ImageUrl").val("");
+    }
+    function deleteSubImgPrize(id, name, url) {
+        $("#subimgprize" + id).remove();
+        var current = $("#Prize_SubImageId").val();
+        current = current.replace(id, '');
+        $("#Prize_SubImageId").val(current);
+        var currentname = $("#Prize_SubImageName").val();
+        currentname = currentname.replace(name, '');
+        $("#Prize_SubImageName").val(currentname);
+        var currenturl = $("#Prize_SubImageUrl").val();
+        currenturl = currenturl.replace(url, '');
+        $("#Prize_SubImageUrl").val(currenturl);
+    }
+</script>
+<script type="text/javascript">
+    function flashdealAdd() {
+        $("#flashdealdiscounterr").html("");
+        $("#flashdealstarttimeerr").html("");
+        $("#flashdealendtimeerr").html("");
+        var dis = $("#flashdealdiscount").val();
+        var start = $("#flashdealstarttime").val();
+        var end = $("#flashdealendtime").val();
+        var count = parseInt($("#flashdealcount").val());
+        if (dis == "") {
+            $("#flashdealdiscounterr").html("*");
+        }
+        else {
+            var _dis = $("#FlashDealDraft_Discount").val();
+            var _start = $("#FlashDealDraft_StartTime").val();
+            var _end = $("#FlashDealDraft_EndTime").val();
+
+            var startlist = _start.split('|');
+            var endlist = _end.split('|');
+
+            var startdate = new Date(start);
+            var enddate = new Date(end);
+            var check = true;
+            for (var i = 0; i < startlist.length; i++) {
+                if (startlist[i] != "") {
+                    var start_date = new Date(startlist[i]);
+                    var end_date = new Date(endlist[i]);
+                    if (startdate >= start_date && startdate <= end_date || enddate >= start_date && enddate <= end_date
+            || start_date >= start_date && start_date <= enddate || end_date >= startdate && end_date <= enddate) {
+                        $("#flashdealstarttimeerr").html("*");
+                        $("#flashdealendtimeerr").html("*");
+                        check = false;
+                    }
+                }
+            }
+            if (check) {
+                _dis = _dis + "|" + dis;
+                _start = _start + "|" + start;
+                _end = _end + "|" + end;
+                $("#FlashDealDraft_Discount").val(_dis);
+                $("#FlashDealDraft_StartTime").val(_start);
+                $("#FlashDealDraft_EndTime").val(_end);
+
+                count = count + 1;
+                $("#flashdealcount").val(count);
+
+                var cho = 'flashdealRemove("X","' + count + '","' + dis + '","' + start + '","' + end + '")';
+                
+                var html = '<div id="flashdeal' + count + '" class="colleft colcontent"><div class="colfour">' + dis + '%</div><div class="colfour">' + start + '</div>';
+                html += "<div class='colfour'>" + end + "</div><div class='colfour'><a class='gridBtn'  onclick='" + cho + "'><span class='fa fa-archive' title='Remove' ></span></a></div></div></div>";
+                $("#flashdealplace").append(html);
+
+                $("#flashdealdiscount").val('');
+            }
+        }
+    }
+    function flashdealRemove(draft, id, dis, start, end) {
+        $("#flashdeal" + id).remove();
+        var _dis = $("#FlashDealDraft_Discount").val();
+        var _start = $("#FlashDealDraft_StartTime").val();
+        var _end = $("#FlashDealDraft_EndTime").val();
+        _dis = _dis.replace(dis, '');
+        _start = _start.replace(start, '');
+        _end = _end.replace(end, '');
+        $("#FlashDealDraft_Discount").val(_dis);
+        $("#FlashDealDraft_StartTime").val(_start);
+        $("#FlashDealDraft_EndTime").val(_end);
+    }
+</script>

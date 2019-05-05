@@ -1,0 +1,52 @@
+﻿@model com.kuazoo.Models.PointActionModel
+@{
+    ViewBag.Title = "K-Point Setting View";
+    Layout = "~/Views/Shared/_AdminSettingLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(1);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="KPointSetting">K-Point Setting</a> <span class="active"> / View K-Point Setting</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> K-Point Setting updated successfully</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update New K-Point Setting</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View K-Point Setting</h1>
+    </div>
+    <div id="wrap">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Description)</div>
+                <div class="colright">@Model.Description</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Amount)</div>
+                <div class="colright">@Model.Amount</div>
+            </div>
+    </div>  
+            <div class="wrapend">
+            <div class="colleft"></div>
+            <div class="colright"><a href="KPointSettingEdit?PointActionId=@Model.PointActionId" class="submitBtn">Edit</a>
+            <a href="KPointSetting" class="grayBtn">Back</a></div>
+        </div>
+</div>

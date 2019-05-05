@@ -1,0 +1,117 @@
+﻿
+@font-face {
+	font-family: 'BrushScriptStd';
+    src: url('fonts/BrushScriptStd.eot'); /* IE9 Compat Modes */
+    src: url('fonts/BrushScriptStd.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/BrushScriptStd.ttf') format("truetype");
+}
+
+@font-face {
+	font-family: 'OpenSans';
+    src: url('fonts/OpenSans-Regular.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Regular.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansBold';
+    src: url('fonts/OpenSans-Bold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Bold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansSemiBold';
+    src: url('fonts/OpenSans-Semibold.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Semibold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Semibold.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansLight';
+    src: url('fonts/OpenSans-Light.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Light.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Light.ttf') format("truetype");
+}
+@font-face {
+	font-family: 'OpenSansItalic';
+	src: url('fonts/OpenSans-Italic.ttf') format("truetype");
+    src: url('fonts/OpenSans-Italic.eot'); /* IE9 Compat Modes */
+    src: url('fonts/OpenSans-Italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	     url('fonts/OpenSans-Italic.ttf') format("truetype");
+}
+.careers
+{
+    width:100%;
+    text-align:center;
+}
+.careers .title {
+font-size: 18px;
+font-family: OpenSans;
+color: #999999;
+margin-top: 20px;
+margin-bottom: 10px;
+}
+.careers p {
+font-size: 16px;
+font-family: OpenSans;
+color: #333333;
+margin-top: 20px;
+margin-bottom: 10px;
+}
+.careers .row
+{
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+.careers .left2
+{
+    font-size: 22px;
+    font-family: OpenSansLight;
+    color: #666666;
+    text-align:left;
+}
+.careers .right2
+{
+    text-align:left;
+}
+.careers .center
+{
+    text-align:center;
+}
+.hkw
+{
+    font-family:OpenSans;
+    font-size:16px;
+    color:#333333;
+    border-top:1px solid #999999;
+}
+.hkw:last-child
+{
+    border-bottom:1px solid #999999;
+    padding-bottom:40px;
+}
+.hkw .title
+{
+    font-family:OpenSansLight;
+    font-size:22px;
+    color:#007fb0;
+}
+.hkw .hkwicon
+{
+    display: inline-table;
+    margin-top:20px;
+}
+.hkw .hkwicon span
+{
+    font-size: 62px;
+    color: white;
+    color:#0080b1;
+  background: -webkit-linear-gradient(#0080b1, #126584);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hkw .hkwicon .iconkuazoopoint
+{
+    background:url(img/icon/icon-kuazoopoints.png)no-repeat;
+    background-size:100% 100%;
+    height:48px;
+    width:97px;   
+}

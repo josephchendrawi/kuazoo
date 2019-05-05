@@ -1,0 +1,464 @@
+﻿@model com.kuazoo.Models.TransactionModel.ExtractData
+@{
+    ViewBag.Title = "Extract Data";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<style>
+    .k-tabstrip-items
+    {  
+        display:none;
+    }
+    #tabstrip
+    {
+        background:none;
+    }
+    .k-content
+    {
+        border:none !important;;
+    }
+</style>
+<script type="text/javascript">
+    function select(e) {
+        var dataItem = this.dataItem(e.item.index());
+        //console.log(dataItem.Value);
+        if (dataItem.Value == "") {
+            $("#tabstrip").css("display", "none");
+            $("#btnExport").css("display", "none");
+        }
+        else {
+            $("#tabstrip").css("display", "block");
+            $("#btnExport").css("display", "block");
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+            var myTab = tabstrip.tabGroup.children("li").eq(dataItem.Value);
+            tabstrip.select(myTab);
+        }
+    }
+</script>
+
+<div id="msgresult">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        @if (ViewBag.msg == "1")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Success Export Data</div></div>
+        }
+        else if (ViewBag.msg == "2")
+        {
+            <div class="notif cerror"><div class="notifwrap warning"><strong>Warning:</strong> No Item to Export</div></div>
+        }
+        else if (ViewBag.msg == "3")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Export Data</div></div>
+        }
+    </div>
+</div>
+}
+</div>
+<div id="mainlist">
+<div id="mainwrap">
+    <h1>Extract Data</h1>
+    @using (Html.BeginForm(null, null, FormMethod.Post))
+    {
+    <div id="wrap">
+        <div>
+            <div class="colleft">Select Report</div>
+            <div class="colright">
+        @(Html.Kendo().DropDownListFor(model => model.ReportType)
+                                    .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                    .OptionLabel("--Select Report--")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .BindTo(new List<SelectListItem>() {
+                                          new SelectListItem() {
+                                              Text = "Member",
+                                              Value = "0"
+                                          },
+                                          new SelectListItem() {
+                                              Text = "Inventory Item",
+                                              Value = "1"
+                                          },
+                                          new SelectListItem() {
+                                              Text = "Transaction",
+                                              Value = "2"
+                                          }
+                                      })
+                                    .Events(e => e.Select("select"))
+                                )
+            </div>
+            <div>
+             @(Html.Kendo().TabStrip()
+                    .Name("tabstrip")
+                    .Items(tabstrip =>
+                    {
+                        tabstrip.Add().Text("Member")
+                            .Content(@<text>  
+                            
+                            <div>
+                                <div class="colleft">Status</div>
+                                <div class="colright">
+                                    @(Html.Kendo().DropDownListFor(model => model.Member.Status)
+                                            .HtmlAttributes(new { @class = "kendoDropdown" })
+                                            .OptionLabel("All")
+                                            .DataTextField("MemberStatusName")
+                                            .DataValueField("MemberStatusId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("MemberStatusList", "Admin");
+                                                });
+                                            })
+                                    )
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft">Age Range</div>
+                                <div class="colright"> 
+                                    @(Html.Kendo().NumericTextBoxFor(model => model.Member.AgeStart)
+                                            .Format("n0")
+                                            .Min(0)
+                                            .Max(29)
+                                            .Value(20)
+                                            .HtmlAttributes(new { @class = "w100" })
+                                            .Events(e => e.Change("ageStartChange").Spin("ageStartSpin"))
+                                    )
+                                    
+                                    to
+                                    @(Html.Kendo().NumericTextBoxFor(model => model.Member.AgeEnd)
+                                            .Format("n0")
+                                            .Min(21)
+                                            .Max(100)
+                                            .Value(30)
+                                            .HtmlAttributes(new { @class = "w100" })
+                                            .Events(e => e.Change("ageEndChange").Spin("ageEndSpin"))
+                                    )
+                                </div>
+                            </div>
+                            </text>);
+
+                        tabstrip.Add().Text("Inventory Item")
+                            .Content(@<text>
+                            <div>
+                                <div class="colleft">Inventory Item</div>
+                                <div class="colright">
+                                    @Html.TextBoxFor(model => model.InventoryItem.InventoryItemName, new { @class = "long" })
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft">Prize Name</div>
+                                <div class="colright">
+                                    @Html.TextBoxFor(model => model.InventoryItem.PrizeName, new { @class = "long" })
+                                  @*  @(Html.Kendo().DropDownListFor(model => model.InventoryItem.Prize)
+                                            .HtmlAttributes(new { @class = "kendoDropdown" })
+                                            .OptionLabel("All")
+                                            .DataTextField("Name")
+                                            .DataValueField("PrizeId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("PrizeList", "Admin");
+                                                });
+                                            })
+                                    )*@
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft">Status</div>
+                                <div class="colright">
+                                    @(Html.Kendo().DropDownListFor(model => model.InventoryItem.Status)
+                                            .HtmlAttributes(new { @class = "kendoDropdown" })
+                                            .OptionLabel("All")
+                                            .DataTextField("Text")
+                                            .DataValueField("Value")
+                                            .BindTo(new List<SelectListItem>() {
+                                                  new SelectListItem() {
+                                                      Text = "Active",
+                                                      Value = "1"
+                                                  },
+                                                  new SelectListItem() {
+                                                      Text = "Inactive",
+                                                      Value = "2"
+                                                  }
+                                              })
+                                    )
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft">Type</div>
+                                <div class="colright"> 
+                                    @(Html.Kendo().DropDownListFor(model => model.InventoryItem.InventoryItemTypeId)
+                                        .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                        .OptionLabel("All")
+                                        .DataTextField("InventoryItemTypeName")
+                                        .DataValueField("InventoryItemTypeId")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("InventoryItemTypeList", "Admin");
+                                            });
+                                        })
+                                    )
+                                </div>
+                            </div>
+                                     
+                            <div>
+                                <div class="colleft">Country</div>
+                                <div class="colright">
+                                    @(Html.Kendo().DropDownListFor(model=>model.InventoryItem.CountryId)
+                                            .HtmlAttributes(new { @class = "kendoDropdown" })
+                                            .OptionLabel("All")
+                                            .DataTextField("CountryName")
+                                            .DataValueField("CountryId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("CountryList", "Admin");
+                                                });
+                                            })
+                                    )
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft">City</div>
+                                <div class="colright">
+                                    @(Html.Kendo().ComboBoxFor(model=>model.InventoryItem.CityId)
+                                            .HtmlAttributes(new { @class = "kendoDropdown" })
+                                            .Placeholder("All")
+                                            .DataTextField("CityName")
+                                            .DataValueField("CityId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("CityList", "Admin").Data("filterCity");
+                                                }).ServerFiltering(true);
+                                            })
+                                            .CascadeFrom("InventoryItem_CountryId")
+                                    )
+                                    <script>
+                                        function filterCity() {
+                                            return {
+                                                countryid: $("#InventoryItem_CountryId").val()
+                                            };
+                                        }
+                                    </script>
+                                </div>
+                            </div>
+                             @{
+                                 DateTime today = DateTime.Today;
+                                 DateTime nextmonth = today.AddMonths(1);
+                                 string todaystr = string.Format("{0:dd/MMM/yyyy}", today);
+                                 string todaystr1 = string.Format("{0:dd/MMM/yyyy}", today.AddDays(1));
+                                 string nextmonthstr = string.Format("{0:dd/MMM/yyyy}", nextmonth);
+                                 string nextmonthstr1 = string.Format("{0:dd/MMM/yyyy}", nextmonth.AddDays(-1));
+        
+                            }  
+                            <div>
+                                <div class="colleft">Publish Date</div>
+                                <div class="colright">
+                                    @(Html.Kendo().DatePickerFor(m => m.InventoryItem.PublishedStart)
+                                          .Format("dd/MMM/yyyy")
+                                          .Value(todaystr)
+                                          .Max(nextmonthstr1)
+                                          .Events(e => e.Change("startChange"))
+                                    )
+                                    to
+                                    @(Html.Kendo().DatePickerFor(m => m.InventoryItem.PublishedEnd)
+                                          .Format("dd/MMM/yyyy")
+                                          .Value(nextmonthstr)
+                                          .Min(todaystr1)
+                                          .Events(e => e.Change("endChange"))
+                                    )
+                                </div>
+                            </div>
+                            </text>);
+
+                        tabstrip.Add().Text("Transaction")
+                            .Content(@<text>
+                            
+                            <div>
+                                <div class="colleft">Merchant</div>
+                                <div class="colright">
+                                    @(Html.Kendo().ComboBoxFor(model=>model.Transaction.MerchantId)
+                                        .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                        .Placeholder("--Select Merchant--")
+                                        .DataTextField("Name")
+                                        .DataValueField("MerchantId")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("MerchantList", "Admin");
+                                            });
+                                        })
+                                    )
+                                </div>
+                            </div>
+                            <div>
+                                <div class="colleft">Inventory Item</div>
+                                <div class="colright">
+                                   @(Html.Kendo().ComboBoxFor(model=>model.Transaction.InventoryItem)
+                                            .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                                            .Placeholder("All")
+                                            .DataTextField("Name")
+                                            .DataValueField("InventoryItemId")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("InventoryItemListByMerchant", "Admin").Data("filterInventory");
+                                                }).ServerFiltering(true);
+                                            })
+                                            .CascadeFrom("Transaction_MerchantId")
+                                        )
+                                        <script>
+                                            function filterInventory() {
+                                                return {
+                                                    MerchantId: $("#Transaction_MerchantId").val()
+                                                };
+                                            }
+                                        </script>
+                                </div>
+                            </div>
+                             @{
+                                 DateTime today = DateTime.Today;
+                                 DateTime nextmonth = today.AddMonths(1);
+                                 string todaystr = string.Format("{0:dd/MMM/yyyy}", today);
+                                 string todaystr1 = string.Format("{0:dd/MMM/yyyy}", today.AddDays(1));
+                                 string nextmonthstr = string.Format("{0:dd/MMM/yyyy}", nextmonth);
+                                 string nextmonthstr1 = string.Format("{0:dd/MMM/yyyy}", nextmonth.AddDays(-1));
+        
+                            }  
+                            <div>
+                                <div class="colleft">Transaction Date</div>
+                                <div class="colright">
+                                    @(Html.Kendo().DatePickerFor(m => m.Transaction.TransactionStart)
+                                          .Format("dd/MMM/yyyy")
+                                          .Value(todaystr)
+                                          .Max(nextmonthstr1)
+                                          .Events(e => e.Change("startChange2"))
+                                    )
+                                    to
+                                    @(Html.Kendo().DatePickerFor(m => m.Transaction.TransactionEnd)
+                                          .Format("dd/MMM/yyyy")
+                                          .Value(nextmonthstr)
+                                          .Min(todaystr1)
+                                          .Events(e => e.Change("endChange2"))
+                                    )
+                                </div>
+                            </div>
+                            </text>);
+                    })
+                                             )
+            
+            </div>
+        </div>
+        <div>
+            <div class="colleft"></div>
+            <div class="colright">
+                <input type="submit" value="Export" id="btnExport" class="submitBtn" onclick="return submitform()" style="display:none"/>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+</div>
+<script type="text/javascript">
+    function submitform(){
+        $("#msgresult").html("");
+        return true;
+    }
+    $(document).ready(function () {
+        @if (Model != null)
+        {
+            <text>
+            $("#tabstrip").css("display", "block");
+            $("#btnExport").css("display", "block");
+            var tabstrip = $("#tabstrip").data("kendoTabStrip");
+            var myTab = tabstrip.tabGroup.children("li").eq(@Model.ReportType);
+            tabstrip.select(myTab);
+            </text>
+        }
+    });
+    function ageStartChange() {
+        var end = $("#Member_AgeEnd").data("kendoNumericTextBox"),
+            start = this.value();
+
+        if (start) {
+            end.min(start + 1);
+        }
+    }
+
+    function ageEndChange() {
+        var start = $("#Member_AgeStart").data("kendoNumericTextBox"),
+            end = this.value();
+
+        if (end) {
+            start.max(end - 1);
+        }
+    }
+    function ageStartSpin() {
+        var end = $("#Member_AgeEnd").data("kendoNumericTextBox"),
+            start = this.value();
+
+        if (start) {
+            end.min(start + 1);
+        }
+    }
+
+    function ageEndSpin() {
+        var start = $("#Member_AgeStart").data("kendoNumericTextBox"),
+            end = this.value();
+
+        if (end) {
+            start.max(end - 1);
+        }
+    }
+    function startChange() {
+        var endPicker = $("#InventoryItem_PublishedEnd").data("kendoDatePicker"),
+            startDate = this.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate() + 1);
+            endPicker.min(startDate);
+        }
+    }
+
+    function endChange() {
+        var startPicker = $("#InventoryItem_PublishedStart").data("kendoDatePicker"),
+            endDate = this.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate() - 1);
+            startPicker.max(endDate);
+        }
+    }
+    function startChange2() {
+        var endPicker = $("#Transaction_TransactionEnd").data("kendoDatePicker"),
+            startDate = this.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate() + 1);
+            endPicker.min(startDate);
+        }
+    }
+
+    function endChange2() {
+        var startPicker = $("#Transaction_TransactionStart").data("kendoDatePicker"),
+            endDate = this.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate() - 1);
+            startPicker.max(endDate);
+        }
+    }
+</script>

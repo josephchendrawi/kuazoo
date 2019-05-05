@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "How MOLPay CASH Work";
+    Layout = "~/Views/Shared/_EmptyReviewLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/ShareEmail.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/molpay.css")" rel="stylesheet" type="text/css" />
+}
+<div class="shareemailwrap">
+    <div class="header"><h2>How Does MOLPay CASH Works</h2></div>
+    <div class="rowcontent">
+        <div class="row workflow" style="width:401px; height:290px; margin-left: auto; margin-right: auto;">
+        </div>    
+        <div class="row">
+        <ol style="text-align:left;">
+            <li>Buyer shops at merchant website, then proceed to checkout and select MOLPay CASH as a payment method.</li>
+            <li>Merchant initiates payment request to MOLPay.</li>
+            <li>MOLPay generates Transaction ID and Verification Code to buyer.</li>
+            <li>Buyer takes the Transaction ID and Verification Code to 7-Eleven outlet to make cash payment.</li>
+            <li>Once received the payment, 7-Eleven staff confirms the payment with a receipt.</li>
+            <li>MOLPay updates merchants on the payment status.</li>
+            <li>MOLPay and 7-Eleven to make settlements, in batches.</li>
+            </ol>
+        </div>
+    </div>
+</div>

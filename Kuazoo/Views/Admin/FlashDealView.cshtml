@@ -1,0 +1,52 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.FlashDeal
+@{
+    ViewBag.Title = "Flash Deal View";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(7);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="FlashDeal">Flash Deal</a> <span class="active"> / View Flash Deal</span>
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View Flash Deal</h1>
+    </div>
+            <div id="wrap">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.MerchantId)</div>
+                <div class="colright">@Model.MerchantName</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.InventoryItemId)</div>
+                <div class="colright">@Model.InventoryItemName</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model=>model.Discount)</div>
+                <div class="colright">@Model.Discount %</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model=>model.StartTime)</div>
+                <div class="colright">@string.Format("{0:dd MMM yyyy hh:mm tt}", Model.StartTime)</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model=>model.EndTime)</div>
+                <div class="colright">@string.Format("{0:dd MMM yyyy hh:mm tt}", Model.EndTime)</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model=>model.Flag)</div>
+                <div class="colright">@Model.Flag</div>
+            </div>
+        </div>
+        <div class="wrapend">
+            <div class="colleft"></div>
+            <div class="colright"><a href="FlashDealEdit?FlashDealId=@Model.FlashDealId" class="submitBtn">Edit</a>
+            <a href="FlashDeal" class="grayBtn">Back</a></div>
+        </div> 
+</div>

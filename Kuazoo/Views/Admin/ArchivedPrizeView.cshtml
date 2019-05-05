@@ -1,0 +1,115 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.Prize
+@{
+    ViewBag.Title = "Archived Prize View";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(3);
+        $('.fancybox').fancybox();
+
+    });
+    function tabOnSelect(e) {
+        var tab = $(e.item).find("> .k-link").text();
+        if (tab == "Winner") {
+            $("#second").css("display", "block");
+            $("#first").css("display", "none");
+        }
+        else {
+            $("#second").css("display", "none");
+            $("#first").css("display", "block");
+        }
+    }
+</script>
+<div id="msgresult">
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="ArchivedPrize">Archived Prize</a> <span class="active"> / View Archived Prize</span>
+    </div>
+</div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View Prize</h1>
+    </div>
+    <div id="wrap">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+            <div class="colright">@Model.Name</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.SponsorName)</div>
+            <div class="colright">@Model.SponsorName</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Price)</div>
+            <div class="colright">@Model.Price</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Description)</div>
+            <div class="colright">@Model.Description</div>
+        </div>
+        @*<div>
+            <div class="colleft">@Html.LabelFor(model => model.Terms)</div>
+            <div class="colright">@Model.Terms</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Detail)</div>
+            <div class="colright">@Model.Detail</div>
+        </div>*@
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.ExpiryDate)</div>
+            <div class="colright">@string.Format("{0:dd MMM yyyy}", Model.ExpiryDate) </div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.PublishDate)</div>
+            <div class="colright">@string.Format("{0:dd MMM yyyy hh:mm tt}", Model.PublishDate) </div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.GroupName)</div>
+            <div class="colright">@Model.GroupName</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.TotalRevenue)</div>
+            <div class="colright">@Model.TotalRevenue</div>
+        </div>
+        <div>
+            <div class="colleft" style="vertical-align:top">Main Image</div>
+            <div class="colright">
+                @if (Model.ImageUrl != null && Model.ImageUrl != "")
+                {
+                <a class="fancybox" style="float:left" href="@Model.ImageUrl"><img src="@Model.ImageUrl" class="imgThumb" /></a>
+                }
+            </div>
+        </div>  
+        <div>
+            <div class="colleft" style="vertical-align:top">Sub Image</div>
+            <div class="colright">
+                @{
+                    var listsuburl = Model.SubImageUrl.Split('|');
+                }
+                @for (int i = 0; i < listsuburl.Count(); i++)
+                {
+                    if (listsuburl[i] != "")
+                    {
+                    <a class="fancybox" style="float:left" href="@listsuburl[i]"><img src="@listsuburl[i]" class="imgThumb" /></a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="wrapend">
+        <div class="colleft"></div>
+        <div class="colright" id="first">
+            <a href="ArchivedPrize" class="grayBtn">Back</a>
+        </div>
+    </div> 
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+    });
+</script>

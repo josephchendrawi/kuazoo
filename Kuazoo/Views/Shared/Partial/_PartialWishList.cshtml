@@ -1,0 +1,420 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItemShow
+
+@if (Model != null & Model.InventoryItemId != 0)
+{
+    var v = Model;
+
+    var whrow = "whrow" + v.InventoryItemId;
+    var InventoryItemId = "InventoryItemId" + v.InventoryItemId;
+    var Name = "Name" + v.InventoryItemId;
+    var Price = "Price" + v.InventoryItemId;
+    var Discount = "Discount" + v.InventoryItemId;
+    var ImageUrl = "ImageUrl" + v.InventoryItemId;
+    var Prize_Name = "Prize_Name" + v.InventoryItemId;
+    var Prize_ImageUrl = "Prize_ImageUrl" + v.InventoryItemId;
+    var FlashDeal_Discount = "FlashDeal_Discount" + v.InventoryItemId;
+    var FlashDeal_FlashDealId = "FlashDeal_FlashDealId" + v.InventoryItemId;
+    var variance = "Variance" + v.InventoryItemId;
+    var VarianceDefault = "VarianceDefault" + v.InventoryItemId;
+    var VarianceDefaultStr = "VarianceDefaultStr" + v.InventoryItemId;
+    var imgid = "img-" + v.ImageId;
+                <div class="whrow" id="@whrow">
+
+        @if (v.TypeName.ToLower().Equals("raffle"))
+        {
+                    <div class="whboxraffle">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxrafflecontent">
+                            <div class="whraflleticket">RM @v.Price</div>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxprize">
+                            <div class="whboxprizeribbon">
+                                <div class="whboxprizetitle">surPRIZE</div>
+                                <div class="whboxprizeimg">
+                                    <img src="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="whboxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        </a>
+                    </div>
+                    <div class="whboxtext">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxtitle">@v.Name</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxsurtitle">@v.Prize.Name</div>
+                        }
+                        </a>
+                        <div class="whboxprice">
+                            <div class="whboxoff">
+                                <div class="boxoffbig2"><span class="boxoffmedium">RM</span> @v.Price</div>
+                            </div>
+                            <div class="whboxprice">
+                                <div class="pricedisc">RAFFLE TICKET</div>
+                            </div>
+                            <div class="whboxbuy">
+                                @if (v.Variance != null && v.Variance != string.Empty)
+                                {
+                                    <button class="btnBuywh" onclick="multiVariance(@v.InventoryItemId)">BUY NOW</button>
+                                }
+                                else
+                                {
+                                    <button class="btnBuywh" onclick="addToCart(@v.InventoryItemId)">BUY NOW</button>
+                                }
+                            </div>
+                        </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                        <div class="whboxbar">
+                            @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                            }
+                            <div class="whboxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            <div class="whboxbartext">@v.Sales raffle tickets remaining!</div>
+                        </div>
+                            }
+                        @*<div class="whtimeleft">
+                            <div class="whtimelefttext">TIME LEFT</div>
+                            <div class="whtimeleftdetail">
+                            @{var whtimeplace = "whtimeplace" + v.InventoryItemId;}
+                                <div class="whtimeplace" id="@whtimeplace"></div>
+                                 <script type="text/javascript">                                     countdownExpire('@v.InventoryItemId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            </div>
+                        </div>*@
+                        <div class="whaction">
+                            <button class="btnRemovewh" onclick="removeWish(@v.InventoryItemId)">Remove from Wishlist</button>
+                        </div>
+                    </div>
+        }//kuazoo on
+        else if (v.SalesVisualMeter >= 100 || v.Sales<1)
+        {
+                    <div class="whboxcontent">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxcontentimg">
+                            <img src="@v.ImageUrl" class="@imgid"/>
+                            <script type="text/javascript">                                adjustImage('@imgid');</script>
+                        </div>
+                        <div class="whboxkuazoo">
+                            <div class="whboxkuazoobg"></div>
+                            <div class="whboxcontentwrap">
+                                <div class="whboxTitle">KUAZOO!</div>
+                                <div class="whboxSubtitle">DRAW IS ON!</div>
+                            </div>
+                            <div class="whboxcontentprizetemp"></div>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxprize">
+                            <div class="whboxprizeribbon">
+                                <div class="whboxprizetitle">surPRIZE</div>
+                                <div class="whboxprizeimg">
+                                    <img src="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="whboxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        </a>
+                    </div>
+                    <div class="whboxtext">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxtitle">@v.Name</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxsurtitle">@v.Prize.Name</div>
+                        }
+                        </a>
+                        <div class="whboxprice">
+                            <div class="whboxoff">
+                                <div class="boxoffbig">@v.Discount.ToString("N0")%</div>
+                                <div class="boxoffsmall">OFF</div>
+                            </div>
+                            <div class="whboxprice">
+                                @if (v.Discount > 0)
+                                {
+                                    <div class="priceori">RM @v.Price</div>
+                                    <div class="pricedisc">RM @{decimal pricedis = v.Price - (v.Price * v.Discount / 100); pricedis = Math.Ceiling(pricedis * 10) / 10;<text>@pricedis.ToString("N2")</text>}</div>
+                                }
+                                else
+                                {
+                                     <div class="pricedisc">RM @v.Price</div>
+                                }
+                            </div>
+                            <div class="whboxbuy">
+                                <button class="btnBuywh disabled" >BUY NOW</button>
+                            </div>
+                        </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                        <div class="whboxbar">
+                            @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                            }
+                            <div class="whboxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            <div class="whboxbartext">@v.Sales deals remaining!</div>
+                        </div>
+                            }
+                        @*<div class="whtimeleft">
+                            <div class="whtimelefttext">TIME LEFT</div>
+                            <div class="whtimeleftdetail">
+                            @{var whtimeplace = "whtimeplace" + v.InventoryItemId;}
+                                <div class="whtimeplace" id="@whtimeplace"></div>
+                                 <script type="text/javascript">                                     countdownExpire('@v.InventoryItemId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            </div>
+                        </div>*@
+                        <div class="whaction">
+                            <button class="btnRemovewh" onclick="removeWish(@v.InventoryItemId)">Remove from Wishlist</button>
+                        </div>
+                    </div>
+        }
+        else if (v.FlashDeal != null)
+        {
+                    <div class="whboxcontent">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxcontentimg">
+                            <img src="@v.ImageUrl" class="@imgid"/>
+                            <script type="text/javascript">                                adjustImage('@imgid');</script>
+                        </div>
+                        <div class="whboxflashdeal">
+                            <div class="whboxflashdealbg"></div>
+                            <div class="whboxcontentwrap">
+                                <div class="whboxTitle">FLASH DEAL!</div>
+                                <div class="whboxSubtitle">
+                                    <div class="whboxSubtitleleft small">FLASH DEAL ENDING IN</div>
+                                    @{
+            var countdo = "countdown" + v.FlashDeal.FlashDealId;   
+                                     }
+                                    <div class="whboxSubtitleright" id="@countdo"></div>
+                                    <script type="text/javascript">                                        countdownStart('@v.FlashDeal.FlashDealId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.FlashDeal.EndTime, DateTimeKind.Utc))')</script>
+                                </div>
+                                <div class="whboxSubtitle">
+                                    <div class="whboxSubtitlehalf ori">
+                                        <div class="small">WAS</div>
+                                        <div class="percen">@v.Discount.ToString("N0")%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                    <div class="whboxSubtitlehalf dis">
+                                        <div class="small">NOW</div>
+                                        <div class="percen">@((v.Discount+v.FlashDeal.Discount).ToString("N0"))%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="whboxcontentprizetemp"></div>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxprize">
+                            <div class="whboxprizeribbon">
+                                <div class="whboxprizetitle">surPRIZE</div>
+                                <div class="whboxprizeimg">
+                                    <img src="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="whboxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        </a>
+                    </div>
+                    <div class="whboxtext">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxtitle">@v.Name</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxsurtitle">@v.Prize.Name</div>
+                        }
+                        </a>
+                        <div class="whboxprice">
+                            <div class="whboxoff">
+                                <div class="boxoffbig">@v.Discount.ToString("N0")%</div>
+                                <div class="boxoffsmall">OFF</div>
+                            </div>
+                            <div class="whboxprice">
+                                @if (v.FlashDeal.Discount > 0)
+                                {
+                                    <div class="priceori">RM @v.Price</div>
+                                    <div class="pricedisc">RM @{decimal pricedis = v.Price - (v.Price * v.FlashDeal.Discount / 100); pricedis = Math.Ceiling(pricedis * 10) / 10;<text>@pricedis.ToString("N2")</text>}</div>
+                                }
+                                else
+                                {
+                                     <div class="pricedisc">RM @v.Price</div>
+                                }
+                            </div>
+                            <div class="whboxbuy">
+                                @if (v.Variance != null && v.Variance != string.Empty)
+                                {
+                                    <button class="btnBuywh" onclick="multiVariance(@v.InventoryItemId)">BUY NOW</button>
+                                }
+                                else
+                                {
+                                    <button class="btnBuywh" onclick="addToCart(@v.InventoryItemId)">BUY NOW</button>
+                                }
+                            </div>
+                        </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                        <div class="whboxbar">
+                            @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                            }
+                            <div class="whboxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            <div class="whboxbartext">@v.Sales deals remaining!</div>
+                        </div>
+                            }
+                        @*<div class="whtimeleft">
+                            <div class="whtimelefttext">TIME LEFT</div>
+                            <div class="whtimeleftdetail">
+                            @{var whtimeplace = "whtimeplace" + v.InventoryItemId;}
+                                <div class="whtimeplace" id="@whtimeplace"></div>
+                                 <script type="text/javascript">                                     countdownExpire('@v.InventoryItemId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            </div>
+                        </div>*@
+                        <div class="whaction">
+                            <button class="btnRemovewh" onclick="removeWish(@v.InventoryItemId)">Remove from Wishlist</button>
+                        </div>
+                    </div>
+            <input id="@FlashDeal_Discount" type="hidden" value="@v.FlashDeal.Discount"/>
+            <input id="@FlashDeal_FlashDealId"  type="hidden" value="@v.FlashDeal.FlashDealId"/>
+        }
+        else
+        {
+                    <div class="whboxcontent">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxcontentimg">
+                            <img src="@v.ImageUrl" class="@imgid"/>
+                            <script type="text/javascript">                                adjustImage('@imgid');</script>
+                        </div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxprize">
+                            <div class="whboxprizeribbon">
+                                <div class="whboxprizetitle">surPRIZE</div>
+                                <div class="whboxprizeimg">
+                                    <img src="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="whboxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                        </a>
+                    </div>
+                    <div class="whboxtext">
+                        <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-') })">
+                        <div class="whboxtitle">@v.Name</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="whboxsurtitle">@v.Prize.Name</div>
+                        }
+                        </a>
+                        <div class="whboxprice">
+                            <div class="whboxoff">
+                                <div class="boxoffbig">@v.Discount.ToString("N0")%</div>
+                                <div class="boxoffsmall">OFF</div>
+                            </div>
+                            <div class="whboxprice">
+                                @if (v.Discount > 0)
+                                {
+                                    <div class="priceori">RM @v.Price</div>
+                                    <div class="pricedisc">RM @{decimal pricedis = v.Price - (v.Price * v.Discount / 100); pricedis = Math.Ceiling(pricedis * 10) / 10;<text>@pricedis.ToString("N2")</text>}</div>
+                                }
+                                else
+                                {
+                                     <div class="pricedisc">RM @v.Price</div>
+                                }
+                            </div>
+                            <div class="whboxbuy">
+                                @if (v.Variance != null && v.Variance != string.Empty)
+                                {
+                                    <button class="btnBuywh" onclick="multiVariance(@v.InventoryItemId)">BUY NOW</button>
+                                }
+                                else
+                                {
+                                    <button class="btnBuywh" onclick="addToCart(@v.InventoryItemId)">BUY NOW</button>
+                                }
+                            </div>
+                        </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                        <div class="whboxbar">
+                            @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                            }
+                            <div class="whboxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            <div class="whboxbartext">@v.Sales deals remaining!</div>
+                        </div>
+                            }
+                        @*<div class="whtimeleft">
+                            <div class="whtimelefttext">TIME LEFT</div>
+                            <div class="whtimeleftdetail">
+                            @{var whtimeplace = "whtimeplace" + v.InventoryItemId;}
+                                <div class="whtimeplace" id="@whtimeplace"></div>
+                                 <script type="text/javascript">                                     countdownExpire('@v.InventoryItemId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.Prize.ExpiryDate, DateTimeKind.Utc))')</script>
+                            </div>
+                        </div>*@
+                        <div class="whaction">
+                            <button class="btnRemovewh" onclick="removeWish(@v.InventoryItemId)">Remove from Wishlist</button>
+                        </div>
+                    </div>
+        }
+        
+            <input id="@InventoryItemId" type="hidden" value="@v.InventoryItemId">
+            <input id="@Name"  type="hidden" value="@v.Name">
+            <input id="@Price"  type="hidden" value="@v.Price">
+            <input id="@Discount" type="hidden" value="@v.Discount">
+            <input id="@ImageUrl" type="hidden" value="@v.ImageUrl">
+            <input id="@Prize_Name"  type="hidden" value="@v.Prize.Name">
+            <input id="@Prize_ImageUrl"  type="hidden" value="@v.Prize.ImageUrl"> 
+            <input id="@variance" type="hidden" value="@v.Variance" />
+            @{
+        bool defaultvar = false;
+        string defaultvarstr = ""; ;
+}
+            @if (v.Variance != null && v.Variance != string.Empty)
+            {
+                string[] vari = v.Variance.Split('|');
+                if (vari.Count() == 1)
+                {
+                    string[] vari2 = vari.First().Split('`');
+                    if (v.Price == decimal.Parse(vari2[1]) && v.Discount == decimal.Parse(vari2[2]))
+                    {
+                        defaultvarstr = vari.First();
+                        defaultvar = true;
+                    }
+                }
+                <text>
+            <input id="@VarianceDefault" type="hidden" value="@defaultvar" />
+            <input id="@VarianceDefaultStr" type="hidden" value="@defaultvarstr" />
+                </text>
+                string varilist = "varianceList" + v.InventoryItemId;
+            <div id="@varilist" class="variancewrap" style="display:none">
+                @foreach (var v1 in vari)
+                {
+                    string[] vari2 = v1.Split('`');
+                    string price = "RM" + vari2[1];
+                    string disc = decimal.Parse(vari2[2]).ToString("N0") + "%";
+                    string discprice = "RM" + Math.Ceiling(decimal.Parse(vari2[1]) - (decimal.Parse(vari2[1]) * decimal.Parse(vari2[2]) / 100));
+                    <div class="row">
+                        <div class="col-sm-5"><h3>@vari2[0]</h3></div>
+                        <div class="col-sm-2"><div class="price">@price</div></div>
+                        <div class="col-sm-2"><div class="discprice"><span class="disc">@disc</span><br />@discprice</div></div>
+                        <div class="col-sm-3">
+                            @if (int.Parse(vari2[3]) > 0)
+                            {
+                                <div class="buyplace"><input type="button"  onclick="addToCartVari('@v1','@v.InventoryItemId')" class="btnBuy" value ="BUY" /></div>
+                            }
+                            else
+                            {
+                                <div class="buyplace"><input type="button"  onclick="addToCartVari('@v1','@v.InventoryItemId')" class="btnBuy disabled" disabled="disabled" value ="BUY" /></div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            }
+        </div>
+    
+}

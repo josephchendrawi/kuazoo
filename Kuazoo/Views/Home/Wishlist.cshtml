@@ -1,0 +1,197 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItemVM
+@{
+    ViewBag.Title = "Wishlist";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+
+@section AddToHead{
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/Wishlist.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/jquery.checkout.js")"></script>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        var obj = getWishlist();
+        if (obj != null) {
+            var items = obj.items;
+            if (items != null && items.length != 0) {
+                for (var i = 0; i < items.length; i++) {
+                    $.get('@Url.Action("GetWishList","Home")/'+items[i].id, "",
+                        function (data) {
+                            $("#wishlistplace").append(data);
+                        },
+                        "html"
+                      );
+                }
+            }
+        }
+    });
+    function adjustImage(id) {
+        $("img." + id).on('load', function () {
+            adjustload(id);
+        });
+
+    }
+    function adjustload(id) {
+        var conHeight = 295;
+        var imgHeight = $("." + id).height();
+        if (imgHeight > 0) {
+            var gap = (imgHeight - conHeight) / 2;
+            $("." + id).css("margin-top", -gap);
+        }
+
+    }
+</script>
+
+<script type="text/javascript">
+    function countdownStart(id, endtime) {
+        //$("#" + id).html('02<span class="small">H</span>16<span class="small">M</span>')
+        var end = new Date(endtime);
+        var now = new Date();
+        var c = end.getTime() - now.getTime();
+        c = c / (60 * 1000);
+        if (c > 0) {
+            c = c + 1;
+            //console.log(c);
+            var hour = parseInt(c / 60);
+            //console.log(hour);
+            var minute = parseInt(c - (hour * 60));
+            //console.log(minute);
+            if (hour < 10) {
+                hour = "0" + hour;
+            }
+            if (minute < 10) {
+                minute = "0" + minute;
+            }
+            $("#countdown" + id).html(hour + '<span class="small">H</span>' + minute + '<span class="small">M</span>');
+            setTimeout(function () {
+                countdownStart(id, endtime);
+            }, 1000);
+        }
+        else {
+            $("#whboxflashdeal" + id).css("display", "none");
+        }
+    }
+</script>
+<script type="text/javascript">
+    function countdownExpire(id, endtime) {
+        //console.log(endtime);
+        var end = new Date(endtime);
+        var now = new Date();
+        var c = end.getTime() - now.getTime();
+        c = c / (60 * 1000);
+        if (c > 0) {
+            c = c + 1;
+            //console.log(c);
+            var day = parseInt(c / 60 / 24);
+
+            var hour = parseInt((c / 60) - (day * 24));
+            //console.log(hour);
+            //var minute = parseInt(c - (hour * 60));
+            //console.log(minute);
+            if (hour < 10) {
+                hour = "0" + hour;
+            }
+            if (day < 10) {
+                day = "0" + day;
+            }
+            $("#whtimeplace" + id).html(day + '<span class="small">D</span>' + hour + '<span class="small">H</span>');
+            setTimeout(function () {
+                countdownExpire(endtime);
+            }, 1000);
+        }
+        else {
+            $("#whtimeplace" + id).html('00<span class="small">D</span>00<span class="small">H</span>');
+        }
+    }
+</script>
+<h2>Wish List</h2>
+<div class="whwrap mhei400" id="wishlistplace">
+</div>
+@section AddToFooter{
+
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+<script type="text/javascript">
+
+    function removeWish(id) {
+        var result= removeWishList(id);
+        if(result=="true"){
+            $("#whrow"+id).remove();
+        }
+    }
+    function multiVariance(id){
+        if($("#VarianceDefault"+id).val().toLowerCase()=="true"){
+            addToCartVari($("#VarianceDefaultStr"+id).val(),id);
+        }
+        else{
+        $.fancybox.open({
+            href :"#varianceList"+id,
+            width : 300,
+        });
+        }
+    }
+    function addToCart(id) {
+        var invid = $("#InventoryItemId"+id).val();
+        var name = $("#Name"+id).val();
+        var price =$("#Price"+id).val();
+        var dis = $("#Discount"+id).val();
+        var flashid = $("#FlashDeal_FlashDealId"+id).val();
+        if(flashid==null)flashid=0;
+        var flash = $("#FlashDeal_Discount"+id).val();
+        if (flash != null) dis = flash;
+        var imageurl = $("#ImageUrl"+id).val();
+        if (imageurl == null) imageurl = "";
+        var prize = $("#Prize_Name"+id).val();
+        if (prize == null) prize = "";
+        var prizeimageurl = $("#Prize_ImageUrl"+id).val();
+        if (prizeimageurl == null) prizeimageurl = "";
+        var varieancelist = $("#Variance"+id).val();
+        var values = { id: invid,variance:'', variancelist:varieancelist, qty: 1,name:name,price:price,dis:dis,imageurl:imageurl,prize:prize,prizeimageurl:prizeimageurl,flashid:flashid,gift:0};
+        console.log(values);
+        _addToCart(values);
+        window.location="@Url.Action("CheckOut", "Home")"
+    }
+    
+    function addToCartVari(_variance,id) {
+         $.ajax({
+            type:'POST',
+            url: "@Url.Action("CheckVarianceLimit", "Home")",
+            data: {id:id,variance:_variance},
+            dataType:"json",
+            success:function(data){
+            if(data.success){
+                var invid = $("#InventoryItemId"+id).val();
+                var name = $("#Name"+id).val();
+                //var price =$("#Price"+id).val();
+                var vari = _variance.split('`');
+                var price =vari[1];
+        
+                var dis = vari[2];//$("#Discount"+id).val();
+                var flashid = $("#FlashDeal_FlashDealId"+id).val();
+                if(flashid==null)flashid=0;
+                var flash = $("#FlashDeal_Discount"+id).val();
+                if (flash != null) dis = flash;
+                var imageurl = $("#ImageUrl"+id).val();
+                if (imageurl == null) imageurl = "";
+                var prize = $("#Prize_Name"+id).val();
+                if (prize == null) prize = "";
+                var prizeimageurl = $("#Prize_ImageUrl"+id).val();
+                if (prizeimageurl == null) prizeimageurl = "";
+                var varieancelist = $("#Variance"+id).val();
+                var values = { id: invid,variance:_variance, variancelist:varieancelist, qty: 1,name:name,price:price,dis:dis,imageurl:imageurl,prize:prize,prizeimageurl:prizeimageurl,flashid:flashid,gift:0};
+                // console.log(values);
+                _addToCart(values);
+                window.location="@Url.Action("CheckOut", "Home")"
+            }
+            else{
+                $.fancybox.close();
+                bootbox.alert("Stock Exceed the Limit");
+            }
+        }
+        });
+    }
+</script>
+
+}

@@ -1,0 +1,188 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.ImageList
+@{
+    ViewBag.Title = "ImageList";
+    Layout = "~/Views/Shared/_EmptyReviewLayout.cshtml";
+}
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/Review.css")" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+    $(document).ready(function () {
+        document.getElementById("imagefile").onchange = function () {
+            document.getElementById("imagefiletitle").value = this.value;
+        };
+    });
+</script>
+<div class="loadingshow" style="display:none">
+    <div class="loadingindicatorwrap"></div>
+    <div class="loadingindicator"><div></div></div>
+</div>
+<div class="reviewwrap">
+<div class="reviewheader">
+    <h2>Image List</h2>
+</div>
+<div class="reviewheaderspace"></div>
+<div class="reviewrow">
+<div class="imagelistheader">
+    <div class="colright" style="display:table;width:150px;float:left;margin-right:10px;">
+        <input id="imagefiletitle" placeholder="Choose File" readonly="readonly" class="file-upload-text" />
+        <div class="file-upload">
+            <span>Browse</span>
+	        <input id="imagefile" type="file" name="imagefile" />
+        </div>
+    </div>
+    <input type="button" value="Upload" class="submitBtn" id="btnUpload" />
+</div>
+<input type="hidden" value="" id="currentChoose" name="currentChoose" />
+<input type="hidden" value="" id="currentChooseImage" name="currentChooseImage" />
+<input type="hidden" value="" id="currentChooseImageUrl" name="currentChooseImageUrl" />
+<div class="imagelistwrap" style="padding:10px;" id="imagelistitem">
+    @*@foreach (var v in Model.List)
+    {
+        var imgid = "img" + v.ImageId;
+         <img id="@imgid" src="@v.Url" class="imgth" onclick="chooseitem(@v.ImageId,'@v.Name','@v.Url')" />
+    }*@
+   @* <input type="button" value="Show Old Image" class="submitBtn" id="btnShowOldImage" onclick="loadmoreimage(0,5)" />*@
+</div>
+
+</div>
+
+<div class="reviewheaderspace"></div>
+<div class="reviewfooter">
+    <input type="button" value="Done" class="submitBtn" id="btnChoose" />
+</div>
+</div>
+
+<script src="@Url.Content("~/Scripts/jquery-ui-1.9.2.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.fileupload.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.fileupload-ui.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.iframe-transport.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    var jqXHRData;
+    $(document).ready(function () {
+        initUpload();
+        //loadmoredraft();
+        $("#btnUpload").on('click', function () {
+            //console.log('start');
+            if (jqXHRData) {
+                //console.log('imagestart');
+                $(".loadingshow").css("display", "block");
+                jqXHRData.submit();
+            }
+        });
+        $("#btnChoose").on('click', function () {
+            var id = $("#currentChoose").val();
+            var name = $("#currentChooseImage").val();
+            var url = $("#currentChooseImageUrl").val();
+            if (id == "") {
+                alert("Choose the image first");
+            }
+            else {
+                parent.document.getElementById("tempChoose").value = id;
+                parent.document.getElementById("tempChooseName").value = name;
+                parent.document.getElementById("tempChooseUrl").value = url;
+                parent.$.fancybox.close();
+            }
+        });
+    });
+    function initUpload() {
+        'use strict';
+        $('#imagefile').fileupload({
+            url: '@Url.Action("ImageListUploadImage", "Profile")',
+            dateType: 'json',
+            add: function (e, data) {
+                jqXHRData = data
+            },
+            done: function (event, data) {
+                $(".loadingshow").css("display", "none");
+                //console.log('imageend');
+                //console.log(data);
+                if (data.result.isUpload) {
+                    //var draft = parent.document.getElementById("tempChooseDraft").value;
+                    //parent.document.getElementById("tempChooseDraft").value = draft+","+data.result.imageid;
+                    var cho =data.result.imageid+",'" + data.result.imagename + "','" + data.result.imageurl + "'";
+                    
+                    var html='<img id="img'+data.result.imageid+'" src="' + data.result.imageurl + '" class="imgth" onclick="chooseitem('+cho+')" />';
+                    html +='<div id="iconimg'+data.result.imageid+'" class="deleteIcon2" onclick="deleteImage('+data.result.imageid+')"></div>';
+                    
+                    $("#imagelistitem").prepend(html);
+                    
+                    chooseitem(data.result.imageid,data.result.imagename,data.result.imageurl);
+                }
+                else {
+                    console.log(data.result.message);
+                }
+            },
+            fail: function (event, data) {
+                $(".loadingshow").css("display", "none");
+                //console.log('imagefailed');
+                if (data.files[0].error) {
+                    alert(data.files[0].error);
+                }
+            }
+        });
+    }
+    function deleteImage(id){
+        var draft = parent.document.getElementById("tempChooseDraft").value;
+        draft= draft.replace(id, '');
+        parent.document.getElementById("tempChooseDraft").value = draft;
+        $("#img"+id).remove();
+        $("#iconimg"+id).remove();
+    }
+    function chooseitem(id,name,url) {
+        var current = $("#currentChoose").val();
+        if (current != "") {
+            $("#img" + current).removeClass("imgactive");
+        }
+        $("#img" + id).addClass("imgactive");
+        $("#currentChoose").val(id);
+        $("#currentChooseImage").val(name);
+        $("#currentChooseImageUrl").val(url);
+    }
+//    function loadmoredraft() {
+//        $("#btnShowOldImage").remove();
+//        $(".loadingshow").css("display", "block");
+//        var draft = parent.document.getElementById("tempChooseDraft").value;
+//        $.ajax({
+//            type:"POST",
+//            url : "@Url.Action("ImageListDataDraft","Admin")",
+//            data : { imageid : draft },
+//            success: function (data) {
+//                for (var i = 0; i < data.length; i++) {
+//                    var cho = data[i].ImageId + ",'" + data[i].Name + "','" + data[i].Url + "'";
+//                    var html='<img id="img' + data[i].ImageId + '" src="' + data[i].Url + '" class="imgth" onclick="chooseitem(' + cho + ')" />';
+//                    html +='<div id="iconimg'+data[i].ImageId+'" class="deleteIcon2" onclick="deleteImage('+data[i].ImageId+')"></div>';
+//                    $("#imagelistitem").append(html);
+//                }
+//                $(".loadingshow").css("display", "none");
+//            },
+//            error: function(XMLHttpRequest, textStatus, errorThrown) {
+//                $(".loadingshow").css("display", "none");
+//            }
+//        });
+//    }
+//    function loadmoreimage(skip,take) {
+//        $("#btnShowOldImage").remove();
+//        $(".loadingshow").css("display", "block");
+//        $.ajax({
+//            type:"POST",
+//            url : "@Url.Action("ImageListDataDraft","Admin")",
+//            data : { skip : skip, take:take},
+//            success: function (data) {
+//                for (var i = 0; i < data.length; i++) {
+//                    var cho = data[i].ImageId + ",'" + data[i].Name + "','" + data[i].Url + "'";
+
+//                    $("#imagelistitem").append('<img id="img' + data[i].ImageId + '" src="' + data[i].Url + '" class="imgth" onclick="chooseitem(' + cho + ')" />');
+//              
+//                }
+//                if (data.length == 5) {// still more
+//                    skip = skip + take;
+//                    $("#imagelistitem").append('<input type="button" value="Load more" class="submitBtn" id="btnShowOldImage" onclick="loadmoreimage(' + skip + ',' + take + ')" />');
+//                }
+//                $(".loadingshow").css("display", "none");
+//            },
+//            error: function(XMLHttpRequest, textStatus, errorThrown) {
+//                $(".loadingshow").css("display", "none");
+//            }
+//        });
+//    }
+</script>

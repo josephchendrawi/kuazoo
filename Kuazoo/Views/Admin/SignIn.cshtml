@@ -1,0 +1,56 @@
+﻿@model com.kuazoo.Models.LogOnModel
+@{
+    ViewBag.Title = "Sign In";
+    Layout = "~/Views/Shared/_EmptyLayout3.cshtml";
+}
+
+<div class="notifwrap">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+    if (ViewBag.msg == "3")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Username or password incorrect.</div></div>
+    }
+    else
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> @ViewBag.msg </div></div>
+    }
+}
+@if (ViewBag.result != null)
+{
+    if (ViewBag.result == "3")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Username or password incorrect.</div></div>
+    }
+    else
+    {
+        <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+    }
+}
+<div class="loginwrap">
+<div class="logincontent">
+    @using (Html.BeginForm())
+    {
+    @Html.AntiForgeryToken()
+    <div class="loginrow">
+        <h2>Sign In</h2>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150">Username</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.UserName, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.UserName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150">Password</div>
+        <div class="logininput">@Html.PasswordFor(model => model.Password, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.Password)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput">@Html.CheckBoxFor(model => model.RememberMe) <label class="rememberme" for="RememberMe">Stay signed in</label></div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput"><button class="btnInput" type="submit">Log In</button></div>
+    </div>
+    }
+</div>
+</div>

@@ -1,0 +1,11 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.Tag
+@{
+    ViewBag.Title = "Unathorized";
+    Layout = "~/Views/Shared/_EmptyLayout.cshtml";
+}
+<script type="text/javascript">
+    window.location.href = "@Url.Action("SignIn","Admin")";
+</script>
+<h2>Unauthorized</h2>
+<div>
+<a href="@Url.Action("SignIn","Admin")">Sign In</a></div>

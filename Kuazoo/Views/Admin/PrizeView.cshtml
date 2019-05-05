@@ -1,0 +1,695 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.Prize
+@{
+    ViewBag.Title = "Prize View";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/chosen.jquery.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(2);
+        $('.fancybox').fancybox();
+
+    });
+    function tabOnSelect(e) {
+        var tab = $(e.item).find("> .k-link").text();
+        if (tab == "Winner") {
+            $("#second").css("display", "block");
+            $("#first").css("display", "none");
+        }
+        else {
+            $("#second").css("display", "none");
+            $("#first").css("display", "block");
+        }
+    }
+</script>
+<div id="msgresult">
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Prize">Prize</a> <span class="active"> / View Prize</span>
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+        if (ViewBag.msg == "1")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New inventory item successfully created</div></div>
+        }
+        else if (ViewBag.msg == "3")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Inventory Item</div></div>
+        }
+        else if (ViewBag.msg == "11")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Inventory Item updated successfully</div></div>
+        }
+        else if (ViewBag.msg == "33")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Inventory Item</div></div>
+        }
+        
+        else if (ViewBag.msg == "1g")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New Game successfully created</div></div>
+        }
+        else if (ViewBag.msg == "3g")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Game</div></div>
+        }
+        else if (ViewBag.msg == "11g")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Game updated successfully</div></div>
+        }
+        else if (ViewBag.msg == "33g")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Game</div></div>
+        }
+}
+    </div>
+</div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>View Prize</h1>
+    </div>
+   @Html.HiddenFor(model => model.PrizeId)
+@(Html.Kendo().TabStrip()
+        .Name("tabstrip")
+        .Events(events => events.Select("tabOnSelect"))
+        .Items(tabstrip =>
+        {
+            tabstrip.Add().Text("Details")
+                .Selected(true)
+                .Content(@<text>     
+    <div id="wrap">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+            <div class="colright">@Model.Name</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.SponsorName)</div>
+            <div class="colright">@Model.SponsorName</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Price)</div>
+            <div class="colright">@Model.Price</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Description)</div>
+            <div class="colright">@Model.Description</div>
+        </div>
+        @*<div>
+            <div class="colleft">@Html.LabelFor(model => model.Terms)</div>
+            <div class="colright">@Model.Terms</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Detail)</div>
+            <div class="colright">@Model.Detail</div>
+        </div>*@
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.ExpiryDate)</div>
+            <div class="colright">@string.Format("{0:dd MMM yyyy}", Model.ExpiryDate) </div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.PublishDate)</div>
+            <div class="colright">@string.Format("{0:dd MMM yyyy hh:mm tt}", Model.PublishDate) </div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.GroupName)</div>
+            <div class="colright">@Model.GroupName</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.TotalRevenue)</div>
+            <div class="colright">@Model.TotalRevenue</div>
+        </div>
+        <div>
+            <div class="colleft" style="vertical-align:top">Main Image</div>
+            <div class="colright">
+                @if (Model.ImageUrl != null && Model.ImageUrl != "")
+                {
+                <a class="fancybox" style="float:left" href="@Model.ImageUrl"><img src="@Model.ImageUrl" class="imgThumb" /></a>
+                }
+            </div>
+        </div>  
+        <div>
+            <div class="colleft" style="vertical-align:top">Sub Image</div>
+            <div class="colright">
+                @{
+                    var listsuburl = Model.SubImageUrl.Split('|');
+                }
+                @for (int i = 0; i < listsuburl.Count(); i++)
+                {
+                    if (listsuburl[i] != "")
+                    {
+                    <a class="fancybox" style="float:left" href="@listsuburl[i]"><img src="@listsuburl[i]" class="imgThumb" /></a>
+                    }
+                }
+            </div>
+        </div>
+                <div>
+                    <div class="colleft">@Html.LabelFor(model => model.FakeVisualMeter)</div>
+                    <div class="colright">@Model.FakeVisualMeter %</div>
+                </div>  
+    </div>
+                </text>);
+
+            tabstrip.Add().Text("Inventory Item")
+                .Content(@<text>
+    <div class="gridheader"><a href="InventoryItemAdd?PrizeId=@Model.PrizeId" class="addNewBtn">Add New</a></div>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.InventoryItemModel.InventoryItem>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.InventoryItemId).Title("Inventory ID").Hidden(false).Visible(true);
+            columns.Bound(p => p.Name).Title("Inventory Name");
+            columns.Bound(p => p.Kuazooed).Title("Kuazooed");
+            columns.Bound(p => p.LastAction).ClientTemplate(
+                "<a class='gridBtn' href='InventoryItemView?InventoryItemId=#=InventoryItemId#&PrizeId=" + Model.PrizeId + "'><span class='fa fa-eye' title='View' ></span></a>&nbsp;&nbsp;" +
+                "#if(LastAction!='5'){#" +
+                "|&nbsp;&nbsp;<a class='gridBtn' href='InventoryItemEdit?InventoryItemId=#=InventoryItemId#&PrizeId=" + Model.PrizeId + "'><span class='fa fa-pencil' title='Edit' ></span></a>&nbsp;&nbsp;" +
+                "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-delete'  href=''><span class='fa fa-archive' title='Archive' ></span></a>" +
+                "#}#").Title("Action").Filterable(filter => filter.Enabled(false)).Width(200);
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("PrizeDetail_Read", "Admin", new { PrizeId = Model.PrizeId }))
+            .Destroy(destroy => destroy.Action("InventoryItem_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.InventoryItemId);
+            })
+            //.Filter(filter=>filter.Add(p=>p.LastAction).IsNotEqualTo("5"))
+        )
+        .Events(events => events.DataBound("onDataBound"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+
+            </text>);
+
+            tabstrip.Add().Text("Winner")
+                .Content(@<text>
+                <input type="hidden" id="_winner" value="" />
+                <input type="hidden" id="_winneremail" value="" />
+                <input type="hidden" id="_winnername" value="" />
+                <input type="hidden" id="_winnerinv" value="" />
+                <div class="winnerplace">
+                @if (Model.ClosestWinnerEmail != "")
+                {
+                    <text>Closest Player : @Model.ClosestWinnerEmail</text>
+                }
+                </div>   
+                <div class="winnerplace" id="_winnerplace">
+                @if (Model.WinnerEmail != "")
+                {
+                    <text>Prize Winner : @Model.WinnerEmail</text>
+                }
+                </div>   
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.TransactionModel.TransactionUserPlay>()
+        .Name("gridwin")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.TransactionId).Hidden(true);
+            columns.Bound(p => p.TransactionDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Transaction Date");
+            columns.Bound(p => p.MemberEmail).Title("Member Email");
+            columns.Bound(p => p.InventoryItemName).Title("Deal Name");
+            columns.Bound(p => p.MemberPlay).Title("Play Game").ClientTemplate(
+                "#if(MemberPlay!=true){#" +
+                "Yes" +
+                "#}else{#" +
+                "No" +
+                "#}#"
+                );
+            columns.Bound(p => p.PaymentStatus).Title("Payment Status");
+            columns.Bound(p => p.InventoryItemId).Hidden(true).Visible(false);
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handlerwin"))
+            .Read(read => read.Action("PrizeWinner_Read", "Admin", new { PrizeId = Model.PrizeId }))
+            .Model(model =>
+            {
+                model.Id(p => p.TransactionId);
+            })
+            //.Filter(filter=>filter.Add(p=>p.LastAction).IsNotEqualTo("5"))
+        )
+        .Events(events => events.DataBound("onDataBound").Change("onChange"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+
+            </text>);
+
+            tabstrip.Add().Text("Game")
+                .Content(@<text>
+
+    @if(Model.GameType==0){
+    <div class="gridheader">
+        <div class="gridleft">
+            <a onclick="gameType(1)" class="addNewBtn">Game</a>
+            <a onclick="gameType(2)" class="addNewBtn">51st Winner</a>
+        </div>
+    </div>
+    }
+    else if (Model.GameType == 1)
+    {
+    <div class="gridheader">
+        <div class="gridleft">
+            Game
+            <a onclick="gameType(1)" class="addNewBtn" style="background:#666">Game</a>
+            <a onclick="gameType(2)" class="addNewBtn">51st Winner</a>
+        </div>
+        <a href="GameAdd?PrizeId=@Model.PrizeId" class="addNewBtn">Add New</a>
+    </div>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.GameModel>()
+        .Name("gridgame")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.GameId).Title("Game ID").Hidden(false).Visible(true);
+            columns.Bound(p => p.Name).Title("Game Name");
+            columns.Bound(p => p.ExpiryDate).Format("{0:dd MMM yyyy}").Title("Expiry Date");
+            columns.Bound(p => p.Create).Format("{0:dd MMM yyyy}").Title("Created On");
+            columns.Bound(p => p.LastAction).ClientTemplate(
+                "<a class='gridBtn' href='GameView?GameId=#=GameId#&PrizeId=" + Model.PrizeId + "'><span class='fa fa-eye' title='View' ></span></a>&nbsp;&nbsp;" +
+                "#if(LastAction!='5'){#" +
+                "|&nbsp;&nbsp;<a class='gridBtn' href='GameEdit?GameId=#=GameId#&PrizeId=" + Model.PrizeId + "'><span class='fa fa-pencil' title='Edit' ></span></a>&nbsp;&nbsp;" +
+                "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-delete'  href=''><span class='fa fa-archive' title='Archive' ></span></a>" +
+                "#}#").Title("Action").Filterable(filter => filter.Enabled(false)).Width(200);
+            columns.Command(command => command.Destroy()).Visible(false);//for make custom button work
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+                    .Events(events => events.Error("error_handlergame"))
+            .Read(read => read.Action("Game_Read", "Admin", new { PrizeId = Model.PrizeId }))
+            .Destroy(destroy => destroy.Action("Game_Destroy", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.PrizeId);
+            })
+            //.Filter(filter=>filter.Add(p=>p.LastAction).IsNotEqualTo("5"))
+        )
+        .Events(events => events.DataBound("onDataBound"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+    }
+    else if(Model.GameType ==2){
+    <div class="gridheader">
+        <div class="gridleft">
+            51st Winner
+            <a onclick="gameType(1)" class="addNewBtn">Game</a>
+            <a onclick="gameType(2)" class="addNewBtn" style="background:#666">51st Winner</a>
+        </div>
+    </div>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.TransactionModel.TransactionUserPlay>()
+        .Name("gridgamewin")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.TransactionId).Hidden(true);
+            columns.Bound(p => p.No).Title("Purchaser Sequence");
+            columns.Bound(p => p.TransactionDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Transaction Date");
+            columns.Bound(p => p.MemberEmail).Title("Member Email");
+            columns.Bound(p => p.InventoryItemName).Title("Deal Name");
+            columns.Bound(p => p.MemberPlay).Title("Play Game").ClientTemplate(
+                "#if(MemberPlay!=true){#" +
+                "Yes" +
+                "#}else{#" +
+                "No" +
+                "#}#"
+                );
+            columns.Bound(p => p.InventoryItemId).Hidden(true).Visible(false);
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handlergamewin"))
+            .Read(read => read.Action("PrizeGame51Winner_Read", "Admin", new { PrizeId = Model.PrizeId }))
+            .Model(model =>
+            {
+                model.Id(p => p.TransactionId);
+            })
+            //.Filter(filter=>filter.Add(p=>p.LastAction).IsNotEqualTo("5"))
+        )
+        .Events(events => events.DataBound("onDataBound").Change("onChange"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+    }
+            </text>);
+        })
+                                                )
+    <div class="wrapend">
+        <div class="colleft"></div>
+        <div class="colright" id="first">
+            <a href="PrizeEdit?PrizeId=@Model.PrizeId" class="submitBtn">Edit</a>
+            <a href="Prize" class="grayBtn">Back</a>
+        </div>
+        <div class="colright" id="second" style="display:none">
+        @if (Model.WinnerEmail == "")
+        {
+            <a class="submitBtn" onclick="setAsWinner(this)">Set As Winner</a>
+        }
+            <a href="Prize" class="grayBtn">Back</a>
+        </div>
+    </div> 
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var kvp = document.location.hash.substr(1);
+        if (kvp == "inventory") {
+            var ts = $("#tabstrip").data("kendoTabStrip");
+            ts.select(1);
+        }
+        else if (kvp == "game") {
+            var ts = $("#tabstrip").data("kendoTabStrip");
+            ts.select(3);
+        }
+    });
+    function gameType(i) {
+        var prizeId = $("#PrizeId").val();
+        window.location = "@Url.Action("PrizeSetGame", "Admin")?PrizeId="+prizeId+"&Type="+i;
+    }
+    function onDataBound(e) {
+        var data = this.dataSource.filter();
+        if (data != null) {
+            //console.log(data);
+            document.location.hash = "";
+            if (data.filters.length > 1) {
+                for (var i = 1; i < data.filters.length; i++) {
+                    console.log(data.filters[i].field + " " + data.filters[i].operator + " " + data.filters[i].value);
+                    insertParam(data.filters[i].field, data.filters[i].value);
+                }
+            }
+        }
+    }
+    function onChange(e) {
+
+        //var data = this.select();
+        //console.log(data);
+        var grid = $("#gridwin").data("kendoGrid");
+        var selectedItem = grid.dataItem(grid.select());
+        $("#_winner").val(selectedItem.TransactionId);
+        $("#_winneremail").val(selectedItem.MemberEmail);
+        $("#_winnername").val(selectedItem.InventoryItemName);
+        $("#_winnerinv").val(selectedItem.InventoryItemId);
+    }
+    function insertParam(key, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        //console.log(kvp);
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+
+            if (x[0] == key) {
+                x[1] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var array = { 'field': 'LastAction', 'operator': 'neq', 'value': '5' };
+        param.push(array);
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': 'contains', 'value': re[1] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+        }
+    }
+    function changeLastAction() {
+        var value = this.value(),
+		 	 grid = $("#grid").data("kendoGrid");
+
+        if (value) {
+            grid.dataSource.filter({ field: "LastAction", operator: "eq", value: value });
+        } else {
+            grid.dataSource.filter({});
+        }
+    }
+    function error_handler(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Prize archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+
+    function error_handlerwin(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Prize archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#gridwin').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+
+    function error_handlergame(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            //console.log(message);
+            if (message != "") {
+                if (message == "1g") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Game archived successfully</div></div>';
+                }
+                else if (message == "2g") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#gridgame').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+    
+    function error_handlergamewin(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Prize archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#gridgamewin').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>
+<script type="text/javascript">
+    function setAsWinner(e) {
+        var prizeid = $("#PrizeId").val();
+        var id = $("#_winner").val();
+        var email = $("#_winneremail").val();
+        var name = $("#_winnername").val();
+        var invid = $("#_winnerinv").val();
+        if (id != "") {
+            var r = confirm("Confirm setting this user " + email + " as winner?");
+            if (r == true) {
+                  $.ajax({
+                    type:'POST',
+                    url: "@Url.Action("PrizeWinner", "Admin")",
+                    data: {prizeid:prizeid,transid:id,invid:invid},
+                    dataType:"json",
+                    success:function(data){
+                    console.log(data);
+                        if(data.success){
+                            $("#_winnerplace").html('Prize Winner : '+email);
+                            e.remove();
+                        }
+                        else{
+                            alert(data.error);
+                        }
+                    }
+                });
+            }
+        }
+        else {
+            alert("Please select user");
+        }
+        $("#_winner").val("");
+        $("#_winneremail").val("");
+        $("#_winnername").val("");
+        $("#_winnerinv").val("");
+    }
+</script>

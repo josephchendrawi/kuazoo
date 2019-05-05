@@ -1,0 +1,358 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItemVM
+@{
+    ViewBag.Title = "Flash Deals";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+@section AddToHead{
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml: true,
+            version: 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+</script>
+    <script src="@Url.Content("~/Scripts/jquery.index.head.js")"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        changehomenav(2);
+    });
+</script>
+}
+@if (Model.item != null && Model.item.Count > 0)
+{
+<div class="banner">
+    <div class="sidelogo">FLASH<BR /><span>DEAL!</span></div><div class="sidelogoshape"></div>
+    <div class="bannertext">
+        <div class="bannerTitle">When deals go cheaper for a flashing moment!</div>
+        @*<a href="@Url.Action("FlashDeals", "Home")"><div class="bannerSubtitle">What is a Flash Deal anyway?</div></a>*@
+    </div>
+</div>
+
+<h2>Flash Deals</h2>
+
+    
+<div class="content">
+    @if (Model.item != null)
+    {
+        foreach (var v in Model.item)
+        {
+            var imgid = "img-" + v.ImageId;
+            if (v.FlashDeal != null)
+            {
+                <div class="dealbox">
+                <a href="@Url.Action("Deals", "Home", new { id = v.Name.Replace(' ', '-').Replace("%", "percent").Replace("&", "and"), d = 2 })" onclick="return checkHref()">
+                    <span class="dealboxa"></span>
+                </a>
+                    <div class="boxheader">
+                         <div class="boxheadertext"><div class="boxheadertexts">@v.Name</div>@*@if(v.Name.Length>55){<text>@v.Name.Substring(0,55)...</text>}else{<text>@v.Name</text>}*@</div>
+                        @if (v.Prize != null)
+                        {
+                        <div class="boxprize">
+                            <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                                <div class="boxprizetitle">surPRIZE</div>
+                                <div class="boxprizeimg">
+                                    <img class="lazy" data-original="@v.Prize.ImageUrl">
+                                </div>
+                                <div class="boxprizedetail">@v.Prize.Name</div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    <div class="boxcontent">
+                    @*@{
+                        var fld = "boxflashdeal" + v.FlashDeal.FlashDealId;   
+                        }
+                        <div class="boxflashdeal" id="@fld">
+                            <div class="boxflashdealbg"></div>
+                            <div class="boxcontentwrap">
+                                <div class="boxTitle">FLASH DEAL!</div>
+                                <div class="boxSubtitle">
+                                    <div class="boxSubtitleleft small">FLASH DEAL ENDING IN</div>
+                                    @{
+                        var countdo = "countdown" + v.FlashDeal.FlashDealId;   
+                                     }
+                                    <div class="boxSubtitleright" id="@countdo"></div>
+                                    <script type="text/javascript">countdownStart('@v.FlashDeal.FlashDealId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.FlashDeal.EndTime, DateTimeKind.Utc))')</script>
+                                </div>
+                                <div class="boxSubtitle">
+                                    <div class="boxSubtitlehalf ori">
+                                        <div class="small">WAS</div>
+                                        <div class="percen">@v.Discount%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                    <div class="boxSubtitlehalf dis">
+                                        <div class="small">NOW</div>
+                                        <div class="percen">@(v.Discount + v.FlashDeal.Discount)%</div>
+                                        <div class="small">OFF</div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (v.Prize != null)
+                            {
+                            <div class="boxcontentprizetemp"></div>
+                            }
+                        </div>*@
+                        <img data-original="@v.ImageUrl" class="@imgid lazycus" />
+                        @*<script type="text/javascript">                            adjustImage('@imgid');</script>*@
+                        <div class="boxsocialbg"></div>
+                        <div class="boxsocial">
+                        @{
+                            var strinv = "inventoryimgname" + v.InventoryItemId;
+                            var strname = "inventoryname" + v.InventoryItemId;
+                            var strurl = "inventoryurl" + v.InventoryItemId;
+                            var strinvfav = "inventoryfav" + v.InventoryItemId;
+                        }
+                        <input type="hidden" id="@strinv" value="@v.ImageName" />
+                        <input type="hidden" id="@strname" value="@v.Name" />
+                        <input type="hidden" id="@strurl" value ="@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")" />
+                                
+                                 @if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+                                 {
+                                 <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon" id="@strinvfav"></span> 
+                                 <script type="text/javascript">
+                                     if(checkWishlist(@v.InventoryItemId)==true){
+                                        $("#@strinvfav").addClass("active");
+                                     }
+                                 </script>  
+                                 }
+                                 else
+                                 {
+                                     var activestr = "";
+                                     if (v.Wishlist) { activestr = "active"; }
+                                    <span onclick="addWishList(this,@v.InventoryItemId)" class="fa fa-heart favicon @activestr"  id="@strinvfav"></span> 
+                                 }
+                                <span onclick="shareEmail(@v.InventoryItemId)" class="fa fa-envelope emailicon active"></span>   
+                                <span onclick="shareFB(@v.InventoryItemId)" class="fa fa-facebook fbicon active"></span>   
+                                <span onclick="shareTwitter(@v.InventoryItemId)" class="fa fa-twitter twicon active"></span>   
+                                <a id="sharetwitterid" href="https://twitter.com/intent/tweet?hashtags=kuazoo&text=@v.Name&url=@Kuazoo.Helper.SetUrl/Home/Deals/@v.Name.Replace(' ', '-').Replace("%","percent").Replace("&","and")?d=1"></a>
+                            <span onclick="sharePin(@v.InventoryItemId)" class="fa fa-pinterest pinicon active"></span>   
+                        </div>
+                    </div>
+                    <div class="boxfooter">
+                        <div class="boxoff">
+                                @if (v.FlashDeal.Discount > 0)
+                                {
+                                    decimal pricedis = v.Price - (v.Price * (v.Discount + v.FlashDeal.Discount) / 100);
+                            <div class="boxoffsmall">RM @v.Price.ToString("N2")</div>
+                                    if (Kuazoo.Helper.DecimalPlace(pricedis).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(pricedis)</div>
+                                    }
+                                }
+                                else
+                                {
+                                    if (Kuazoo.Helper.DecimalPlace(v.Price).Length > 7)
+                                    {
+                                        <div class="boxoffbig sm">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="boxoffbig">RM @Kuazoo.Helper.DecimalPlace(v.Price)</div>
+                                    }
+                                }
+                        </div>
+                        <div class="boxprice" style="width:190px">
+                            <div>
+                                <span class="boxoffbeforeflashdeal">@v.Discount.ToString("N0")%</span>
+                                <span class="boxoffbigflashdeal">@((v.Discount + v.FlashDeal.Discount).ToString("N0"))% OFF</span>
+                            </div>
+                            @if (v.Prize.GameType == null || v.Prize.GameType == 0 || v.Prize.GameType == 1)
+                            {
+                            <div>
+                                @{
+                                var widthbar = "width:" + v.SalesVisualMeter + "%";
+                                }
+                                <div class="boxbarbg"><div class="boxbaractive" style="@widthbar"></div></div>
+                            </div>
+                            <div class="boxtext">@v.Sales deals to surPRIZE!</div>
+                            }
+                        </div>
+                    @{
+                            var fld = "boxflashdeal" + v.FlashDeal.FlashDealId;
+                            var countdo = "countdown" + v.FlashDeal.FlashDealId;    
+                        }
+                        <div class="boxflashdealfooter"  id="@fld">
+                            <div class="small">ENDS IN</div>
+                            <div class="count" id="@countdo"></div>
+                            <script type="text/javascript">countdownStart('@v.FlashDeal.FlashDealId', '@string.Format("{0:yyyy-MM-dd'T'HH:mm:ssZ}", DateTime.SpecifyKind(v.FlashDeal.EndTime, DateTimeKind.Utc))')</script>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
+
+
+}
+else
+{
+<div class="kuazoocontent">
+
+<h2>Looks like there are currently no Flash Deals</h2>
+<h3 class="margintop30">But before you leave this page, let us say this</h3>
+<img class="kuazooimg margintop30" src="@Url.Content("~/Content/img/flashdealfun.png")"  />
+<hr />
+<h2>So What are Flash Deals, Anyway?</h2>
+<h3 class="margintop30">Flash Deal is when something cheap just got a whole lot cheaper - but only for a very short time.</h3>
+    
+<div class="kuazooflashdealplace">
+    <div class="kuazooflashbox">
+        <div class="boxheader">
+            <div class="boxheadertext">An Example of a Deal</div>
+            <div class="boxprize">
+                <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                    <div class="boxprizetitle">surPRIZE</div>
+                    <div class="boxprizeimg">
+                        <img src="@Url.Content("~/Content/img/exprize1.jpg")" />
+                    </div>
+                    <div class="boxprizedetail">Fine Dining Meal for Two at Frangipani, Kuala Lumpur</div>
+                </div>
+            </div>
+        </div>
+        <div class="boxcontent">
+            <img src="@Url.Content("~/Content/img/exdeal1.jpg")" />
+        </div>
+        <div class="boxfooter">
+            <div class="boxoff">
+                <div class="boxoffsmall">RM 2888</div>
+                <div class="boxoffbig">RM 1444</div>
+            </div>
+            <div class="boxprice">
+                <div>
+                    <span class="boxdisc">50% OFF</span>
+                </div>
+                <div>
+                    <div class="boxbarbg"><div class="boxbaractive" style="width:38%"></div></div>
+                </div>
+                <div class="boxtext">38 deals to surPRIZE!</div>
+            </div>
+        </div>
+    </div>
+    <div class="kuazooflashdealhappenwrap">
+    <div class="kuazooflashdealhappen">FLASH DEAL HAPPENS</div>
+    </div>
+    <div class="kuazooflashbox">
+        <div class="boxheader">
+            <div class="boxheadertext">An Example of a Flash Deal</div>
+            <div class="boxprize">
+                <div class="boxprizeribbon"  style="filter: url('#drop-shadow');">
+                    <div class="boxprizetitle">surPRIZE</div>
+                    <div class="boxprizeimg">
+                        <img src="@Url.Content("~/Content/img/exprize1.jpg")" />
+                    </div>
+                    <div class="boxprizedetail">Fine Dining Meal for Two at Frangipani, Kuala Lumpur</div>
+                </div>
+            </div>
+        </div>
+        <div class="boxcontent">
+            <div class="boxflashdeal">
+                <div class="boxflashdealbg"></div>
+                <div class="boxcontentwrap">
+                    <div class="boxTitle">FLASH DEAL!</div>
+                    <div class="boxSubtitle">
+                        <div class="boxSubtitleleft small">FLASH DEAL ENDING IN</div>
+                        <div class="boxSubtitleright">02<span class="small">H</span>16<span class="small">M</span></div>
+                    </div>
+                    <div class="boxSubtitle">
+                        <div class="boxSubtitlehalf ori">
+                            <div class="small">WAS</div>
+                            <div class="percen">50%</div>
+                            <div class="small">OFF</div>
+                        </div>
+                        <div class="boxSubtitlehalf dis">
+                            <div class="small">NOW</div>
+                            <div class="percen">70%</div>
+                            <div class="small">OFF</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="boxcontentprizetemp"></div>
+            </div>
+            <img src="@Url.Content("~/Content/img/exdeal1.jpg")" />
+        </div>
+        <div class="boxfooter">
+            <div class="boxoff">
+                <div class="boxoffsmall">RM 2888</div>
+                <div class="boxoffbig">RM 866.40</div>
+            </div>
+            <div class="boxprice">
+                <div>
+                    <span class="boxdisc">70% OFF</span>
+                </div>
+                <div>
+                    <div class="boxbarbg"><div class="boxbaractive" style="width:38%"></div></div>
+                </div>
+                <div class="boxtext">38 deals to surPRIZE!</div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+<h2>When Will There Be Flash Deals?</h2>
+<h3 class="margintop30">There is no time scheduled for Flash Deals. 
+You need to look for the pink bell. It is an indicator if any Flash Deals are on. So you have to keep eyes peeled. OR, you can <a href="@Url.Action("SignUp", "User")"><span class="blue">sign up</span></a> to be notified!</h3>
+
+<div class="flashdealbellwrap">
+<div class="flashdealbellcontent">
+    <img src="@Url.Content("~/Content/img/kuazooflashdealbell.png")" class="flashdealbell" />
+    <div class="flashdealbelltext">
+    There is no need to click on the Flash Deal tab to check if there is currently a Flash Deal going on.
+    Just watch out for the pink bell!
+    </div>
+</div>
+</div>
+</div>
+}
+@*<div class="citycontent">
+    <div class="citytitle">BROWSE BY CITY</div>
+    <div class="citylistwrap">
+        <div class="cityitem"><a href="@Url.Action("FlashDeals", "Home", new { id = 0 })" class="@if (ViewBag.cityid == 0)
+                                                                                                 {<text>active</text>}">All</a></div>
+        @foreach (var v in Kuazoo.Helper.GetListCity())
+        {
+            <div class="cityitem"><a href="@Url.Action("FlashDeals", "Home", new { id = v.Value })" class="@if (ViewBag.cityid == v.Value)
+                                                                                                           {<text>active</text>}">@v.Key</a></div>
+        }
+    </div>
+</div>*@
+
+
+<input type="hidden" id="twitterChoose" value="" />
+<input type="hidden" id="childChoose" value="0" />
+<input type="hidden" id="emailMsg" value="" />
+@if (Request.IsAuthenticated == false || com.kuazoo.UserService.NotGuest().Result == false)
+{
+<input type="hidden" id="isAu" value="0" />
+}
+else
+{
+<input type="hidden" id="isAu" value="1" />
+}
+<input type="hidden" id="imagebaseURL" value="@Kuazoo.Helper.imagebaseURL" />
+<input type="hidden" id="_url" value="@Kuazoo.Helper.SetUrl" />
+
+@section AddToFooter{
+<script src="@Url.Content("~/Scripts/jquery.easing.1.3.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.mobile.just-touch.js")"></script>
+<script src="@Url.Content("~/Scripts/mightyslider.min.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.review.css")">
+<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+<script type="text/javascript" async src="http://assets.pinterest.com/js/pinit.js"></script>
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.index.js")"></script>
+}

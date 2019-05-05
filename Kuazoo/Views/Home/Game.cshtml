@@ -1,0 +1,167 @@
+﻿@model com.kuazoo.Models.GameModelShow
+@{
+    ViewBag.Title = "Game";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/checkout.css")" rel="stylesheet" type="text/css" />
+}
+
+<h2>Game</h2>
+<div class="gamewrap">
+
+@if (Model != null && Model.ImageId != 0)
+{
+    @Html.HiddenFor(model=>model.GameId)
+    @Html.HiddenFor(model => model.OrderNo)
+    @Html.HiddenFor(model => model.TransactionId)
+    @Html.HiddenFor(model => model.UserLatitude)
+    @Html.HiddenFor(model => model.UserLongitude)
+    @Html.HiddenFor(model => model.GameAttempt)
+    <div class="gameplace">
+        <img src="@Model.ImageUrl" class="imgGame" onclick="imgClick()"  style="opacity:0;"/>  
+    </div>
+    <div class="gamebutton">
+        <div class="gametable">Attempts Left: <span id="attempLeft">@Model.GameAttempt</span></div>
+        <div class="gametime">Time: <span id="timeleft">00:00:00</span></div>
+        <div class="btnSkip" onclick="skipgame()">Skip remaining  attempts <span class="fa fa-play"></span></div>
+    </div>   
+}
+else
+{
+    <p>There no game for that surPRIZE</p>
+}
+
+</div>
+<div id="gamestart" style="display:none">
+    <div>@Model.GameName<br />@Html.Raw(Model.GameInstruction)</div>
+    <button class="btnGame2" onclick="gameplay()">START GAME</button>
+</div>
+
+@section AddToFooter{
+<script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+<link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.game.css")">
+
+    <script type="text/javascript">
+        var timestart=0;;
+        $(document).ready(function () {
+        
+        var gid = $("#GameId").val();
+        var id = $("#TransactionId").val();
+        $.ajax({
+            type:'POST',
+            url: "@Url.Action("GameCheck", "Home")",
+            data: {gameid:gid,id:id},
+            dataType:"json",
+            success:function(data){
+                if(data.success==false){
+                    skipgame();
+                }
+            }
+        });
+
+        @if (Model != null && Model.ImageId != 0)
+{
+<text>
+            $.fancybox.open({
+                href: "#gamestart",
+                closeClick: false,
+                closeBtn: false,
+                padding: 0,
+                helpers: {
+                    overlay: { closeClick: false }
+                }
+            });</text>
+            }
+
+        });
+        function gameplay() {
+            $.fancybox.close();
+            $(".imgGame").css("opacity","1");
+            $image = $('.imgGame');
+            $image.mousemove(function (e) {
+                imgPos = [
+                        $image.offset().left,
+                        $image.offset().top,
+                        $image.offset().left + $image.outerWidth(),
+                        $image.offset().top + $image.outerHeight()
+                        ];
+                var y = parseFloat(e.pageY - imgPos[1]).toFixed(2);
+                var x = parseFloat(e.pageX - imgPos[0]).toFixed(2);
+                $("#UserLatitude").val(x);
+                $("#UserLongitude").val(y);
+            });
+            timestart=0;
+            countdownStart(60);
+        }
+        var clicked =0;
+        function imgClick() {
+            var left = $("#GameAttempt").val();
+            if (left > 0) {
+                if(clicked==0){
+                    clicked=1;
+                    var x = $("#UserLatitude").val();
+                    var y = $("#UserLongitude").val();
+                    var imgspot = '<div class="gameSpot" style="top:' + (y - 12.5) + 'px;left:' + (x - 12.5) + 'px;"></div>';
+                    $(".gameplace").append(imgspot);
+                    left = left - 1;
+                    $("#GameAttempt").val(left);
+                    $("#attempLeft").html(left);
+                    var gid = $("#GameId").val();
+                    var id = $("#TransactionId").val();
+                    console.log(timestart);
+                    $.ajax({
+                        type:'POST',
+                        url: "@Url.Action("GameSpot", "Home")",
+                        data: {gameid:gid,id:id,x:x,y:y,time:timestart},
+                        dataType:"json",
+                        success:function(data){
+                            console.log(data);
+                            skipgame();
+                        }
+                    });
+                    //if(left<1){
+                    //skipgame();
+                    //}
+                }
+            }
+            else{
+            skipgame();
+            }
+        }
+        
+        function countdownStart(c) {
+        if (c > 0) {
+            //console.log(c);
+            var hour = parseInt(c / 60/60); 1
+            //console.log(hour);
+            var minute = parseInt((c/60) - (hour * 60));
+            var second = parseInt(c - (hour * 60 * 60) - (minute * 60));
+            //console.log(minute);
+            if (hour < 10) {
+                hour = "0" + hour;
+            }
+            if (minute < 10) {
+                minute = "0" + minute;
+            }
+            if (second < 10) {
+                second = "0" + second;
+            }
+            $("#timeleft").html(hour+":"+minute+":"+second);
+            timestart = timestart+1;
+            setTimeout(function () {
+                countdownStart(c-1);
+            }, 1000);
+        }
+        else {
+            $("#timeleft").html("00:00:00");
+            var orderno =$("#OrderNo").val();
+            window.location="@Url.Action("GameFinish","Home")/"+orderno;
+        }
+    }
+        function skipgame() {
+            var orderno =$("#OrderNo").val();
+            window.location="@Url.Action("GameFinish","Home")/"+orderno;
+        }
+    </script>
+}

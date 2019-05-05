@@ -1,0 +1,460 @@
+﻿@{
+    ViewBag.Title = "CheckOut";
+    Layout = "~/Views/Shared/_CheckOutLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/checkout.css")" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+    var subtotal = 0;
+    var total = 0;
+    var promo=0;
+    var promotype=1;
+    $(document).ready(function () {
+        var obj = getCart();
+        if(obj==null){
+            window.location="@Url.Action("Index", "Home")";
+        }
+        var items = obj.items;
+        if(items == null){
+            window.location="@Url.Action("Index", "Home")";
+        }
+        var check = 0;
+        if(items.length==0){
+            window.location="@Url.Action("Index", "Home")";
+        }
+        for (var i = 0; i < items.length; i++) {
+        if(i==0){
+            if(items[i].variance!=""){
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckVarianceLimit", "Home")",
+                data: {id:items[i].id,variance:items[i].variance},
+                dataType:"json",
+                success:function(data){
+                if(data.success==false){
+                    bootbox.alert("The item is currently sold out.",function(){
+                    window.location="@Url.Action("Index", "Home")";
+                    });
+                }
+                }
+            });
+            }
+            else{
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckVarianceLimit", "Home")",
+                data: {id:items[i].id,variance:"default"},
+                dataType:"json",
+                success:function(data){
+                if(data.success==false){
+                    
+                    bootbox.alert("The item is currently sold out.",function(){
+                    window.location="@Url.Action("Index", "Home")";
+                    });
+                }
+                }
+            });
+            }
+        }
+            var price = parseFloat(items[i].price);
+            var disprice = price - (price * items[i].dis / 100);
+            //disprice = Math.ceil(disprice*10)/10;
+            disprice = Math.round(disprice*1000)/1000;
+            disprice = disprice.toFixed(2);
+            disprice = disprice *  items[i].qty;
+            var dropdownvariance ='<select style="width:100px" id="cartvariance'+items[i].id+'" onchange="updateVariance(this,'+items[i].id+')">';
+                var maxqty=1;
+                var listvar = items[i].variancelist.split('|');
+                if(listvar.length==0){
+                dropdownvariance+='<option value="">--Select--</option>';
+                }
+                for (var i2 = 0; i2 < listvar.length; i2++) {
+                    if (listvar[i2] !='') {
+                        var vari = listvar[i2].split('`');
+                        if(vari[3]!=0){
+                        if(listvar[i2] == items[i].variance){
+                            maxqty=vari[3];
+                            dropdownvariance+='<option value="'+listvar[i2]+'" selected="selected">'+vari[0]+'</option>';
+                        }
+                        else{
+                            dropdownvariance+='<option value="'+listvar[i2]+'">'+vari[0]+'</option>';
+                        }
+                        }
+                    }
+                }
+            dropdownvariance+='</select>';
+
+            var html = '<tr>';
+            html += '<td class="itemname"><div class="imagecontent"><div class="imageplace"><div class="image1"><img src="' + items[i].imageurl + '" /></div>';
+            html += '<div class="image2"><div>SurPRIZE</div><img src="' + items[i].prizeimageurl + '" /></div>';
+            html += '</div><div class="imagetext">' + items[i].name + ' <br /><span>' + items[i].prize + '</span></div></div>';
+            html += '<td class="center top">'+dropdownvariance+'</td>';
+            html += '<td class="center top"> <input id="cartqty' + items[i].id + '" class="numeric" onkeyup="updateQty(this,' + items[i].id  + ','+maxqty+')" onchange="updateQty(this,' + items[i].id + ','+maxqty+')" type="number" value="' + items[i].qty + '" min="1" max="'+maxqty+'" step="1"/></td>';
+            html += '<td class="center top" id="dis' + items[i].id + '" data-value=' + parseFloat(items[i].dis).toFixed(3) + '>' + parseFloat(items[i].dis).toFixed(0) + '%<br/>(RM ' + parseFloat(price).toFixed(2) + ')</td>';
+            html += '<td class="right top" style="position:relative" id="disprice' + items[i].id + '" data-value=' + items[i].price + ' data-curvalue='+disprice.toFixed(2)+'> RM ' + parseFloat(disprice).toFixed(2);
+            html += '</div></td></tr>';
+            var d1 = document.getElementById("checkoutplace");
+            d1.insertAdjacentHTML('afterend', html);
+            adjustImage();
+            subtotal = subtotal + disprice;
+        }
+        total = subtotal;
+        $("#subtotal").html("RM " + subtotal.toFixed(2));
+        $("#total").html("RM " + total.toFixed(2));
+
+        var kpoint = getKPoint();
+        if(kpoint!=""){
+            if(kpoint.point>0){
+            $("#kpoint").val(kpoint.point);
+            }
+        }
+        
+        $("#TransactionId").val(0);
+        var trans = getTransaction();
+        if (trans != "") {
+            var traid =trans.id;
+            $("#TransactionId").val(traid);
+        }
+        var promog = getPromotion();
+        if(promog!=""){
+            var promotion =0;
+            $("#promoplace").css("display","table-row");
+            if(promog.type==1){
+                promotion = subtotal*promog.value/100;
+                promo = promog.value;
+                promotype=1;
+            }
+            else{
+                promotion = promog.value;
+                promo = promog.value;
+                promotype=2;
+            }
+            $("#promo").html("-RM " + parseFloat(promotion).toFixed(2));
+            total = subtotal - promotion;
+            $("#total").html("RM " + total.toFixed(2));
+
+            $("#promotionAp").attr("data-value",promog.value);
+            $("#promotionAp").attr("data-type",promog.type);
+            $("#promotionAp").attr("data-id",promog.id);
+            $("#promotionAp").attr("data-code",promog.code);
+        
+            //check promo code active
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckOutPromotionCode","Home")",
+                data: {id:promog.code, tId:$("#TransactionId").val()},
+                dataType:"json",
+                success:function(data){
+                    if(data.success==false){
+                        bootbox.alert(data.error,function(){
+                            deletePromo();
+                        });
+                    }
+                }
+            });
+        
+        }
+    });
+    function updateQty(e, id,maxqty) {
+        var dis = $("#dis"+id).attr("data-value");
+        var price = $("#disprice" + id).attr("data-value");
+        var pricecur = $("#disprice" + id).attr("data-curvalue");
+        var qty =1;
+        if(e.value>maxqty){
+        e.value=maxqty;
+        qty= maxqty;
+        }
+        else{
+        qty = e.value;
+        }
+        dis = parseFloat(dis);
+        price = parseFloat(price);
+        $("#dis"+id).html(dis.toFixed(0) + '%<br/>(RM ' + price.toFixed(2) + ')');
+        var disprice = price - (price * dis/100);
+            //disprice = Math.ceil(disprice*10)/10;
+            //disprice = Math.round(disprice);
+            disprice = disprice.toFixed(2);
+        disprice=disprice*qty;
+        $("#disprice" + id).html("RM " + disprice.toFixed(2));
+        $("#disprice" + id).attr("data-curvalue", disprice.toFixed(2));
+        subtotal = subtotal - pricecur;
+        subtotal = subtotal + disprice;
+        total = subtotal;
+        if(promo!=0){
+            var promotion =0;
+            if(promotype==1){
+                promotion = (subtotal*promo/100);
+            }
+            else{
+                promotion = promo;
+            }
+            total = total - promotion;
+            $("#promo").html("-RM "+parseFloat(promotion).toFixed(2));
+        }
+        $("#subtotal").html("RM " + subtotal.toFixed(2));
+        $("#total").html("RM " + total.toFixed(2));
+        var variance = $("#cartvariance"+id).val();
+        _updateToCart(id, e.value,variance);
+    }
+    function updateVariance(e,id){
+        var qty = $("#cartqty"+id).val();
+        var value = e.value.split('`');
+        $("#cartqty"+id).attr("max",value[3]);
+        if($("#cartqty"+id).val()>value[3]){
+            $("#cartqty"+id).val(value[3]);
+            //updateQty($("#cartqty"+id),id,value[3]);
+        }
+        $("#disprice"+id).attr("data-value",value[1]);
+        $("#dis"+id).attr("data-value",value[2]);
+        var dis = $("#dis"+id).attr("data-value");
+        var price = parseFloat(value[1]);
+        var pricecur = $("#disprice" + id).attr("data-curvalue");
+        var disprice = price - (price * dis/100);
+            //disprice = Math.ceil(disprice*10)/10;
+            //disprice = Math.round(disprice);
+            disprice = disprice.toFixed(2);
+            disprice = disprice*qty;
+        $("#dis"+id).html(' RM ' + parseFloat(dis).toFixed(0) + '%<br/>(RM ' + price.toFixed(2) + ')');
+        $("#disprice" + id).html("RM " + disprice.toFixed(2));
+        $("#disprice" + id).attr("data-curvalue", disprice.toFixed(2));
+        subtotal = subtotal - pricecur;
+        subtotal = subtotal + disprice;
+        total = subtotal;
+        if(promo!=0){
+            var promotion =0;
+            if(promotype==1){
+                promotion = (subtotal*promo/100);
+            }
+            else{
+                promotion = promo;
+            }
+            total = total - promotion;
+            $("#promo").html("-RM "+parseFloat(promotion).toFixed(2));
+        }
+        $("#subtotal").html("RM " + subtotal.toFixed(2));
+        $("#total").html("RM " + total.toFixed(2));
+        //console.log(value);
+        _updateToCart3(id,qty,e.value,value[1],value[2]);
+
+    }
+    function checkout() {
+        var point =0;
+        if($("#kpoint").val()!="" && $("#kpoint").val()!=null){
+        point = $("#kpoint").val();
+        }
+        if(point<100){
+            point=0;
+        }
+        addToKPoint({point:point});
+        var id= $("#promotionAp").attr("data-id");
+        var code= $("#promotionAp").attr("data-code");
+        var type= $("#promotionAp").attr("data-type");
+        var typename= $("#promotionAp").attr("data-typename");
+        var value= $("#promotionAp").attr("data-value");
+        if(id!=""){
+            addToPromotion({id:id,code:code,type:type,typename:typename,value:value});
+        }
+
+        window.location="@Url.Action("CheckOutAut","Home")"
+    }
+    function kpointpress(e){
+        $("#kpointerr").html("");
+        var maxpoint = 0;
+        if(subtotal>0){maxpoint=(subtotal*100)/2;}
+        if(e.value> @Kuazoo.Helper.currKPoint){
+            e.value = @Kuazoo.Helper.currKPoint;
+            if(e.value>0 && e.value<100){
+                $("#kpointerr").html("Minimum 100 points");
+            }
+        }
+        else if(subtotal>0 && e.value>maxpoint){
+            e.value = maxpoint;
+        }
+        else if(e.value>0 && e.value<100){
+            $("#kpointerr").html("Minimum 100 points");
+        }
+    }
+    function promotioncheck(){
+        var code =$("#promotioncode").val();
+        clearKPoint();
+        $("#btnPromotion").attr("disabled", "disabled");
+        $("#promo").html("-RM 0");
+        $("#promoplace").css("display","none");
+        $("#promotionAp").removeAttr("data-value");
+        $("#promotionAp").removeAttr("data-type");
+        $("#promotionAp").removeAttr("data-typename");
+        $("#promotionAp").removeAttr("data-id");
+        $("#promotionAp").removeAttr("data-code");
+         $.ajax({
+            type:'POST',
+            url: "@Url.Action("CheckOutPromotionCode","Home")",
+            data: {id:code, tId:$("#TransactionId").val()},
+            dataType:"json",
+            success:function(data){
+                if(data.success==true){
+                    var promotion =0;
+                    $("#promoplace").css("display","table-row");
+                    if(data.result.Type==1){
+                        promotion = subtotal*data.result.Value/100;
+                        promo = data.result.Value;
+                        promotype=1;
+                    }
+                    else{
+                        promotion = data.result.Value;
+                        promo = data.result.Value;
+                        promotype=2;
+                    }
+                    console.log(promotion);
+                    $("#promo").html("<span class='delicon' onclick='deletePromo()'></span>"+"-RM "+promotion.toFixed(2));
+                    total = subtotal - promotion;
+                    $("#total").html("RM " + total.toFixed(2));
+
+
+                    $("#promotionAp").attr("data-value",data.result.Value);
+                    $("#promotionAp").attr("data-type",data.result.Type);
+                    $("#promotionAp").attr("data-typename",data.result.TypeName);
+                    $("#promotionAp").attr("data-id",data.result.PromotionId);
+                    $("#promotionAp").attr("data-code",data.result.Code);
+                }
+                else{
+                    total = subtotal;
+                    $("#total").html("RM " + total.toFixed(2));
+                    //alert(data.error);
+                    //$("#msgDialog").html(data.error);
+                
+//                    $("#msgDialog").dialog({
+//                        modal: true,
+//                        buttons: {
+//                            Ok: function () {
+//                                $(this).dialog("close");
+//                            }
+//                        }
+//                    });
+                    bootbox.alert(data.error);
+                }
+                $("#btnPromotion").removeAttr("disabled");
+            }
+        });
+    }
+    function deletePromo(){
+        clearKPoint();
+        $("#promo").html("-RM 0");
+        $("#promoplace").css("display","none");
+        $("#promotionAp").removeAttr("data-value");
+        $("#promotionAp").removeAttr("data-type");
+        $("#promotionAp").removeAttr("data-typename");
+        $("#promotionAp").removeAttr("data-id");
+        $("#promotionAp").removeAttr("data-code");
+        $("#btnPromotion").removeAttr("disabled");
+        total = subtotal;
+        $("#total").html("RM " + total.toFixed(2));
+    }
+    function adjustImage() {
+        $(".image1 img").on('load', function () {
+            var conHeight = 80;
+            var imgHeight = $(".image1 img").height();
+            if (imgHeight > 0) {
+                var gap = (imgHeight - conHeight) / 2;
+                $(".image1 img").css("margin-top", -gap);
+            }
+        });
+
+    }
+</script>
+}
+<link href="@Url.Content("~/Content/tooltip.css")" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/tooltip.js")" type="text/javascript"></script>
+
+<h2>Check Out</h2>
+<div id="msgresult">
+@if (ViewBag.err != null)
+{
+
+    if (ViewBag.err == "33")
+    {
+        <div id="breadcrumbs">
+        <div class="mainwrap">
+            <div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> Insufficient K-Point.</div></div>
+        </div>
+        </div>
+    }
+}
+</div>
+<input type="hidden" id="TransactionId" value="0" />
+
+<div class="checkoutbrumb">
+    <div class="checkouts"><div class="cart cart0 cartactive"><span class="fa fa-shopping-cart"></span></div></div>
+    <div class="checkouts2"><div class="cart cart1"><div class="icon1"></div>Shipping</div></div>
+    <div class="checkouts3"><div class="cart cart2"><div class="icon2"></div>Payment & Confirm Order</div></div>
+</div>
+<div class="checkoutcontent">
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tr id="checkoutplace">
+            <th>ITEM</th>
+            <th>SELECT</th>
+            <th>QUANTITY</th>
+            <th>DISCOUNT</th>
+            <th class="right">PRICE</th>
+        </tr>
+        @if(@Kuazoo.Helper.currKPoint > 0){
+        <div style="display:none;">
+            <div id="kpointtooltip">
+                K-Points are points you earn when you purchase deals from Kuazoo or when you share a deal with someone. It can be used to exchange for additional discounts.
+            </div>
+        </div>
+        <tr>
+            <td colspan="2" class="left yourkpoint">Your Currently have K-Point Balance of: <span>@Kuazoo.Helper.currKPoint</span>
+            <br />Enter the amount of K-Points that you would like to use 
+            <span class="fa fa-question-circle" style="font-family:FontAwesome;color:#428bca;font-size:20px" onmouseover="tooltip.pop(this, '#kpointtooltip')"></span>
+            </td>
+            <td colspan="3" class="right enteramount">
+                <input type="text" id="kpoint" class="txtInputKpoint" onkeyup="kpointpress(this)" placeholder="Enter the amount you would like to use" />
+                <br /><span id="kpointerr"></span>
+            </td>
+        </tr>
+        }
+        <tr>
+            <td colspan="2" class="left yourkpoint promotion">If you have a promo code that can be redeemed, please enter here</td>
+            <td colspan="3" class="right enteramount promotion">
+                <span id="promotionAp">
+                    <input type="text" id="promotioncode" class="txtInput" placeholder="Enter the promo code here"/> 
+                    <button class="btnApply2" id="btnPromotion" onclick="promotioncheck()">APPLY</button>
+                </span>
+            </td>
+        </tr>
+        @*<tr>
+            <td colspan="5" class="promotion">Promotion Code <span id="promotionAp">
+                <input type="text" id="promotioncode" class="txtInput" /> 
+                <button class="btnApply" id="btnPromotion" onclick="promotioncheck()">APPLY</button>
+                </span>
+            </td>
+        </tr>*@
+        <tr id="promoplace" style="display:none">
+            <td colspan="4"  class="sub1 right">Promo Used</td>
+            <td colspan="1" id="promo" class="sub2 right">RM 0</td>
+        </tr>
+        <tr>
+            <td colspan="4" class="sub1 right">Item Subtotal</td>
+            <td colspan="1" id="subtotal" class="sub2 right"></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="sub1 right">Shipping</td>
+            <td colspan="1" class="sub2 right">FREE</td>
+        </tr>
+        <tr>
+            <td colspan="4" class="total1 right">TOTAL</td>
+            <td colspan="1" id="total" class="total2 right"></td>
+        </tr>
+    </table>
+</div>
+<div class="checkoutend">
+    <button class="btnApply" onclick="checkout()">CHECKOUT</button>
+</div>
+
+<div id="msgDialog" title="Information"></div>
+@section AddToFooter
+{
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+
+}

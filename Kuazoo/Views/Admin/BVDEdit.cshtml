@@ -1,0 +1,208 @@
+﻿@model com.kuazoo.Models.BVDModel
+@{
+    ViewBag.Title = "Blog/Video/Deal Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+    <script src="@Url.Content("~/Scripts/jquery.fancybox.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/fancy/jquery.fancybox.css")">
+
+
+<script type="text/javascript">
+    var hook = true;
+    window.onbeforeunload = function () {
+        if (hook) {
+            return "You are about to leave this page";
+        }
+    }
+    $(document).ready(function () {
+        changeverticalnav(-1);
+        $('.fancybox').fancybox();
+    });
+
+</script>
+
+<input type="hidden" value="" id="tempChoose" name="tempChoose"/>
+<input type="hidden" value="" id="tempChooseName" name="tempChooseName"/>
+<input type="hidden" value="" id="tempChooseUrl" name="tempChooseUrl"/>
+<input type="hidden" value="" id="tempChooseDraft" name="tempChooseDraft"/>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="LandingPage">BVD</a> <span class="active"> / Edit BVD</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New Blog/Video/Deal successfully updated</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update New Blog/Video/Deal</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Edit Blog/Video/Deal</h1>
+    </div>
+        @using (Html.BeginForm())
+        {
+            @Html.HiddenFor(model => model.BVDId)
+    <div id="wrap">
+    <div class="colright">
+        <div class="colhalf">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Type)</div>
+                <div class="colright">
+                    @(Html.Kendo().DropDownListFor(model => model.Type)
+                    .HtmlAttributes(new { @class = "kendoDropdown w400" })
+                    .OptionLabel("--Select Type--")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .HtmlAttributes(new { style = "width: 250px" })
+                    .BindTo(new List<SelectListItem>()
+                    {
+                        new SelectListItem() {
+                        Text = "Blog", Value ="0"
+                        },
+                        new SelectListItem() {
+                        Text = "Video", Value ="1"
+                        },
+                        new SelectListItem() {
+                        Text = "Deal", Value ="2"
+                        },
+                        new SelectListItem() {
+                        Text = "Big Deal", Value ="3"
+                        }
+                    })
+                    .Events(e => e
+                        .Select("dropdownlist_select")
+                    )
+                    )@Html.ValidationMessageFor(model => model.Type)
+                </div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Title)</div>
+                <div class="colright">@Html.TextBoxFor(model => model.Title, new { @class = "long" })@Html.ValidationMessageFor(model => model.Title)</div>
+            </div>
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Link)</div>
+                <div class="colright">@Html.TextBoxFor(model => model.Link, new { @class = "long", placeholder = "http://www.website.com" })@Html.ValidationMessageFor(model => model.Link)</div>
+            </div>
+
+            <div class="imgchooser">
+                <div class="colleft" style="vertical-align:top">Image</div>
+                @Html.HiddenFor(model => model.SubImageId)
+                @Html.HiddenFor(model => model.SubImageName)
+                @Html.HiddenFor(model => model.SubImageUrl)
+                <div class="colright"  id="mainimageplace">
+                    @if (Model != null && Model.SubImageId != 0)
+                    {
+                        <a  class="fancybox" style="float:left" href="@Model.SubImageUrl">
+                            <img src="@Model.SubImageUrl" class="imgThumb" />
+                        </a> 
+                        @*<div class="deleteIcon" onclick="deleteImg()"></div>*@                       
+                    }
+                </div>
+                <div class="colright" style="display:table;width:150px;">
+                    <input id="mainImagebtn" type="button" value="Add Image" class="submitBtn"/>
+                    @Html.ValidationMessageFor(model => model.SubImageId)
+                    <span class="field-validation-error" id="errImageId"></span>
+                </div>
+            </div> 
+
+
+            <div class="datechooser">
+                <div class="colleft">@Html.LabelFor(model => model.UpdatedDate)</div>
+                <div class="colright">
+                @(Html.Kendo().DatePickerFor(model => model.UpdatedDate)
+                    .HtmlAttributes(new { @class = "w200" })
+                    .Format("dd MMM yyyy")
+                )
+                @Html.ValidationMessageFor(model => model.UpdatedDate)
+                    <span class="field-validation-error" id="errExpireDate"></span>
+                </div>
+            </div> 
+
+            
+            <div>
+                <div class="colleft">Sequence</div>
+                <div class="colright">@Html.TextBoxFor(model => model.Seq, new { @class = "short" })@Html.ValidationMessageFor(model => model.Seq)</div>
+            </div>
+        </div>
+    </div>
+    </div>
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    @*<a href="###"><input type="button" value="Preview" class="grayBtn"/></a>*@
+                    <input type="submit" value="Submit" class="submitBtn" onclick="return UpdateConf()"/>
+                    <a href="LandingPage"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>
+        }
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Name").focus();
+
+        $("#mainImagebtn").click(function () {
+            $("#tempChoose").val("");
+            $("#tempChooseUrl").val("");
+            $("#tempChooseName").val("");
+            $.fancybox.open({
+                href: '@Url.Action("ImageList", "Admin")',
+                type: 'iframe',
+                padding: 0,
+                afterClose: function () {
+                    if ($("#tempChoose").val() != "") {
+                        var html = "";
+                        html = '<a  class="fancybox" style="float:left" href="' + $("#tempChooseUrl").val() + '"><img src="' + $("#tempChooseUrl").val() + '" class="imgThumb" /></a>';
+                        //html += '<div class="deleteIcon" onclick="deleteImg()"></div>';
+                        $("#mainimageplace").html(html);
+                        $("#SubImageId").val($("#tempChoose").val());
+                        $("#SubImageName").val($("#tempChooseName").val());
+                        $("#SubImageUrl").val($("#tempChooseUrl").val());
+                        $("#tempChoose").val("");
+                        $("#tempChooseUrl").val("");
+                        $("#tempChooseName").val("");
+                    }
+                }
+            });
+        });
+    });
+
+
+    function deleteImg() {
+        $("#mainimageplace").html("");
+        $("#SubImageId").val(0);
+        $("#SubImageName").val("");
+        $("#SubImageUrl").val("");
+    }
+
+    function dropdownlist_select(e) {
+        console.log(e.item.index());
+        switch (e.item.index()) {
+            case 1:
+                $('.datechooser').show();
+                break;
+            case 2:
+                $('.datechooser').hide();
+                break;
+            case 3:
+                $('.datechooser').hide();
+                break;
+            case 4:
+                $('.datechooser').hide();
+                break;
+        }
+    }
+</script>

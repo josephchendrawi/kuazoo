@@ -1,0 +1,1210 @@
+﻿@{
+    ViewBag.Title = "CheckOut";
+    Layout = "~/Views/Shared/_CheckOutLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/checkout.css")" rel="stylesheet" type="text/css" />
+    
+<script type="text/javascript">
+    var subtotal = 0;
+    var total = 0;
+    var promotion =0;
+    var _kpoint =0;
+    $(document).ready(function () {
+        var obj = getCart();
+        var items = obj.items;
+        var check = 0;
+        var giftcheck=0;
+        for (var i = 0; i < items.length; i++) {
+        if(i==0){
+            if(items[i].variance!=""){
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckVarianceLimit", "Home")",
+                data: {id:items[i].id,variance:items[i].variance},
+                dataType:"json",
+                success:function(data){
+                if(data.success==false){
+                    bootbox.alert("The item is currently sold out.",function(){
+                    window.location="@Url.Action("Index", "Home")";
+                    });
+                }
+                }
+            });
+            }
+            else{
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckVarianceLimit", "Home")",
+                data: {id:items[i].id,variance:"default"},
+                dataType:"json",
+                success:function(data){
+                if(data.success==false){
+                    bootbox.alert("The item is currently sold out.",function(){
+                    window.location="@Url.Action("Index", "Home")";
+                    });
+                }
+                }
+            });
+            }
+        }
+            var price = parseFloat(items[i].price);
+            var disprice = price - (price * items[i].dis / 100);
+            //disprice = Math.ceil(disprice*10)/10;
+            disprice = Math.round(disprice*1000)/1000;
+            disprice = disprice.toFixed(2);
+            disprice = disprice * items[i].qty;
+            var html = '<tr>';
+            html += '<td class="sub1"><input type="hidden" id="_inventoryId" value="'+items[i].id+'"/><div class="imageplace"><div class="image1"><img src="' + items[i].imageurl + '" /></div>';
+            html += '<div class="image2"><div>SurPRIZE</div><img src="' + items[i].prizeimageurl + '" /></div></div></td>';
+            html += '<td class="sub2 imagetext">' + items[i].name + ' <br /><span>' + items[i].prize + '</span><br/>';
+            var vari = items[i].variance.split('`');
+            html+= 'Select: ' + vari[0] +'<br/>';
+            html += 'Qty: ' + items[i].qty + '<br/>Price: RM ' + disprice.toFixed(2) + '</td></tr>';
+            //html += '<td class="center"> <input id="cartqty' + items[i].id + '" class="numeric" onkeyup="updateQty(this,' + items[i].id + ')" onchange="updateQty(this,' + items[i].id + ')" type="number" value="' + items[i].qty + '" min="1" step="1"/></td>';
+            //html += '<td class="center" id="dis' + items[i].id + '" data-value=' + items[i].dis + '> RM ' + items[i].dis + '%<br/>(RM ' + price + ')</td>';
+            //html += '<td class="right" id="disprice' + items[i].id + '" data-value=' + items[i].price + ' data-curvalue='+disprice+'> RM ' + disprice + '</td></tr>';
+            var d1 = document.getElementById("checkoutplace");
+            d1.insertAdjacentHTML('beforeBegin', html);
+            subtotal = subtotal + disprice;
+            if(giftcheck==0){
+                giftcheck=items[i].gift;
+            }
+            adjustImage();
+        }
+        total = subtotal;
+        $("#subtotal").html("RM " + subtotal.toFixed(2));
+        $("#total").html("RM " + total.toFixed(2));
+        var ship = getShipping();
+        if (ship != "") {
+            if (ship.gender == 1) {
+                $("#gender1").prop("checked", true);
+            }
+            else {
+                $("#gender2").prop("checked", true);
+            }
+            $("#tfirstname").val(ship.fn);
+            $("#tlastname").val(ship.ln);
+            $("#tphone").val(ship.ph);
+            $("#taddress1").val(ship.ad1);
+            $("#taddress2").val(ship.ad2);
+            $("#tcity").val(ship.city);
+            $("#tcountry").val(ship.country);
+            countrychange(ship.country,ship.state);
+            $("#tstate").val(ship.state);
+            $("#tzipcode").val(ship.zip);
+            if (ship.gift == "1") {
+                $("#giveasgift").prop("checked", true);
+                $("#tnote").css('display',"block");
+                $("#tnote").removeAttr("disabled");
+                $("#tnote").val(ship.note);
+                
+                $(".giftwarningwrap").css('display',"block");
+                $("#billingship").removeAttr("checked");
+                $("#_billing").css("display","block");    
+                billingemptying();            
+            }
+        }
+        else{
+            if(giftcheck==1){
+                $("#giveasgift").prop("checked", true);
+                $("#tnote").css('display',"block");
+                $("#tnote").removeAttr("disabled");
+                
+                $(".giftwarningwrap").css('display',"block");
+                $("#billingship").removeAttr("checked");
+                $("#_billing").css("display","block");
+                billingemptying();
+            }
+            @if(ViewBag.ship!=null){
+            <text>
+            if(giftcheck!=1){
+                if (@ViewBag.ship.Gender == 1) {
+                    $("#gender1").prop("checked", true);
+                }
+                else {
+                    $("#gender2").prop("checked", true);
+                }
+                $("#tfirstname").val("@ViewBag.ship.FirstName");
+                $("#tlastname").val("@ViewBag.ship.LastName");
+                $("#tphone").val("@ViewBag.ship.Phone");
+                $("#taddress1").val("@ViewBag.ship.AddressLine1");
+                $("#taddress2").val("@ViewBag.ship.AddressLine2");
+                $("#tcity").val("@ViewBag.ship.City");
+                $("#tcountry").val("@ViewBag.ship.Country");
+                countrychange("@ViewBag.ship.Country","@ViewBag.ship.State");
+                $("#tstate").val("@ViewBag.ship.State");
+                $("#tzipcode").val("@ViewBag.ship.ZipCode");
+            }
+            </text>
+            }
+            else if(ViewBag.user!=null){
+            <text>
+                if (@ViewBag.user.Gender == 1) {
+                    $("#gender1").prop("checked", true);
+                }
+                else {
+                    $("#gender2").prop("checked", true);
+                }
+                $("#tfirstname").val("@ViewBag.user.FirstName");
+                $("#tlastname").val("@ViewBag.user.LastName");
+            </text>
+            }
+        }
+        var bill = getBilling();
+        if (bill != "") {
+            if (bill.gender == 1) {
+                $("#bgender1").prop("checked", true);
+            }
+            else {
+                $("#bgender2").prop("checked", true);
+            }
+            $("#btfirstname").val(bill.fn);
+            $("#btlastname").val(bill.ln);
+            $("#btaddress1").val(bill.ad1);
+            $("#btaddress2").val(bill.ad2);
+            $("#btcity").val(bill.city);
+            $("#btcountry").val(bill.country);
+            bcountrychange(bill.country,bill.state);
+            $("#btstate").val(bill.state);
+            $("#btzipcode").val(bill.zip);
+            $("#btphone").val(bill.ph);
+            if(bill.bill == false){
+                $("#btemail").val(bill.email);
+                if (bill.pass != "") {
+                    $("#btpass").val(bill.pass);
+                    $("#btcfpass").val(bill.pass);
+                }
+            }
+            else{
+                $("#btemail").val(bill.email);
+                $("#btemail").prop("disabled","disabled");
+                $(".cracc").css("display","none");
+            }
+        }
+        else{
+            @if(ViewBag.bill!=null){
+            <text>
+                if (@ViewBag.bill.Gender == 1) {
+                    $("#bgender1").prop("checked", true);
+                }
+                else {
+                    $("#bgender2").prop("checked", true);
+                }
+                $("#btfirstname").val("@ViewBag.bill.FirstName");
+                $("#btlastname").val("@ViewBag.bill.LastName");
+                $("#btphone").val("@ViewBag.bill.Phone");
+                $("#btaddress1").val("@ViewBag.bill.AddressLine1");
+                $("#btaddress2").val("@ViewBag.bill.AddressLine2");
+                $("#btcity").val("@ViewBag.bill.City");
+                $("#btcountry").val("@ViewBag.bill.Country");
+                bcountrychange("@ViewBag.bill.Country","@ViewBag.bill.State");
+                $("#btstate").val("@ViewBag.bill.State");
+                $("#btzipcode").val("@ViewBag.bill.ZipCode");
+                $("#btemail").val("@ViewBag.bill.Email");
+                $("#btemail").prop("disabled","disabled");
+                $(".cracc").css("display","none");
+            </text>
+            }
+        }
+
+        
+        if (document.getElementById('giveasgift').checked) { 
+            $("#userEmail").css("display","none");
+            $("#reciepientEmail").css("display","inline-table");
+        }
+        else{
+            $("#reciepientEmail").css("display","none");
+            $("#userEmail").css("display","inline-table");
+        }
+        
+        
+        var kpoint = getKPoint();
+        if(kpoint!=""){
+            $("#usedkpoint").prop("checked",true);
+            $("#kpoint").css('display',"inline-block");
+            $("#kpoint").removeAttr("disabled");
+            
+            _kpoint = kpoint.point;
+            var _kpv = _kpoint;
+            if(_kpoint<100){
+                _kpoint=0;
+                _kpv=0;
+            }
+            else{
+                _kpv=_kpv/100;
+            }
+
+            $("#kpoint").val(_kpoint);
+            total = subtotal - _kpv;
+            $("#total").html("RM " + total.toFixed(2));
+        }
+        $("#TransactionId").val(0);
+        var trans = getTransaction();
+        if (trans != "") {
+            var traid =trans.id;
+            $("#TransactionId").val(traid);
+        }
+        var promodata = getPromotion();
+        //console.log(promodata);
+        if(promodata!=""){
+            if(promodata.type==1){
+                promotion=subtotal*promodata.value/100;
+            }
+            else{
+                promotion = promodata.value;
+            }
+            $("#promotionAp").attr("data-value",promodata.value);
+            $("#promotionAp").attr("data-type",promodata.type);
+            $("#promotionAp").attr("data-typename",promodata.typename);
+            $("#promotionAp").attr("data-id",promodata.id);
+            $("#promotionAp").attr("data-code",promodata.code);
+            $("#promo").html("<span class='delicon2' onclick='deletePromo()'></span> -RM "+parseFloat(promotion).toFixed(2));
+            var _kpv = _kpoint;
+            if(_kpv<100){
+                _kpv=0;
+            }
+            else{
+                _kpv=_kpv/100;
+            }
+
+            total = subtotal - _kpv - promotion;
+            $("#total").html("RM " + total.toFixed(2));
+            
+            //check promo code active
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckOutPromotionCode","Home")",
+                data: {id:promodata.code, tId:$("#TransactionId").val()},
+                dataType:"json",
+                success:function(data){
+                    bootbox.alert(data.error,function(){
+                        deletePromo();
+                    });
+                }
+            });
+        }
+        else{
+            $('#promotab').hide();
+        }
+    });
+    function billingshipchange(e) {
+        if (e.checked) {
+            billingsameship();
+            $("#_billing").css("display","none");
+        }
+        else{
+            $("#_billing").css("display","block");
+            $("#btfirstname").val("");
+            $("#btlastname").val("");
+            $("#btaddress1").val("");
+            $("#btaddress2").val("");
+            $("#btcity").val("");
+            $("#btcountry").val("");
+            $("#btstate").val("");
+            $("#btzipcode").val("");
+            $("#btphone").val("");
+            
+            if (document.getElementById('giveasgift').checked) {                
+                var bill = getBilling();
+                if (bill != "") {
+                    if (bill.gender == 1) {
+                        $("#bgender1").prop("checked", true);
+                    }
+                    else {
+                        $("#bgender2").prop("checked", true);
+                    }
+                    $("#btfirstname").val(bill.fn);
+                    $("#btlastname").val(bill.ln);
+                    $("#btaddress1").val(bill.ad1);
+                    $("#btaddress2").val(bill.ad2);
+                    $("#btcity").val(bill.city);
+                    $("#btcountry").val(bill.country);
+                    bcountrychange(bill.country,bill.state);
+                    $("#btstate").val(bill.state);
+                    $("#btzipcode").val(bill.zip);
+                    $("#btphone").val(bill.ph);
+                    if(bill.bill == false){
+                        $("#btemail").val(bill.email);
+                        if (bill.pass != "") {
+                            $("#btpass").val(bill.pass);
+                            $("#btcfpass").val(bill.pass);
+                        }
+                    }
+                    else{
+                        $("#btemail").val(bill.email);
+                        $("#btemail").prop("disabled","disabled");
+                        $(".cracc").css("display","none");
+                    }
+                }
+                else{
+                    @if(ViewBag.bill!=null){
+                    <text>
+                        if (@ViewBag.bill.Gender == 1) {
+                            $("#bgender1").prop("checked", true);
+                        }
+                        else {
+                            $("#bgender2").prop("checked", true);
+                        }
+                        $("#btfirstname").val("@ViewBag.bill.FirstName");
+                        $("#btlastname").val("@ViewBag.bill.LastName");
+                        $("#btphone").val("@ViewBag.bill.Phone");
+                        $("#btaddress1").val("@ViewBag.bill.AddressLine1");
+                        $("#btaddress2").val("@ViewBag.bill.AddressLine2");
+                        $("#btcity").val("@ViewBag.bill.City");
+                        $("#btcountry").val("@ViewBag.bill.Country");
+                        bcountrychange("@ViewBag.bill.Country","@ViewBag.bill.State");
+                        $("#btstate").val("@ViewBag.bill.State");
+                        $("#btzipcode").val("@ViewBag.bill.ZipCode");
+                        $("#btemail").val("@ViewBag.bill.Email");
+                        $("#btemail").prop("disabled","disabled");
+                        $(".cracc").css("display","none");
+                    </text>
+                    }
+                }
+            }
+        }
+    }
+
+    function billingemptying(){
+            $("#btfirstname").val("");
+            $("#btlastname").val("");
+            $("#btaddress1").val("");
+            $("#btaddress2").val("");
+            $("#btcity").val("");
+            $("#btcountry").val("");
+            $("#btstate").val("");
+            $("#btzipcode").val("");
+            $("#btphone").val("");
+    }
+
+    function billingsameship(){
+            var gender = 1;
+            if (document.getElementById('gender1').checked == false) {
+                gender = 2;
+            }
+            if (gender == 1) {
+                $("#bgender1").prop("checked", true);
+            }
+            else {
+                $("#bgender2").prop("checked", true);
+            }
+            $("#btfirstname").val($("#tfirstname").val());
+            $("#btlastname").val($("#tlastname").val());
+            $("#btaddress1").val($("#taddress1").val());
+            $("#btaddress2").val($("#taddress2").val());
+            $("#btcity").val($("#tcity").val());
+            $("#btcountry").val($("#tcountry").val());
+            bcountrychange($("#tcountry").val(),$("#tstate").val());
+            $("#btstate").val($("#tstate").val());
+            $("#btzipcode").val($("#tzipcode").val());
+            $("#btphone").val($("#tphone").val());
+    }
+    function givechange(e) {
+        if (e.checked) {
+            $("#tnote").css('display',"block");
+            $("#tnote").removeAttr("disabled");
+
+            $(".giftwarningwrap").css('display',"block");
+            //$("#billingship").removeAttr("checked");
+            //$("#_billing").css("display","block");    
+            //billingemptying();
+            
+            $("#userEmail").css("display","none");
+            $("#reciepientEmail").css("display","inline-table");
+        }
+        else {
+            $("#tnote").attr("disabled","disabled");
+            $("#tnote").css('display',"none");
+
+            $(".giftwarningwrap").css('display',"none");
+            //$("#billingship").prop('checked', true);
+            //$("#_billing").css("display","none");  
+            //billingsameship(); 
+            
+            $("#userEmail").css("display","inline-table");
+            $("#reciepientEmail").css("display","none");
+        }
+    }
+    function checkoutcontinue() {
+        var gender = 1;
+        if (document.getElementById('gender1').checked == false) {
+            gender = 2;
+        }
+        var fn = $("#tfirstname").val();
+        var ln = $("#tlastname").val();
+        var ad1 = $("#taddress1").val();
+        var ad2 = $("#taddress2").val();
+        var ph = $("#tphone").val();
+        var city = $("#tcity").val();
+        var state = $("#tstate").val();
+        var zip = $("#tzipcode").val();
+        var country = $("#tcountry").val();
+        
+        $("#tfirstname").removeClass("err");
+        $("#taddress1").removeClass("err");
+        $("#tphone").removeClass("err");
+        $("#tcity").removeClass("err");
+        $("#tstate").removeClass("err");
+        $("#tzipcode").removeClass("err");
+        $("#tcountry").removeClass("err");
+        
+        if (document.getElementById('billingship').checked) {
+            billingsameship();
+        }
+        
+        var bgender = 1;
+        if (document.getElementById('bgender1').checked == false) {
+            bgender = 2;
+        }
+        var bfn = $("#btfirstname").val();
+        var bln = $("#btlastname").val();
+        var bad1 = $("#btaddress1").val();
+        var bad2 = $("#btaddress2").val();
+        var bcity = $("#btcity").val();
+        var bstate = $("#btstate").val();
+        var bzip = $("#btzipcode").val();
+        var bcountry = $("#btcountry").val();
+        var bemail = $("#btemail").val();
+        var rcemail = $("#rcemail").val();
+        var bph = $("#btphone").val();
+        var bpass = $("#btpass").val();
+        var bcfpass = $("#btcfpass").val();
+
+        $("#btcc").removeClass("err");
+        $("#btccv").removeClass("err");
+        $("#btfirstname").removeClass("err");
+        $("#btaddress1").removeClass("err");
+        $("#btcity").removeClass("err");
+        $("#btstate").removeClass("err");
+        $("#tzipcode").removeClass("err");
+        $("#btcountry").removeClass("err");
+        $("#btphone").removeClass("err");
+        $("#btemail").removeClass("err");
+        $("#btpass").removeClass("err");
+        $("#btcfpass").removeClass("err");
+
+        var note = "";
+        var gift = 0;
+        var go = true;
+        if (document.getElementById('giveasgift').checked) {
+            gift = 1;
+            note = $("#tnote").val();
+            if(rcisEmail()==false){
+                go = false;
+            }
+        }
+        else{
+            rcemail = "";
+        }
+
+        if(go == false){
+            if(rcemail == ""){
+                $('#rcemail').attr('placeholder', 'Email cannot be empty');
+            }
+            else{
+                $('#rcemail').attr('placeholder', 'Invalid Email');
+            }
+            $("#rcemail").focus();
+        }
+        else if (fn == "") {
+            $("#tfirstname").addClass("err");
+            $('#tfirstname').attr('placeholder', 'Name cannot be empty');
+            $("#tfirstname").focus();
+        }
+        else if (ad1 == "") {
+            $("#taddress1").addClass("err");
+            $('#taddress1').attr('placeholder', 'Address cannot be empty');
+            $("#taddress1").focus();
+        }
+        else if (bemail == "") {
+            $("#btemail").addClass("err");
+            $('#btemail').attr('placeholder', 'Email cannot be empty');
+            $("#btemail").focus();
+        }
+        else if(bisEmail()==false){
+            $('#btemail').attr('placeholder', 'Invalid Email');
+            $("#btemail").focus();
+        }
+        else if (ph == "") {
+            $("#tphone").addClass("err");
+            $("#tphone").focus();
+        }
+        else if (city == "") {
+            $("#tcity").addClass("err");
+            $('#tcity').attr('placeholder', 'City cannot be empty');
+            $("#tcity").focus();
+        }
+        else if (state == "") {
+            $("#tstate").addClass("err");
+            $("#tstate").focus();
+        }
+        else if (zip == "") {
+            $("#tzipcode").addClass("err");
+            $('#tzipcode').attr('placeholder', 'Empty!');
+            $("#tzipcode").focus();
+        }
+        else if (country == "") {
+            $("#tcountry").addClass("err");
+            $('#tcountry').attr('placeholder', 'Country cannot be empty');
+            $("#tcountry").focus();
+        }
+
+        else if (bfn == "") {
+            $("#btfirstname").addClass("err");
+            $('#btfirstname').attr('placeholder', 'Name cannot be empty');
+            $("#btfirstname").focus();
+        }
+        else if (bad1 == "") {
+            $("#btaddress1").addClass("err");
+            $('#btaddress1').attr('placeholder', 'Address cannot be empty');
+            $("#btaddress1").focus();
+        }
+        else if (bcity == "") {
+            $("#btcity").addClass("err");
+            $('#btcity').attr('placeholder', 'City cannot be empty');
+            $("#btcity").focus();
+        }
+        else if (bstate == "") {
+            $("#btstate").addClass("err");
+            $("#btstate").focus();
+        }
+        else if (bzip == "") {
+            $("#btzipcode").addClass("err");
+            $('#btzipcode').attr('placeholder', 'Empty!');
+            $("#btzipcode").focus();
+        }
+        else if (bcountry == "") {
+            $("#btcountry").addClass("err");
+            $('#btcountry').attr('placeholder', 'Country cannot be empty');
+            $("#btcountry").focus();
+        }
+        else if (bph == "") {
+            $("#btphone").addClass("err");
+            $("#btphone").focus();
+        }
+        else if((bpass !="" || bcfpass!="") && bpass != bcfpass){
+            $("#btpass").addClass("err");
+            $("#btcfpass").addClass("err");
+            $("#btpass").focus();
+        }
+        else {
+              var maxpoint = 0;
+            if(subtotal>0){maxpoint=(subtotal*100)/2;}
+
+            var point =0;
+            if($("#kpoint").val()!="" && $("#kpoint").val()!=null){
+            point = $("#kpoint").val();
+            }
+            if(point<100){
+                point=0;
+            }
+            else if(subtotal>0 && point>maxpoint){
+                point = maxpoint;
+            }
+            addToKPoint({point:point});
+            
+            var id= $("#promotionAp").attr("data-id");
+            var code= $("#promotionAp").attr("data-code");
+            var type= $("#promotionAp").attr("data-type");
+            var typename= $("#promotionAp").attr("data-typename");
+            var value= $("#promotionAp").attr("data-value");
+            if(id!=""){
+                addToPromotion({id:id,code:code,type:type,typename:typename,value:value});
+            }
+
+            var item = { gender: gender, fn: fn, ln: ln, ad1: ad1, ad2: ad2, ph:ph, city: city, state: state, zip: zip, country: country, gift: gift, note: note, rcemail: rcemail };
+            addToShipping(item);
+
+
+             $.ajax({
+                type:'POST',
+                url: "@Url.Action("CheckOutBillAccount","Home")",
+                data: {email:bemail},
+                dataType:"json",
+                success:function(data){
+                    if(data.success){
+//                        var result = '<div id="breadcrumbs"><div class="mainwrap">';
+//                            result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> Email Already Register. Please Sign In or used other email</div></div>';
+//                            result +='</div></div>';
+//                        $("#msgresult").html(result);
+                        bootbox.alert("Email exist, please sign in or try with another email account.");
+                        $("#temail").addClass("err");
+                        $("#temail").focus();
+                    }
+                    else{
+                    
+                        @if(ViewBag.bill!=null){
+                        <text>
+                            var billactive=true;
+                        </text>
+                        }
+                        else{
+                        <text>
+                            var billactive=false;
+                        </text>
+                        }
+
+                        var item = { payment:"",cc:"",ccv:"",month:0,year:0, gender: bgender, fn: bfn, ln: bln, ad1: bad1, ad2: bad2, city: bcity, state: bstate, zip: bzip, country: bcountry, email:bemail,ph:bph,pass:bpass,bill:billactive };
+                        addToBilling(item);
+
+                        window.location= "@Url.Action("CheckOutReview", "Home")";
+                    }
+                }
+            });
+            
+        }
+    }
+    function kpointpress(e){
+        var maxpoint = 0;
+        if(subtotal>0){maxpoint=(subtotal*100)/2;}
+
+        $("#kpointerr").html("");
+        if(e.value> @Kuazoo.Helper.currKPoint){
+          e.value = @Kuazoo.Helper.currKPoint;
+            if(e.value>0 && e.value<100){
+                $("#kpointerr").html("Minimal point 100");
+            }
+        }
+        else if(subtotal>0 && e.value>maxpoint){
+            e.value = maxpoint;
+        }
+        else if(e.value>0 && e.value<100){
+            $("#kpointerr").html("Minimal point 100");
+        }
+        _kpoint=0;
+        if(e.value!=""){
+            _kpoint = e.value;
+        }
+        var _kpv =_kpoint;
+        if(_kpv<100){
+            _kpv=0;
+        }
+        else{
+            _kpv = _kpv/100;
+        }
+        total = subtotal - _kpv - promotion;
+        $("#total").html("RM " + total.toFixed(2));
+    }
+    
+    function usedkpointchange(e){
+        if (e.checked) {
+            _kpoint=0;
+            if($("#kpoint").val()!=""){
+                _kpoint = $("#kpoint").val();
+            }
+            var _kpv =_kpoint;
+            if(_kpv<100){
+                _kpv=0;
+            }
+            else{
+                _kpv = _kpv/100;
+            }
+            total = subtotal - _kpv - promotion;
+            $("#total").html("RM " + total);
+            
+            $("#kpoint").css('display',"inline-block");
+            $("#kpoint").removeAttr("disabled");
+        }
+        else {
+            _kpoint=0;
+            total = subtotal - promotion;
+            $("#total").html("RM " + total);
+
+            $("#kpoint").attr("disabled","disabled");
+            $("#kpoint").css('display',"none");
+        }
+    }
+    function promotioncheck(){
+        var code =$("#promotioncode").val();
+        clearPromotion();
+        $("#btnPromotion").attr("disabled", "disabled");
+        $("#promo").html("-RM 0.00");
+        $("#promoplace").css("display","none");
+        $("#promotionAp").removeAttr("data-value");
+        $("#promotionAp").removeAttr("data-type");
+        $("#promotionAp").removeAttr("data-typename");
+        $("#promotionAp").removeAttr("data-id");
+        $("#promotionAp").removeAttr("data-code");
+         $.ajax({
+            type:'POST',
+            url: "@Url.Action("CheckOutPromotionCode","Home")",
+            data: {id:code, tId:$("#TransactionId").val()},
+            dataType:"json",
+            success:function(data){
+                if(data.success==true){
+                    $('#promotab').show();
+                    promotion =0;
+                    $("#promoplace").css("display","table-row");
+                    if(data.result.Type==1){
+                        promotion = subtotal*data.result.Value/100;
+                    }
+                    else{
+                        promotion = data.result.Value;
+                    }
+                    $("#promo").html("<span class='delicon2' onclick='deletePromo()'></span> -RM "+parseFloat(promotion).toFixed(2));
+                    
+                    var _kpv =_kpoint;
+                    if(_kpv<100){
+                        _kpv=0;
+                    }
+                    else{
+                        _kpv = _kpv/100;
+                    }
+                    total = subtotal - _kpv - promotion;
+                    $("#total").html("RM " + total.toFixed(2));
+
+
+                    $("#promotionAp").attr("data-value",data.result.Value);
+                    $("#promotionAp").attr("data-type",data.result.Type);
+                    $("#promotionAp").attr("data-typename",data.result.TypeName);
+                    $("#promotionAp").attr("data-id",data.result.PromotionId);
+                    $("#promotionAp").attr("data-code",data.result.Code);
+                }
+                else{
+                    var _kpv =_kpoint;
+                    if(_kpv<100){
+                        _kpv=0;
+                    }
+                    else{
+                        _kpv = _kpv/100;
+                    }
+                    total = subtotal - _kpv;
+                    $("#total").html("RM " + total);
+                    //alert(data.error);
+//                    $("#msgDialog").html(data.error);
+//                
+//                    $("#msgDialog").dialog({
+//                        modal: true,
+//                        buttons: {
+//                            Ok: function () {
+//                                $(this).dialog("close");
+//                            }
+//                        }
+//                    });
+                    bootbox.alert(data.error);
+                }
+                $("#btnPromotion").removeAttr("disabled");
+            }
+        });
+    }
+    function deletePromo(){
+        clearPromotion();
+        $("#promo").html("-RM 0.00");
+        $("#promoplace").css("display","none");
+        $("#promotionAp").removeAttr("data-value");
+        $("#promotionAp").removeAttr("data-type");
+        $("#promotionAp").removeAttr("data-typename");
+        $("#promotionAp").removeAttr("data-id");
+        $("#promotionAp").removeAttr("data-code");
+        $("#btnPromotion").removeAttr("disabled");
+        var _kpv =_kpoint;
+        if(_kpv<100){
+            _kpv=0;
+        }
+        else{
+            _kpv = _kpv/100;
+        }
+        total = subtotal - _kpv;
+        $("#total").html("RM " + total.toFixed(2));
+        $('#promotab').hide();
+    }
+    function isNumberSpace(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 32) {
+            return false;
+        }
+        return true;
+    }
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+    function isEmail(){
+        var _e = $("#temail").val();
+        var re = /^([a-zA-Z0-9_\.\-])+\@@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+        if (_e == '' || !re.test(_e))
+        {
+            $("#temail").addClass("err");
+            return false;
+        }
+        else{
+            $("#temail").removeClass("err");
+            return true;
+        }
+    }
+    function bisEmail(){
+        var _e = $("#btemail").val();
+        var re = /^([a-zA-Z0-9_\.\-])+\@@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+        if (_e == '' || !re.test(_e))
+        {
+            $("#btemail").addClass("err");
+            return false;
+        }
+        else{
+            $("#btemail").removeClass("err");
+            return true;
+        }
+    }
+    function rcisEmail(){
+        var _e = $("#rcemail").val();
+        var re = /^([a-zA-Z0-9_\.\-])+\@@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+        if (_e == '' || !re.test(_e))
+        {
+            $("#rcemail").addClass("err");
+            return false;
+        }
+        else{
+            $("#rcemail").removeClass("err");
+            return true;
+        }
+    }
+    function adjustImage() {
+        $(".image1 img").on('load', function () {
+            var conHeight = 80;
+            var imgHeight = $(".image1 img").height();
+            if (imgHeight > 0) {
+                var gap = (imgHeight - conHeight) / 2;
+                $(".image1 img").css("margin-top", -gap);
+            }
+        });
+
+    }
+</script>
+}
+
+<h2>Check Out</h2>
+
+<div class="checkoutbrumb">
+    <div class="checkouts"><div class="cart cart0 cartactive"><span class="fa fa-shopping-cart"></span></div></div>
+    <div class="checkouts2"><div class="cart cart1 cartactive"><div class="icon1"></div>Shipping</div></div>
+    <div class="checkouts3"><div class="cart cart2"><div class="icon2"></div>Payment & Confirm Order</div></div>
+</div>
+<input type="hidden" id="TransactionId" value="0" />
+<div class="checkoutcontent"  style="display:inline-table">
+    <div class="shipcontent">
+        <div class="shipheader">SHIP TO</div>
+        <div class="shipdata">
+            <div class="giftwarningwrap">
+                <div class="shiprow giftwarning">
+                    <div class="gifticon shipcol1"></div>
+                    <div class="shipcol2">
+                        You have selected this deal as a gift for someone. Please fill in the <b>recipient's details</b> so we can send it to the right person and place.
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Salutation</div>
+                <div class="shipcol2">
+                    <div class="shipcol21">
+                        <input type="radio" name="gender" value="1" id="gender1" checked="checked"/><label for="gender1">&nbsp;Mr</label>
+                    </div>
+                    <div class="shipcol22">
+                        <input type="radio" name="gender" value="2" id="gender2"/><label for="gender2">&nbsp;Ms</label>
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Full Name*</div>
+                <div class="shipcol2">
+                    <div class="shipcol21">
+                        <input type="text" class="txtInput100" id="tfirstname" placeholder="First Name"/>
+                    </div>
+                    <div class="shipcol2space">
+                    </div>
+                    <div class="shipcol22">
+                        <input type="text" class="txtInput100" id="tlastname" placeholder="Last Name"/>
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Address Line 1*</div>
+                <div class="shipcol2"><input type="text" id="taddress1" class="txtInput100"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Address Line 2</div>
+                <div class="shipcol2"><input type="text" id="taddress2" class="txtInput100"/></div>
+            </div>
+            <div class="shiprow" id="userEmail" style="display:none;">
+                <div class="shipcol1">Email*</div>
+                <div class="shipcol2"><input type="text" id="btemail" class="txtInput100" onkeyup="bisEmail()"/></div>
+            </div>
+            <div class="shiprow" id="reciepientEmail" style="display:none;">
+                <div class="shipcol1">Email*</div>
+                <div class="shipcol2"><input type="text" id="rcemail" class="txtInput100" onkeyup="rcisEmail()"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Phone*</div>
+                <div class="shipcol2"><input type="text" id="tphone" class="txtInput100" placeholder="Example : 6016 824 4881" onkeypress="return isNumberSpace()"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">City*</div>
+                <div class="shipcol2"><input type="text" id="tcity" class="txtInput100"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">State*</div>
+                <div class="shipcol2">
+                    <div class="shipcol21">
+                        <input type="text" id="tstate" name="tstate" class="kendoDropdown w100"/><br />
+                        <span class="staterestrict">* Delivery in all Peninsular Malaysia except Felda and P.O Box.</span>
+                    </div>
+                    <div class="shipcol2space">
+                    </div>
+                    <div class="shipcol2text">
+                        Zip Code*
+                    </div>
+                    <div class="shipcol22">
+                        <input type="text" id="tzipcode" class="txtInput100p" maxlength="10" onkeypress="return isNumber()"/>
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Country*</div>
+                <div class="shipcol2"><input type="text" id="tcountry" class="txtInput100" disabled="disabled" onkeyup="countrykeypress(this)" value="Malaysia"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1" style="vertical-align:top">Give as Gift?</div>
+                <div class="shipcol2">
+                    <input type="checkbox" id="giveasgift" onchange="givechange(this)" /><label for="giveasgift">&nbsp;Yes, I would like to write a note to the receiver.</label>
+                    
+                    <textarea class="txtArea100" id="tnote" disabled="disabled" style="display:none"></textarea>
+                </div>
+            </div>
+        </div>    
+        <div class="shipheader">BILLING ADDRESS</div>
+        <div class="shipdata">
+            <div class="shiprow" style="border-bottom:1px solid #cccccc">
+                <div class="shipcol2">
+                    <input type="checkbox" id="billingship" onchange="billingshipchange(this)" checked="checked"/><label for="billingship">&nbsp;MY BILLING AND SHIPPING ADDRESS ARE THE SAME</label>
+                </div>               
+            </div>
+            <div  id="_billing" style="display:none">
+           <div class="shiprow">
+                <div class="shipcol1">Salutation</div>
+                <div class="shipcol2">
+                    <div class="shipcol21">
+                        <input type="radio" name="gender2" value="1" id="bgender1" checked="checked"/><label for="gender1">&nbsp;Mr</label>
+                    </div>
+                    <div class="shipcol22">
+                        <input type="radio" name="gender2" value="2" id="bgender2"/><label for="gender2">&nbsp;Ms</label>
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Full Name*</div>
+                <div class="shipcol2">
+                    <div class="shipcol21">
+                        <input type="text" class="txtInput100" id="btfirstname" placeholder="First Name"/>
+                    </div>
+                    <div class="shipcol2space">
+                    </div>
+                    <div class="shipcol22">
+                        <input type="text" class="txtInput100" id="btlastname" placeholder="Last Name"/>
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Address Line 1*</div>
+                <div class="shipcol2"><input type="text" id="btaddress1" class="txtInput100"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Address Line 2</div>
+                <div class="shipcol2"><input type="text" id="btaddress2" class="txtInput100"/></div>
+            </div>
+             <div class="shiprow">
+                <div class="shipcol1">City*</div>
+                <div class="shipcol2"><input type="text" id="btcity" class="txtInput100"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">State*</div>
+                <div class="shipcol2">
+                    <div class="shipcol21">
+                        <input type="text" id="btstate" name="btstate" class="kendoDropdown w100"/><br />
+                        <span class="staterestrict">* Delivery in all Peninsular Malaysia except Felda and P.O Box.</span>
+                    </div>
+                    <div class="shipcol2space">
+                    </div>
+                    <div class="shipcol2text">
+                        Zip Code*
+                    </div>
+                    <div class="shipcol22">
+                        <input type="text" id="btzipcode" class="txtInput100p"  maxlength="10" onkeypress="return isNumber()"/>
+                    </div>
+                </div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Country*</div>
+                <div class="shipcol2"><input type="text" id="btcountry" class="txtInput100"  onkeyup="bcountrykeypress(this)"  value="Malaysia"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Phone*</div>
+                <div class="shipcol2"><input type="text" id="btphone" class="txtInput100" placeholder="Example : 6016 824 4881" onkeypress="return isNumberSpace()"/></div>
+            </div>
+            </div>
+        </div>    
+        <div class="shipdata cracc">
+            <div class="shiprow">
+                <div class="shipcol2 title">CREATE ACCOUNT FOR FASTER FUTURE CHECKOUTS (optional)</div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Create Password*</div>
+                <div class="shipcol2"><input type="password" id="tpass" class="txtInput100"/></div>
+            </div>
+            <div class="shiprow">
+                <div class="shipcol1">Retype Password*</div>
+                <div class="shipcol2"><input type="password" id="tcfpass" class="txtInput100"/></div>
+            </div>
+        </div>
+        <div class="shipdata">
+            <div class="shiprow right">
+                <button class="btnApply" onclick="checkoutcontinue()">CONTINUE</button>
+            </div>
+        </div>
+    </div>
+    <div class="shiplist">
+        <div class="checkoutcontent">
+            <table cellpadding="0" cellspacing="0" border="0">
+            @if (Request.IsAuthenticated)
+            {
+                <tr id="checkoutplace">
+                    @if(@Kuazoo.Helper.currKPoint > 0){
+                    <td class="left yourkpoint">K-Point Balance : <span>@Kuazoo.Helper.currKPoint</span>
+                        <br /><input type="checkbox" id="usedkpoint" onchange="usedkpointchange(this)" /><label for="usedkpoint"> Use K-Point</label>
+                    </td>
+                    <td class="right enteramount"><input type="text" id="kpoint" disabled="disabled"  class="txtInputSmall right" placeholder="Enter amount" onkeyup="kpointpress(this)" style="display:none"  /><br /><span id="kpointerr"></span></td>
+                    }
+                </tr>
+            }
+                <tr>
+                    <td class="left padnone" colspan="2">
+                        <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td>Promo Code<span id="promotionAp"></span></td>
+                            <td class="right">
+                                <input type="text" id="promotioncode" class="txtInputSmall center" /> 
+                                <button class="btnApply2" id="btnPromotion" onclick="promotioncheck()">APPLY</button>
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr id="promotab">
+                    <td  class="sub1 left pad0">Promo Used</td>
+                    <td id="promo" class="sub2 right pad0">-RM 0.00</td>
+                </tr>
+                <tr>
+                    <td  class="sub1 left pad0">Item Subtotal</td>
+                    <td id="subtotal" class="sub2 right pad0"></td>
+                </tr>
+                <tr>
+                    <td class="sub1 left">Shipping</td>
+                    <td class="sub2 right">FREE</td>
+                </tr>
+                <tr>
+                    <td class="total1 left">TOTAL</td>
+                    <td id="total" class="total2 right"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="msgDialog" title="Information"></div>
+@section AddToFooter
+{
+    <script src="@Url.Content("~/Scripts/bootbox.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/console.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/prettify.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.10.4.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.lazyload.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("img.lazy").lazyload();
+        });
+    </script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        var country=$("#tcountry").val();
+        countrychange(country,"");
+        var bcountry=$("#btcountry").val();
+        bcountrychange(bcountry,"");
+    });
+    function countrykeypress(e) {
+        var state=$("#tstate").val();
+        countrychange(e.value,state);
+    }
+    function countrychange(data,state) {
+        if (data.length > 3) {
+            var did = $("#_inventoryId").val();
+            //console.log(data);
+            $(".staterestrict").css("display","none");
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("InventoryType", "Home")",
+                data: {id:did},
+                dataType:"json",
+                success:function(data){
+                if(data==true){
+                    $(".staterestrict").css("display","block");
+                }
+                }
+            });
+            $("#tstate").kendoComboBox({
+                dataTextField: "StateName",
+                dataValueField: "StateName",
+                filter: "contains",
+                suggest: true,
+                minLength: 2,
+                dataSource: {
+                    type: "json",
+                    serverFiltering: false,
+                    transport: {
+                        read: {
+                            url: "@Url.Action("StateListInv","Home")?id="+data+"&did="+did,
+                        }
+                    }
+                },
+                value:state
+            });
+        }
+    }
+    function bcountrykeypress(e) {
+        var state=$("#btstate").val();
+        bcountrychange(e.value,state);
+    }
+    function bcountrychange(data,state) {
+        if (data.length > 3) {
+            //console.log(data);
+            var did = $("#_inventoryId").val();
+            $("#btstate").kendoComboBox({
+                dataTextField: "StateName",
+                dataValueField: "StateName",
+                filter: "contains",
+                suggest: true,
+                minLength: 2,
+                dataSource: {
+                    type: "json",
+                    serverFiltering: false,
+                    transport: {
+                        read: {
+                            url: "@Url.Action("StateListInv","Home")?id="+data+"&did="+did,
+                        }
+                    }
+                },
+                value:state
+            });
+        }
+    }
+</script>
+}

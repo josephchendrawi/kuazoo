@@ -1,0 +1,69 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.Image
+@{
+    ViewBag.Title = "Image Add";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(7);
+
+        document.getElementById("imageUpload").onchange = function () {
+            document.getElementById("uploadFile").value = this.value;
+            $("#Name").val(this.value);
+        };
+
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Image">Image</a> <span class="active"> / Add Image</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New Image successfully created</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New Image</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Add Image</h1>
+    </div>
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+    <div id="wrap">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.Name)</div>
+                <div class="colright" style="display:table;width:150px;">
+                    <input id="uploadFile" placeholder="Choose File" readonly="readonly" class="file-upload-text" />
+                    <div class="file-upload">
+                        <span>Browse</span>
+	                    <input id="imageUpload" type="file" name="imageUpload" />
+                    </div>
+                    @Html.HiddenFor(model => model.Name)@Html.ValidationMessageFor(model => model.Name);
+                </div>
+            </div>
+            <br />
+    </div> 
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright"><input type="submit" value="Submit" class="submitBtn"/></div>
+            </div>
+        }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Url").focus();
+    });
+</script>

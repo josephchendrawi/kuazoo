@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "FacebookRedirect";
+    Layout = "~/Views/Shared/_EmptyLayout.cshtml";
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        try{
+
+            var urlHash = window.location.hash;
+            if (urlHash != "") {
+                urlHash = urlHash.replace("#access_token=", "");
+            }
+            var token = urlHash.split('&');
+            var url = "https://graph.facebook.com/oauth/access_token?client_id=@Kuazoo.Helper.SetFacebookId" +
+                        "&client_secret=@Kuazoo.Helper.SetFacebookSecret" +
+                        "&grant_type=fb_exchange_token&fb_exchange_token=" + token[0];
+            $.post(url, function (data) {
+                var n = data.split("&");
+                var n2 = n[0].split("=");
+                window.location = "@Url.Action("FacebookLogin","User")"+"?token=" + n2[1] + "&returnUrl=@ViewBag.returnUrl";
+            }).fail(function () { 
+                window.location = "@Url.Action("FacebookLogin","User")"+"?token=" + token[0] + "&returnUrl=@ViewBag.returnUrl";
+            });
+        }
+        catch(e){
+            window.location = "@Url.Action("SignIn","User")";
+        }
+    });
+</script>

@@ -1,0 +1,146 @@
+﻿@model com.kuazoo.PointHeader
+@{
+    ViewBag.Title = "K-Point Balance";
+    Layout = "~/Views/Shared/_ProfileLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/kpoint.css")" rel="stylesheet" type="text/css" />
+
+}
+@section AddToBread{
+
+
+<div class="notifwrap" id="notification">
+</div>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeprofilenav(4);
+    });
+</script>
+@if (Model.Balance != 0)
+{
+    
+<h2>My K-Point Balance</h2>
+<div id="kuazooexplain">Kuazoo Points (K-Points) can be exchanged for additional discounts on other deals or vouchers. For every purchase you make or sharing of deals with your friends and family, you will be rewarded with Kuazoo points.</div>
+
+    if (Model != null)
+    {
+<div class="kpointbalancecontent">
+    <div class="kpointbalance">@Model.Balance</div>
+</div>
+
+<div class="kpointbalancelist">
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <th>DATE</th>
+            <th>DESCRIPTION</th>
+            <th>TYPE</th>
+            <th class="right">CREDIT AMOUNT</th>
+        </tr>
+        @if (Model.ListDetail != null)
+        {
+            foreach (var v in Model.ListDetail)
+            {
+        <tr>
+            <td>@string.Format("{0:dd MMM yyyy hh:mm tt}", v.Create.AddHours(Kuazoo.Helper.defaultGMT))</td>
+            @if (v.Type == com.kuazoo.KPointAction.InviteFriend)
+            {
+                <td>Received from invite friend</td>
+                <td>Earned</td>
+            }
+            else if (v.Type == com.kuazoo.KPointAction.PostAfterPurchase)
+            {
+                <td>Received from sharing @v.InventoryItemName</td>
+                <td>Earned</td>
+            }
+            else if (v.Type == com.kuazoo.KPointAction.PostBeforePurchase)
+            {
+                <td>Received from sharing @v.InventoryItemName</td>
+                <td>Earned</td>
+            }
+            else if (v.Type == com.kuazoo.KPointAction.PurchaseItem)
+            {
+                <td>Received from purchase @v.InventoryItemName</td>
+                <td>Earned</td>
+            }
+            else if (v.Type == com.kuazoo.KPointAction.Redeemed)
+            {
+                <td>Used on purchase of @v.InventoryItemName</td>
+                <td>Redeemed</td>
+            }
+            else if (v.Type == com.kuazoo.KPointAction.Revert)
+            {
+                <td>Received back due to the failed purchase attempt of @v.InventoryItemName</td>
+                <td>Refund</td>
+            }
+            else if (v.Type == com.kuazoo.KPointAction.Transfer)
+            {
+                if (Model.UserId == v.FromUser)
+                {
+                <td>Used on transfer to @v.ToUserName</td>
+                <td>Redeemed</td>
+                }
+                else
+                {
+                <td>Received transfer from @v.FromUserName</td>
+                <td>Earned</td>
+                }
+            }
+            <td class="right">@v.Amount</td>
+        </tr>
+            }
+        }
+        <tr class="footer">
+            <td colspan="2">
+                CURRENT BALANCE
+            </td>
+            <td colspan="2" class="right">
+                @Model.Balance
+            </td>
+        </tr>
+    </table>
+</div>
+    }
+    else
+    {
+<div class="kpointbalancecontent">
+    <div class="kpointbalance">0</div>
+</div>
+    }
+
+}
+else
+{
+    <style>
+        .noentry
+        {
+            padding: 30px 80px 30px 80px;
+        }
+        .noentry h6
+        {    
+            line-height: 14px;
+        }
+    </style>
+    <div class="noentry">
+        <p><h2>K-Points</h2></p>
+        <br />
+        <span class="lovehandimg"></span>
+        <p><h5>K-Points - because we value our loyal customers</h5></p>
+        <p><h6>At Kuazoo we’d like to thank our loyal customers for continuing to shop with us. For every purchase you make, you are rewarded with K-points (Kuazoo Points). These can be exchanged for additional discounts on other products or experiences.</h6></p>
+        <hr />
+        <span class="monkeyheadlogoimg"></span>
+        <p><h5>What are K-Points?</h5></p>
+        <p><h6>K-Points is a currency which can only be used on Kuazoo.com. For every Ringgit you spend on our website you receive 1 K-Point. Every 100 K-points are worth 1 Ringgit. With K-Points, deals can get up to 50% cheaper than the great offer prices. This means that products and experiences on Kuazoo become even more rewarding for our loyal customers.</h6></p>
+        <hr />
+        <span class="folderimg"></span>
+        <p><h5>How to collect Kuazoo Points?</h5></p>
+        <p><h6>Saving K-Points is very easy! After you've purchased a deal, K-Points will be added to your account automatically. You can earn K-points with the following actions:</h6></p>
+        <p><h6>&emsp;-&emsp;Buying products or experiences: <b><i>1 K-Point for every 1 Ringgit you spend</i></b></h6></p>
+        <p><h6>&emsp;-&emsp;Sharing a deal on Facebook before you’ve made a purchase: <b><i>1 K-Point</i></b></h6></p>
+        <p><h6>&emsp;-&emsp;Sharing a deal on Facebook after you’ve made a purchase: <b><i>3 K-Points</i></b></h6></p>
+        <p><h6>&emsp;-&emsp;Inviting a friend via e-mail: <b><i>1 K-Point</i></b></h6></p>
+    </div>
+
+
+}

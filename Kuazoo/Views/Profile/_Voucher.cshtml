@@ -1,0 +1,201 @@
+﻿@model com.kuazoo.TransactionHtml
+@{
+    ViewBag.Title = "Voucher";
+    Layout = "~/Views/Shared/_EmptyLayout4.cshtml";
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        
+        
+<title></title>
+	
+</head>
+    <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" style="width: 100% !important; -webkit-text-size-adjust: none; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: #FFFFFF;font-family:Arial;" bgcolor="#FFFFFF">
+    	<center>
+        	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="backgroundTable" style="height: 100% !important; margin-bottom: 0; margin-top: 0; margin-right: 0; margin-left: 0; padding-left: 0; padding-top: 0; padding-bottom: 0; padding-right: 0; width: 100% !important;">
+            	<tr>
+                	<td align="center" valign="top">
+                    	<table border="0" cellpadding="20" cellspacing="0" id="templateContainer" width="760" style="font-family: Verdana; margin-top: 20px; font-size: 13px; border-top-color: #dddddd; border-right-color: #dddddd; border-bottom-color: #dddddd; border-left-color: #dddddd; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: solid; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; background: #FAFAFA;" bgcolor="#FAFAFA">
+                        	<tr>
+								<td colspan="2" style="background:#00466a">
+									<a href="http://www.kuazoo.com"><img src="http://www.kuazoo.com/Content/img/logo.png" width="151px" height="27px"/></a>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" style="font-size:30px;color:#666666;font-family:Arial; ">
+									Thank you for shopping at Kuazoo! <br/>
+									<span style="font-size:13px;">Your item will be delivered in 3- 5 business days! Here are the details of your order:</span>
+								</td>
+							</tr>
+							<tr style="vertical-align: top;">
+								<td style="font-size:13px;width:70%;color:#333333">
+									<span style="color:#00466a;font-weight:bold">Your Order Information</span><br/>
+									<strong>Order Number:</strong> @Model.orderno<br/>
+									<strong>Order Date:</strong> @string.Format("{0:dd MMM yyyy}", Model.transactiondate) <br/>
+									<strong>Order Total:</strong> RM @Model.amount.ToString("N2")<br/>
+									<strong>Payment Method:</strong> @Model.paymenttype
+								</td>
+								<td style="font-size:13px;width:30%;border-left:1px solid #dddddd;">
+									<span style="color:#00466a;font-weight:bold">Your Billing Information</span><br/>
+									@Html.Raw(Model.customeraddress)
+								</td>
+							</tr>
+							<tr style="vertical-align: top;">
+								<td colspan="2" style="font-size:13px;">
+									<table border="0" cellpadding="5" cellspacing="0" style="width:100%">
+										<tr style="vertical-align:top">
+											<td style="font-size:13px;width:160px;border-bottom:1px solid #dddddd;">
+												<img src="@Model.imageurl" alt="Deal Image" style="width:160px">
+											</td>
+											<td style="font-size:13px;border-bottom:1px solid #dddddd;">
+										<table border="0" cellpadding="5" cellspacing="0" style="width:100%">
+											<tr>
+												<td style="font-size:14px; text-align:left; font-weight:bold;color:#333333;background:#dddddd">
+													Deal Name 
+												</td>
+												<td style="font-size:14px; text-align:left;font-weight:bold;color:#333333;background:#dddddd">
+													Brand
+												</td>
+												<td style="font-size:14px;text-align:right; font-weight:bold;color:#333333;background:#dddddd">
+													Deal Amount (RM)
+												</td>
+											</tr>
+											<tr style="border-bottom:1px solid #dddddd">
+												<td style="font-size:13px;color:#333333;text-align:left;border-bottom:1px solid #dddddd">
+													@Model.dealname<br/>
+													SKU : @Model.sku
+												</td>
+												<td style="font-size:13px;color:#333333;text-align:left;border-bottom:1px solid #dddddd;vertical-align:top">
+													@Model.merchant
+												</td>
+												<td style="font-size:13px;color:#333333;text-align:right;border-bottom:1px solid #dddddd;vertical-align:top">
+												    @Model.price.ToString("N2")
+												</td>
+											</tr>
+											<tr>
+												<td style="font-size:13px;color:#333333;text-align:left;border-bottom:1px solid #dddddd">
+												</td>
+												<td style="font-size:13px;color:#333333;text-align:left;border-bottom:1px solid #dddddd">
+												</td>
+												<td style="font-size:13px;color:#333333;text-align:right;border-bottom:1px solid #dddddd">
+													<table border="0" cellpadding="5" cellspacing="0" style="width:100%">
+														<tr>
+															<td style="text-align:left">Shipping</td>
+															<td style="text-align:right">FREE</td>
+														</tr>
+														<tr>
+															<td style="text-align:left">Voucher<br/>(@Model.promocode)</td>
+															<td style="text-align:right;vertical-align:top">@Model.promo.ToString("N2")</td>
+														</tr>
+														<tr>
+															<td style="text-align:left">K-Point</td>
+															<td style="text-align:right">@Model.kpoint.ToString("N2")</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											<tr>
+												<td style="font-size:13px;color:#333333;text-align:left;">
+												</td>
+												<td style="font-size:13px;color:#333333;text-align:left;">
+												</td>
+												<td style="font-size:13px;font-weight:bold;color:#333333;text-align:right;">
+													<table border="0" cellpadding="5" cellspacing="0" style="width:100%">
+														<tr>
+															<td style="text-align:left">Total (RM)</td>
+															<td style="text-align:right">@Model.amount.ToString("N2")</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+												
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" style="font-size:16px;">
+									To access your account and view your order details, click <a href="http://www.kuazoo.com">here</a><br/>
+									We hope you enjoy your purchase. Have a great day!
+									<br/><br/>
+									<table border="0" cellpadding="5" cellspacing="0" style="width:100%">
+										<tr>
+											<td style="width:100px">
+												<img src="http://www.kuazoo.com.my/Content/img/kuazoo-monkey.png" style="width:100px">
+											</td>
+											<td style="font-size:13px;color:#0091c7;vertical-align:middle;">
+												<span style="font-size:16px;font-weight:bold;color:#00466a">KUAZOO</span><br/><br/>
+												customerservice@kuazoo.com<br/>
+												+603-20274708<br/>
+												www.kuazoo.com
+											</td>
+										</tr>	
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" style="font-size:30px;color:#666666;font-family:Arial;padding-bottom:0px ">
+								<br/>
+									You may be interested in these
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" style="font-size:16px;color:#333333;font-family:Arial; ">
+									<table border="0" cellpadding="5" cellspacing="0" style="width:100%">
+										@Html.Raw(Model.dealinterest)
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" style="background:#0080b1;text-align:center;font-size:18px;color:#ffffff;">
+									Download our app!<br/><br/>
+									<span style="background:url(http://www.kuazoo.com.my/Content/img/mem_appstore_50_2.png)no-repeat; height:45px; width:132px;display:inline-block"></span>
+									<span style="background:url(http://www.kuazoo.com.my/Content/img/mem_android_50_2.png)no-repeat; height:45px; width:129px;display:inline-block"></span>
+								</td>
+							</tr>
+                        </table>
+                        <br />
+                    </td>
+                </tr>
+				<tr>
+					<td>
+						<center>
+							<div class="sharedetail" style="display:table-cell">
+								<a href="#"><img src="http://www.kuazoo.com.my/Content/img/icon/icon-email.png" style="width:28px;height:28px"></a>
+								<a href="#"><img src="http://www.kuazoo.com.my/Content/img/icon/icon-fb.png" style="width:28px;height:28px"></a>
+								<a href="#"><img src="http://www.kuazoo.com.my/Content/img/icon/icon-twitter.png" style="width:28px;height:28px"></a>
+								<a href="#"><img src="http://www.kuazoo.com.my/Content/img/icon/icon-pinterest.png" style="width:28px;height:28px"></a>
+							</div>
+						</center>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<center style="color:#666666;font-size:11px">
+							You are receiving this with your email address <span style="color:#0080b1">@Model.mailto</span><br/>
+							To ensure our emails don't end up in your spam, add our email to your address book.
+							<br/><br/><br/>
+						</center>
+					</td>
+				</tr>
+            </table>
+        </center>
+    
+<style type="text/css">
+body { width: 100% !important; }
+body { -webkit-text-size-adjust: none !important; }
+body { margin: 0 !important; padding: 0 !important; }
+a{
+	color:blue;
+	text-decoration:none;
+}
+#backgroundTable { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+body { background-color: #FFFFFF !important; }
+</style>
+</body>
+</html>

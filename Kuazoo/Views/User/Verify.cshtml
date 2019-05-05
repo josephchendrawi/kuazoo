@@ -1,0 +1,19 @@
+﻿@model com.kuazoo.Models.LogOnModel
+@{
+    ViewBag.Title = "Verify";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+<div class="notifwrap">
+@if (ViewBag.result != null)
+{
+    if (ViewBag.result == "1")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Account activated successfully.</div></div>
+    }
+    else
+    {
+        <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+    }
+}
+</div>

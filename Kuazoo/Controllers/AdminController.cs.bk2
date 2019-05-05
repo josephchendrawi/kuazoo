@@ -1,0 +1,1491 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using com.kuazoo;
+using com.kuazoo.Models;
+using Kendo.Mvc.Extensions;
+using Kendo.Mvc.UI;
+using Kendo.Mvc;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using System.Configuration;
+
+namespace Kuazoo.Controllers
+{
+    public class AdminController : Controller
+    {
+        private CountryService countryservice = new CountryService();
+        private MerchantService merchantservice = new MerchantService();
+        private InventoryItemService inventoryitemservice = new InventoryItemService();
+        private FlashDealService flashdealservice = new FlashDealService();
+        private TagService tagservice = new TagService();
+        private MemberService memberservice = new MemberService();
+        private TransactionService transactionservice = new TransactionService();
+        private ImageService imageservice = new ImageService();
+        //
+        // GET: /Admin/
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+        #region merchant
+        public ActionResult Merchant()
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+
+        public ActionResult Merchant_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.Merchant> listmer = merchantservice.GetMerchantList().Result;
+            List<MerchantModel> newlistmer = new List<MerchantModel>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new MerchantModel() { MerchantId = v.MerchantId, Name = v.Name, CountryId = v.Country.CountryId, Country = new MasterModel.Country() { CountryId = v.Country.CountryId, CountryName = v.Country.Name }, AddressLine1 = v.AddressLine1, AddressLine2 = v.AddressLine2, CityId = v.City.CityId, City = new MasterModel.City() { CityId = v.City.CityId, CityName = v.City.Name }, PostCode = v.PostCode, ContactNumber = v.ContactNumber, Email = v.Email, Website = v.Website, Facebook = v.Facebook, Latitude = v.Latitude, Longitude = v.Longitude, StatusId = v.Status.StatusId, LastAction = v.LastAction = v.LastAction });
+            }
+            IEnumerable<MerchantModel> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        public String Merchant_Duplicate(int MerchantId)
+        {
+            string res = "";
+            if (MerchantId != null && MerchantId > 0)
+            {
+                try
+                {
+                    Boolean result = merchantservice.DuplicateMerchant(MerchantId).Result;
+
+                    if (result) res = "1";
+                    else res = "2";
+                }
+                catch (Exception ex)
+                {
+                    res = ex.Message;
+                }
+
+            }
+
+            return res;
+        }
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Merchant_Destroy([DataSourceRequest] DataSourceRequest request, MerchantModel Merchant)
+        {
+
+            try
+            {
+                if (Merchant != null)
+                {
+                    Boolean result = merchantservice.DeleteMerchant(Merchant.MerchantId).Result;
+
+                    if (result) ViewBag.result = "1";
+                    else ViewBag.result = "2";
+                    ModelState.AddModelError("", ViewBag.result);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.result = ex.Message;
+                ModelState.AddModelError("", ViewBag.result);
+            }
+
+            return Json(ModelState.ToDataSourceResult());
+        }
+
+        public ActionResult MerchantAdd()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult MerchantAdd(FormCollection collection)
+        {
+            try
+            {
+                MerchantModel mv = new MerchantModel();
+
+                com.kuazoo.Merchant mer = new com.kuazoo.Merchant();
+                mer.MerchantId = 0;
+                mer.Name = collection.Get("Name");
+                mer.AddressLine1 = collection.Get("AddressLine1");
+                mer.AddressLine2 = collection.Get("AddressLine2");
+                com.kuazoo.City city = new com.kuazoo.City();
+                city.CityId = Convert.ToInt16(collection.Get("CityDropDown").ToString());
+                mer.City = city;
+                mer.PostCode = collection.Get("PostCode");
+                mer.ContactNumber = collection.Get("ContactNumber");
+                mer.Email = collection.Get("Email");
+                mer.Website = collection.Get("Website");
+                mer.Facebook = collection.Get("Facebook");
+                try
+                {
+                    string coord = collection.Get("TempLatLong");
+                    char[] delimChars = { ',' };
+                    string[] seperated = coord.Split(delimChars);
+                    //check if
+                    int length1 = seperated[0].Length;
+                    int length2 = seperated[1].Length;
+                    mer.Latitude = float.Parse(seperated[0].Substring(1, length1 - 1));
+                    mer.Longitude = float.Parse(seperated[1].Substring(0, length2 - 2));
+                }
+                catch
+                {
+                    mer.Latitude = 0;
+                    mer.Longitude = 0;
+                }
+
+                com.kuazoo.Status stat = new com.kuazoo.Status();
+                stat.StatusId = (int)MerchantStatus.Premium;
+                mer.Status = stat;
+                bool result = merchantservice.CreateMerchant(mer).Result;
+                ViewBag.result = "3";
+                if (result == true)
+                {
+                    ViewBag.result = "1";
+                }
+                TempData["msg"] = ViewBag.result;
+                return RedirectToAction("Merchant", "Admin");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.result = ex.Message;
+                return View();
+            }
+        }
+
+        public ActionResult MerchantEdit(int MerchantId)
+        {
+            com.kuazoo.Merchant v = merchantservice.GetMerchantById(MerchantId).Result;
+            MerchantModel merchant = new MerchantModel() { MerchantId = v.MerchantId, Name = v.Name, CountryId = v.Country.CountryId, Country = new MasterModel.Country() { CountryId = v.Country.CountryId, CountryName = v.Country.Name }, AddressLine1 = v.AddressLine1, AddressLine2 = v.AddressLine2,  CityId = v.City.CityId, City = new MasterModel.City() { CityId = v.City.CityId, CityName = v.City.Name }, PostCode = v.PostCode, ContactNumber = v.ContactNumber, Email = v.Email, Website = v.Website, Facebook = v.Facebook, Latitude = v.Latitude, Longitude = v.Longitude, StatusId = v.Status.StatusId, LastAction = v.LastAction = v.LastAction };
+            return View(merchant);
+        }
+        [HttpPost]
+        public ActionResult MerchantEdit(FormCollection collection,MerchantModel Merchant)
+        {
+            try
+            {
+                com.kuazoo.Merchant mer = new com.kuazoo.Merchant();
+                mer.MerchantId = Merchant.MerchantId;
+                mer.Name = Merchant.Name;
+                mer.AddressLine1 = Merchant.AddressLine1;
+                mer.AddressLine2 = Merchant.AddressLine2;
+                com.kuazoo.City city = new com.kuazoo.City();
+                city.CityId = Merchant.CityId;
+                mer.City = city;
+                mer.PostCode = Merchant.PostCode;
+                mer.ContactNumber = Merchant.ContactNumber;
+                mer.Email = Merchant.Email;
+                mer.Website = Merchant.Website;
+                mer.Facebook = Merchant.Facebook;
+                try
+                {
+                    string coord = collection.Get("TempLatLong");
+                    char[] delimChars = { ',' };
+                    string[] seperated = coord.Split(delimChars);
+                    //check if
+                    int length1 = seperated[0].Length;
+                    int length2 = seperated[1].Length;
+                    mer.Latitude = float.Parse(seperated[0].Substring(1, length1 - 1));
+                    mer.Longitude = float.Parse(seperated[1].Substring(0, length2 - 2));
+                }
+                catch
+                {
+                    mer.Latitude = 0;
+                    mer.Longitude = 0;
+                }
+                com.kuazoo.Status stat = new com.kuazoo.Status();
+                stat.StatusId = Merchant.StatusId;
+                mer.Status = stat;
+                bool result = merchantservice.CreateMerchant(mer).Result;
+
+                if (result == true)
+                {
+                    ViewBag.result = "1";
+                    TempData["msg"] = "11";
+                }
+                else
+                {
+                    ViewBag.result = "3";
+                    TempData["msg"] = "33";
+                }
+                return RedirectToAction("Merchant", "Admin");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.result = ex.Message;
+            }
+            return View(Merchant);
+        }
+        public ActionResult MerchantView(int MerchantId)
+        {
+            com.kuazoo.Merchant v = merchantservice.GetMerchantById(MerchantId).Result;
+            MerchantModel merchant = new MerchantModel() { MerchantId = v.MerchantId, Name = v.Name, CountryId = v.Country.CountryId, Country = new MasterModel.Country() { CountryId = v.Country.CountryId, CountryName = v.Country.Name }, AddressLine1 = v.AddressLine1, AddressLine2 = v.AddressLine2, CityId = v.City.CityId, City = new MasterModel.City() { CityId = v.City.CityId, CityName = v.City.Name }, PostCode = v.PostCode, ContactNumber = v.ContactNumber, Email = v.Email, Website = v.Website, Facebook = v.Facebook, Latitude = v.Latitude, Longitude = v.Longitude, StatusId = v.Status.StatusId, LastAction = v.LastAction = v.LastAction };
+            return View(merchant);
+        }
+        #endregion
+
+        #region InventoryItem
+        public ActionResult InventoryItem()
+        {
+            //List<com.kuazoo.Tag> listtag = inventoryitemservice.GetTagList().Result;
+            //List<InventoryItemModel.Tag> newlisttag = new List<InventoryItemModel.Tag>();
+            //foreach (var v in listtag)
+            //{
+            //    newlisttag.Add(new InventoryItemModel.Tag() { TagId = v.TagId, TagName = v.Name });
+            //}
+            //ViewData["taglist"] = newlisttag;
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+        public ActionResult InventoryItem_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.InventoryItem> listmer = inventoryitemservice.GetInventoryItemList().Result;
+            List<InventoryItemModel.InventoryItem> newlistmer = new List<InventoryItemModel.InventoryItem>();
+            foreach (var v in listmer)
+            {
+                if ( v.Prize != null)
+                {
+                    newlistmer.Add(new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name, Price = v.Price, Description = v.Description, MerchantId = v.Merchant.MerchantId, MerchantName = v.Merchant.Name, CityName = v.Merchant.City.Name, CountryName = v.Merchant.Country.Name, Keyword = v.Keyword, InventoryItemTypeId = v.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemType.InventoryItemTypeName, Discount = v.Discount, ExpireDate = v.ExpireDate, MaximumSales = v.MaximumSales, PublishDate = v.PublishDate, MinimumTarget = v.MinimumTarget, LastAction = v.LastAction, Tag = v.Tag, TagName = v.TagName, ImageName = v.ImageName, ImageUrl = v.ImageUrl, SubImageId =  String.Join("|",v.SubImageId), SubImageName = String.Join("|",v.SubImageName), SubImageUrl = String.Join("|",v.SubImageUrl), Flag = v.Flag, Prize = new InventoryItemModel.Prize() { PrizeId = v.Prize.PrizeId, Name = v.Prize.Name, Description = v.Prize.Description, ImageName = v.Prize.ImageName, ImageUrl = v.Prize.ImageUrl, Price = v.Prize.Price, SponsorName = v.Prize.SponsorName, Detail = v.Prize.Detail, Terms = v.Prize.Terms } });
+                }
+                else
+                {
+                    newlistmer.Add(new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name, Price = v.Price, Description = v.Description, MerchantId = v.Merchant.MerchantId, MerchantName = v.Merchant.Name, CityName = v.Merchant.City.Name, CountryName = v.Merchant.Country.Name, Keyword = v.Keyword, InventoryItemTypeId = v.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemType.InventoryItemTypeName, Discount = v.Discount, ExpireDate = v.ExpireDate, MaximumSales = v.MaximumSales, PublishDate = v.PublishDate, MinimumTarget = v.MinimumTarget, LastAction = v.LastAction, Tag = v.Tag, TagName = v.TagName, ImageName = v.ImageName, ImageUrl = v.ImageUrl, SubImageId =  String.Join("|",v.SubImageId), SubImageName = String.Join("|",v.SubImageName), SubImageUrl = String.Join("|",v.SubImageUrl), Flag = v.Flag });
+                }
+            }
+            IEnumerable<InventoryItemModel.InventoryItem> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        public String InventoryItem_Duplicate(int InventoryItemId)
+        {
+            string res = "";
+            if (InventoryItemId != null && InventoryItemId>0)
+            {
+                try
+                {
+                    Boolean result = inventoryitemservice.DuplicateInventoryItem(InventoryItemId).Result;
+
+                    if (result) res = "1";
+                    else res = "2";
+                }
+                catch (Exception ex)
+                {
+                    res = ex.Message;
+                }
+
+            }
+
+            return res;
+        }
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult InventoryItem_Destroy([DataSourceRequest] DataSourceRequest request, InventoryItemModel.InventoryItem InventoryItem)
+        {
+            if (InventoryItem != null)
+            {
+                Boolean result = inventoryitemservice.DeleteInventoryItem(InventoryItem.InventoryItemId).Result;
+
+                if (result) ViewBag.result = "1";
+                else ViewBag.result = "2";
+                ModelState.AddModelError("", ViewBag.result);
+
+            }
+
+            return Json(ModelState.ToDataSourceResult());
+        }
+        public ActionResult InventoryItemAdd()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult InventoryItemAdd(HttpPostedFileBase imageUpload, HttpPostedFileBase imageUploadPrize, FormCollection collection, InventoryItemModel.InventoryItem InventoryItem)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string imageurl = "";
+                    string imageurlprize = "";
+                    if (imageUpload != null)
+                    {
+                        if (!Helper.IsValidImage(imageUpload.FileName))
+                        {
+                            throw new Exception("File is not an image file");
+                        }
+                        string name = InventoryItem.Name;
+                        if (name == null) name = "";
+                        //imageurl = Helper.uploadImage(imageUpload);
+                        imageurl = Helper.uploadImageWithName(imageUpload, name);
+                    }
+                    if (imageUploadPrize != null)
+                    {
+                        if (!Helper.IsValidImage(imageUploadPrize.FileName))
+                        {
+                            throw new Exception("File is not an image file");
+                        }
+                        string name = InventoryItem.Name;
+                        if (name == null) name = "";
+                        name = "Prize-" + name;
+                        //imageurl = Helper.uploadImage(imageUpload);
+                        imageurlprize = Helper.uploadImageWithName(imageUploadPrize, name);
+                    }
+                    com.kuazoo.InventoryItem pro = new com.kuazoo.InventoryItem();
+                    pro.InventoryItemId = 0;
+                    pro.Name = InventoryItem.Name;
+                    com.kuazoo.Currency curr = new com.kuazoo.Currency();
+                    pro.Price = InventoryItem.Price;
+                    pro.Description = InventoryItem.Description;
+                    com.kuazoo.Merchant merchant = new com.kuazoo.Merchant();
+                    merchant.MerchantId = InventoryItem.MerchantId;
+                    pro.Merchant = merchant;
+                    pro.Keyword = InventoryItem.Keyword;
+                    com.kuazoo.InventoryItemType InventoryItemtype = new com.kuazoo.InventoryItemType();
+                    InventoryItemtype.InventoryItemTypeId = InventoryItem.InventoryItemTypeId;
+                    pro.InventoryItemType = InventoryItemtype;
+                    pro.Discount = InventoryItem.Discount;
+                    pro.ExpireDate = InventoryItem.ExpireDate;
+                    pro.MaximumSales = InventoryItem.MaximumSales;
+                    pro.PublishDate = InventoryItem.PublishDate;
+                    pro.MinimumTarget = InventoryItem.MinimumTarget;
+                    string tag = collection.Get("InventoryItemTagDropDown");
+                    if (tag != null || tag != "")
+                    {
+                        pro.Tag = tag;
+                    }
+                    pro.ImageName = "";
+                    if (imageurl != "")
+                    {
+                        pro.ImageName = imageurl;
+                    }
+                    pro.ImageDelete = false;
+
+                    string subimg = collection.Get("strSubImage");
+                    List<string> listsubimg = new List<string>();
+                    foreach (var v in subimg.Split('|'))
+                    {
+                        if (v != "") listsubimg.Add(v);
+                    }
+                    pro.SubImageName = listsubimg;
+
+                    pro.Flag = true;//InventoryItem.Flag;
+
+                    com.kuazoo.Prize pr = new com.kuazoo.Prize();
+                    pr.PrizeId = 0;
+                    pr.Name = InventoryItem.Prize.Name;
+                    pr.Price = InventoryItem.Prize.Price;
+                    pr.Description = InventoryItem.Prize.Description;
+                    pr.SponsorName = InventoryItem.Prize.SponsorName;
+                    pr.Terms = InventoryItem.Prize.Terms;
+                    pr.Detail = InventoryItem.Prize.Detail;
+
+                    pr.ImageName = "";
+                    if (imageurlprize != "")
+                    {
+                        pr.ImageName = imageurlprize;
+                    }
+                    pro.Prize = pr;
+
+
+                    bool result = inventoryitemservice.CreateInventoryItem(pro).Result;
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                    }
+                    TempData["msg"] = ViewBag.result;
+                    return RedirectToAction("InventoryItem", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(InventoryItem);
+
+        }
+
+        public ActionResult InventoryItemEdit(int InventoryItemId)
+        {
+            com.kuazoo.InventoryItem v = inventoryitemservice.GetInventoryItemById(InventoryItemId).Result;
+            InventoryItemModel.InventoryItem InventoryItem;
+            if (v.Prize != null)
+            {
+                InventoryItem = new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name, Price = v.Price, Description = v.Description, MerchantId = v.Merchant.MerchantId, MerchantName = v.Merchant.Name, CityName = v.Merchant.City.Name, CountryName = v.Merchant.Country.Name, Keyword = v.Keyword, InventoryItemTypeId = v.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemType.InventoryItemTypeName, Discount = v.Discount, ExpireDate = v.ExpireDate, MaximumSales = v.MaximumSales, PublishDate = v.PublishDate, MinimumTarget = v.MinimumTarget, LastAction = v.LastAction, Tag = v.Tag, TagName = v.TagName, ImageName = v.ImageName, ImageUrl = v.ImageUrl, SubImageId = String.Join("|",v.SubImageId), SubImageName = String.Join("|",v.SubImageName), SubImageUrl = String.Join("|",v.SubImageUrl), Flag = v.Flag, Prize = new InventoryItemModel.Prize() { PrizeId = v.Prize.PrizeId, Name = v.Prize.Name, Description = v.Prize.Description, ImageName = v.Prize.ImageName, ImageUrl = v.Prize.ImageUrl, Price = v.Prize.Price, SponsorName = v.Prize.SponsorName, Detail = v.Prize.Detail, Terms = v.Prize.Terms } };
+            }
+            else
+            {
+                InventoryItem = new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name, Price = v.Price, Description = v.Description, MerchantId = v.Merchant.MerchantId, MerchantName = v.Merchant.Name, CityName = v.Merchant.City.Name, CountryName = v.Merchant.Country.Name, Keyword = v.Keyword, InventoryItemTypeId = v.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemType.InventoryItemTypeName, Discount = v.Discount, ExpireDate = v.ExpireDate, MaximumSales = v.MaximumSales, PublishDate = v.PublishDate, MinimumTarget = v.MinimumTarget, Tag = v.Tag, TagName = v.TagName, ImageName = v.ImageName, ImageUrl = v.ImageUrl, SubImageId = String.Join("|", v.SubImageId), SubImageName = String.Join("|", v.SubImageName), SubImageUrl = String.Join("|", v.SubImageUrl), Flag = v.Flag };
+            }
+            return View(InventoryItem);
+        }
+        [HttpPost]
+        public ActionResult InventoryItemEdit(HttpPostedFileBase imageUpload,HttpPostedFileBase imageUploadPrize, FormCollection collection, InventoryItemModel.InventoryItem InventoryItem)
+        {
+   
+            if (ModelState.IsValid)
+            {
+                try
+                {
+
+                    string imageurl = "";
+                    string imageurlprize = "";
+                    if (imageUpload != null)
+                    {
+                        if (!Helper.IsValidImage(imageUpload.FileName))
+                        {
+                            throw new Exception("File is not an image file");
+                        }
+                        string name = InventoryItem.Name;
+                        if (name == null) name = "";
+                        //imageurl = Helper.uploadImage(imageUpload);
+                        imageurl = Helper.uploadImageWithName(imageUpload, name);
+                    }
+                    if (imageUploadPrize != null)
+                    {
+                        if (!Helper.IsValidImage(imageUploadPrize.FileName))
+                        {
+                            throw new Exception("File is not an image file");
+                        }
+                        string name = InventoryItem.Name;
+                        if (name == null) name = "";
+                        name = "Prize-" + name;
+                        //imageurl = Helper.uploadImage(imageUpload);
+                        imageurlprize = Helper.uploadImageWithName(imageUploadPrize, name);
+                    }
+                    com.kuazoo.InventoryItem pro = new com.kuazoo.InventoryItem();
+                    pro.InventoryItemId = InventoryItem.InventoryItemId;
+                    pro.Name = InventoryItem.Name;
+                    com.kuazoo.Currency curr = new com.kuazoo.Currency();
+                    pro.Price = InventoryItem.Price;
+                    pro.Description = InventoryItem.Description;
+                    com.kuazoo.Merchant merchant = new com.kuazoo.Merchant();
+                    merchant.MerchantId = InventoryItem.MerchantId;
+                    pro.Merchant = merchant;
+                    pro.Keyword = InventoryItem.Keyword;
+                    com.kuazoo.InventoryItemType InventoryItemtype = new com.kuazoo.InventoryItemType();
+                    InventoryItemtype.InventoryItemTypeId = InventoryItem.InventoryItemTypeId;
+                    pro.InventoryItemType = InventoryItemtype;
+                    pro.Discount = InventoryItem.Discount;
+                    pro.ExpireDate = InventoryItem.ExpireDate;
+                    pro.MaximumSales = InventoryItem.MaximumSales;
+                    pro.PublishDate = InventoryItem.PublishDate;
+                    pro.MinimumTarget = InventoryItem.MinimumTarget;
+                    pro.Tag = InventoryItem.Tag;
+                    pro.ImageName = InventoryItem.ImageName;
+                    pro.ImageUrl = InventoryItem.ImageUrl;
+                    if (imageurl != "")
+                    {
+                        pro.ImageName = imageurl;
+                    }
+                    pro.ImageDelete = false;
+                    string deleteimg = collection.Get("flagDeleteImage");
+                    if (deleteimg != null || deleteimg != "")
+                    {
+                        if (deleteimg == "1")
+                        {
+                            pro.ImageDelete = true;
+                        }
+                    }
+                    string deletesubimg = collection.Get("flagDeleteSubImage");
+                    pro.SubImageDelete = deletesubimg;
+                    string subimg = collection.Get("strSubImage");
+                    List<string> listsubimg = new List<string>();
+                    foreach (var v in subimg.Split('|'))
+                    {
+                        if(v!="")listsubimg.Add(v);
+                    }
+                    pro.SubImageName = listsubimg;
+
+                    string tag = collection.Get("InventoryItemTagDropDown");
+                    if (tag != null || tag != "")
+                    {
+                        pro.Tag = tag;
+                    }
+                    pro.Flag = InventoryItem.Flag;
+
+                    com.kuazoo.Prize pr = new com.kuazoo.Prize();
+                    pr.PrizeId = InventoryItem.Prize.PrizeId;
+                    pr.Name = InventoryItem.Prize.Name;
+                    pr.Price = InventoryItem.Prize.Price;
+                    pr.Description = InventoryItem.Prize.Description;
+                    pr.SponsorName = InventoryItem.Prize.SponsorName;
+                    pr.Terms = InventoryItem.Prize.Terms;
+                    pr.Detail = InventoryItem.Prize.Detail;
+                    pr.ImageName = "";
+                    if (imageurlprize != "")
+                    {
+                        pr.ImageName = imageurlprize;
+                    }
+
+                    string deleteimgprize = collection.Get("flagDeleteImagePrize");
+                    if (deleteimgprize != null || deleteimgprize != "")
+                    {
+                        if (deleteimgprize == "1")
+                        {
+                            pr.ImageName = "";
+                        }
+                    }
+
+                    pro.Prize = pr;
+
+                    bool result = inventoryitemservice.CreateInventoryItem(pro).Result;
+
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                        TempData["msg"] = "11";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                        TempData["msg"] = "33";
+                    }
+                    return RedirectToAction("InventoryItem", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(InventoryItem);
+
+        }
+
+        public ActionResult InventoryItemView(int InventoryItemId)
+        {
+            com.kuazoo.InventoryItem v = inventoryitemservice.GetInventoryItemById(InventoryItemId).Result;
+            InventoryItemModel.InventoryItem InventoryItem;
+            if(v.Prize != null)
+            {
+                InventoryItem = new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name, Price = v.Price, Description = v.Description, MerchantId = v.Merchant.MerchantId, MerchantName = v.Merchant.Name, CityName = v.Merchant.City.Name, CountryName = v.Merchant.Country.Name, Keyword = v.Keyword, InventoryItemTypeId = v.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemType.InventoryItemTypeName, Discount = v.Discount, ExpireDate = v.ExpireDate, MaximumSales = v.MaximumSales, PublishDate = v.PublishDate, MinimumTarget = v.MinimumTarget, LastAction = v.LastAction, Tag = v.Tag, TagName = v.TagName, ImageName = v.ImageName, ImageUrl = v.ImageUrl, SubImageId = String.Join("|", v.SubImageId), SubImageName = String.Join("|", v.SubImageName), SubImageUrl = String.Join("|", v.SubImageUrl), Flag = v.Flag, Prize = new InventoryItemModel.Prize() { PrizeId = v.Prize.PrizeId, Name = v.Prize.Name, Description = v.Prize.Description, ImageName = v.Prize.ImageName, ImageUrl = v.Prize.ImageUrl, Price = v.Prize.Price, SponsorName = v.Prize.SponsorName, Detail = v.Prize.Detail, Terms = v.Prize.Terms } };
+            }
+            else
+            {
+                InventoryItem = new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name, Price = v.Price, Description = v.Description, MerchantId = v.Merchant.MerchantId, MerchantName = v.Merchant.Name, CityName = v.Merchant.City.Name, CountryName = v.Merchant.Country.Name, Keyword = v.Keyword, InventoryItemTypeId = v.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemType.InventoryItemTypeName, Discount = v.Discount, ExpireDate = v.ExpireDate, MaximumSales = v.MaximumSales, PublishDate = v.PublishDate, MinimumTarget = v.MinimumTarget, Tag = v.Tag, TagName = v.TagName, ImageName = v.ImageName, ImageUrl = v.ImageUrl, SubImageId =  String.Join("|",v.SubImageId), SubImageName = String.Join("|",v.SubImageName), SubImageUrl = String.Join("|",v.SubImageUrl), Flag = v.Flag };
+            }
+            return View(InventoryItem);
+        }
+
+        [HttpPost]
+        public virtual ActionResult InventoryUploadImage(String Name, String strSubImage= "")//name and strsubimage come from post jquery
+        {
+            HttpPostedFileBase imageUpload = Request.Files["imagefile"];
+            bool isUpload = false;
+            string message = "";
+            string imageurl = "";
+            string imagename = "";
+            if (imageUpload != null)
+            {
+                try
+                {
+                    if (!Helper.IsValidImage(imageUpload.FileName))
+                    {
+                        message = "File is not an image file";
+                    }
+                    if (Name == null) Name = "";
+                    string tempname = Name + "-" + imageUpload.FileName;
+                    string[] currentlist = strSubImage.Split('|');
+                    int flag=0;
+                    foreach (var v in currentlist)
+                    {
+                        if (v == tempname)
+                        {
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    if (flag == 1)
+                    {
+                        message = "Image already upload!";
+                    }
+                    else
+                    {
+
+                        imagename = Helper.uploadImageWithName(imageUpload, Name);
+                        imageurl = ConfigurationManager.AppSettings["uploadpath"] + imagename;
+                        isUpload = true;
+                        message = "Image uploaded successfully!";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    message = string.Format("File upload failed: {0}", ex.Message);
+                }
+            }
+            return Json(new { isUpload = isUpload, message = message, imageurl = imageurl,imagename=imagename }, "text/html");
+        }
+        #endregion
+
+        #region flashdeal
+
+        public ActionResult FlashDeal()
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+        public ActionResult FlashDeal_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.FlashDeal> listmer = flashdealservice.GetFlashDealList().Result;
+            List<InventoryItemModel.FlashDeal> newlistmer = new List<InventoryItemModel.FlashDeal>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new InventoryItemModel.FlashDeal() { FlashDealId = v.FlashDealId, Discount = v.Discount, MerchantId = v.MerchantId, MerchantName = v.MerchantName, InventoryItemId = v.InventoryItemId, InventoryItemName = v.InventoryItemName, StartTime = v.StartTime, StartTimeStr = string.Format("{0:dd MMM yyyy hh:mm tt}", v.StartTime), EndTime = v.EndTime, EndTimeStr = string.Format("{0:dd MMM yyyy hh:mm tt}", v.EndTime), Flag = v.Flag, LastAction = v.LastAction });
+            }
+            IEnumerable<InventoryItemModel.FlashDeal> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult FlashDeal_Destroy([DataSourceRequest] DataSourceRequest request, InventoryItemModel.FlashDeal FlashDeal)
+        {
+            if (FlashDeal != null)
+            {
+                Boolean result = flashdealservice.DeleteFlashDeal(FlashDeal.FlashDealId).Result;
+
+                if (result) ViewBag.result = "1";
+                else ViewBag.result = "2";
+                ModelState.AddModelError("", ViewBag.result);
+
+            }
+
+            return Json(ModelState.ToDataSourceResult());
+        }
+        public ActionResult FlashDealAdd()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult FlashDealAdd(FormCollection collection, InventoryItemModel.FlashDeal FlashDeal)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    com.kuazoo.FlashDeal pro = new com.kuazoo.FlashDeal();
+                    pro.FlashDealId = 0;
+                    pro.InventoryItemId = FlashDeal.InventoryItemId;
+                    pro.Discount = FlashDeal.Discount;
+                    pro.StartTime = FlashDeal.StartTime;
+                    pro.EndTime = FlashDeal.EndTime;
+                    pro.Flag = true;//FlashDeal.Flag;
+
+                    bool result = flashdealservice.CreateFlashDeal(pro).Result;
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                    }
+                    TempData["msg"] = ViewBag.result;
+                    return RedirectToAction("FlashDeal", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(FlashDeal);
+
+        }
+
+        public ActionResult FlashDealEdit(int FlashDealId)
+        {
+            com.kuazoo.FlashDeal v = flashdealservice.GetFlashDealById(FlashDealId).Result;
+            InventoryItemModel.FlashDeal FlashDeal;
+            FlashDeal = new InventoryItemModel.FlashDeal() { FlashDealId = v.FlashDealId, Discount = v.Discount, MerchantId =v.MerchantId,MerchantName =v.MerchantName, InventoryItemId = v.InventoryItemId, InventoryItemName = v.InventoryItemName, StartTime = v.StartTime, EndTime = v.EndTime, Flag = v.Flag, LastAction = v.LastAction };
+
+            return View(FlashDeal);
+        }
+        [HttpPost]
+        public ActionResult FlashDealEdit(FormCollection collection, InventoryItemModel.FlashDeal FlashDeal)
+        {
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+
+                    com.kuazoo.FlashDeal pro = new com.kuazoo.FlashDeal();
+                    pro.FlashDealId = FlashDeal.FlashDealId;
+                    pro.InventoryItemId = FlashDeal.InventoryItemId;
+                    pro.Discount = FlashDeal.Discount;
+                    pro.StartTime = FlashDeal.StartTime;
+                    pro.EndTime = FlashDeal.EndTime;
+                    pro.Flag = FlashDeal.Flag;
+
+
+                    bool result = flashdealservice.CreateFlashDeal(pro).Result;
+
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                        TempData["msg"] = "11";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                        TempData["msg"] = "33";
+                    }
+                    return RedirectToAction("FlashDeal", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(FlashDeal);
+
+        }
+
+        public ActionResult FlashDealView(int FlashDealId)
+        {
+            com.kuazoo.FlashDeal v = flashdealservice.GetFlashDealById(FlashDealId).Result;
+            InventoryItemModel.FlashDeal FlashDeal;
+            FlashDeal = new InventoryItemModel.FlashDeal() { FlashDealId = v.FlashDealId, Discount = v.Discount, MerchantId = v.MerchantId, MerchantName = v.MerchantName, InventoryItemId = v.InventoryItemId, InventoryItemName = v.InventoryItemName, StartTime = v.StartTime, EndTime = v.EndTime, Flag = v.Flag, LastAction = v.LastAction };
+
+            return View(FlashDeal);
+        }
+
+        #endregion
+
+        #region tag
+        public ActionResult Tag()
+        {
+            List<com.kuazoo.Tag> listtag = tagservice.GetTagList().Result;
+            List<InventoryItemModel.Tag> newlisttag = new List<InventoryItemModel.Tag>();
+            foreach (var v in listtag)
+            {
+                newlisttag.Add(new InventoryItemModel.Tag() { TagId = v.TagId, TagName = v.Name });
+            }
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            ViewData["taglist"] = newlisttag;
+            return View();
+        }
+        public ActionResult Tag_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.Tag> listmer = tagservice.GetTagList().Result;
+            List<InventoryItemModel.Tag> newlistmer = new List<InventoryItemModel.Tag>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new InventoryItemModel.Tag() { TagId = v.TagId, TagName = v.Name, ShowAsCategory = v.ShowAsCategory, ParentId = v.Parent != null ? v.Parent.TagId : 0, ParentName =  v.Parent != null ? v.Parent.Name : "", LastAction = v.LastAction });
+            }
+            IEnumerable<InventoryItemModel.Tag> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Tag_Destroy([DataSourceRequest] DataSourceRequest request, InventoryItemModel.Tag Tag)
+        {
+            if (Tag != null)
+            {
+                Boolean result = tagservice.DeleteTag(Tag.TagId).Result;
+
+                if (result) ViewBag.result = "1";
+                else ViewBag.result = "2";
+                ModelState.AddModelError("", ViewBag.result);
+
+            }
+
+            return Json(ModelState.ToDataSourceResult());
+        }
+
+        public ActionResult TagAdd()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult TagAdd(InventoryItemModel.Tag Tag)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    com.kuazoo.Tag pro = new com.kuazoo.Tag();
+                    pro.TagId = 0;
+                    pro.Name = Tag.TagName;
+                    if (Tag.ParentId != null)
+                    {
+                        Tag parent = new Tag();
+                        parent.TagId = (int)Tag.ParentId;
+                        pro.Parent = parent;
+                    }
+                    else
+                    {
+                        pro.Parent = null;
+                    }
+                    pro.ShowAsCategory = Tag.ShowAsCategory;
+
+                    bool result = tagservice.CreateTag(pro).Result;
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                    }
+
+                    TempData["msg"] = ViewBag.result;
+                    return RedirectToAction("Tag", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(Tag);
+
+        }
+        public ActionResult TagEdit(int TagId)
+        {
+            com.kuazoo.Tag v = tagservice.GetTagById(TagId).Result;
+            InventoryItemModel.Tag InventoryItem = new InventoryItemModel.Tag() { TagId = v.TagId, TagName = v.Name, ShowAsCategory = v.ShowAsCategory, ParentId = v.Parent != null ? v.Parent.TagId : 0, ParentName = v.Parent != null ? v.Parent.Name : "", LastAction = v.LastAction };
+            return View(InventoryItem);
+        }
+        [HttpPost]
+        public ActionResult TagEdit(InventoryItemModel.Tag Tag)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    com.kuazoo.Tag pro = new com.kuazoo.Tag();
+                    pro.TagId = Tag.TagId;
+                    pro.Name = Tag.TagName;
+                    if (Tag.ParentId != null)
+                    {
+                        Tag parent = new Tag();
+                        parent.TagId = (int)Tag.ParentId;
+                        pro.Parent = parent;
+                    }
+                    else
+                    {
+                        pro.Parent = null;
+                    }
+                    pro.ShowAsCategory = Tag.ShowAsCategory;
+
+                    bool result = tagservice.CreateTag(pro).Result;
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                        TempData["msg"] = "11";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                        TempData["msg"] = "33";
+                    }
+                    return RedirectToAction("Tag", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(Tag);
+
+        }
+        public ActionResult TagView(int TagId)
+        {
+            com.kuazoo.Tag v = tagservice.GetTagById(TagId).Result;
+            InventoryItemModel.Tag InventoryItem = new InventoryItemModel.Tag() { TagId = v.TagId, TagName = v.Name, ShowAsCategory = v.ShowAsCategory, ParentId = v.Parent != null ? v.Parent.TagId : 0, ParentName = v.Parent != null ? v.Parent.Name : "", LastAction = v.LastAction };
+            return View(InventoryItem);
+        }
+        #endregion
+
+
+        #region member
+
+        public ActionResult Member()
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+        public ActionResult Member_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.Member> listmer = memberservice.GetMemberList().Result;
+            List<MemberModel.Member> newlistmer = new List<MemberModel.Member>();
+            string gender = "";
+            foreach (var v in listmer)
+            {
+                if (v.Gender == 0) gender = "Male";
+                else if (v.Gender == 1) gender = "Female";
+                newlistmer.Add(new MemberModel.Member() { MemberId = v.MemberId, FirstName = v.FirstName, LastName = v.LastName, Email = v.Email, Gender = v.Gender, GenderStr = gender, DateOfBirth = v.DateOfBirth, MemberStatus = new MemberModel.MemberStatus() { MemberStatusId = v.MemberStatus.MemberStatusId, MemberStatusName = v.MemberStatus.MemberStatusName }, LastLockout = v.LastLockout, LastLockoutDate = v.LastLockoutDate });
+            }
+            IEnumerable<MemberModel.Member> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        //public ActionResult MemberEdit(int MemberId)
+        //{
+        //    com.kuazoo.Member v = memberservice.GetMemberById(MemberId).Result;
+        //    MemberModel.Member Member;
+        //    Member = new MemberModel.Member() { MemberId = v.MemberId, FirstName = v.FirstName, LastName = v.LastName, Email = v.Email, Gender = v.Gender, DateOfBirth = v.DateOfBirth, MemberStatus = new MemberModel.MemberStatus() { MemberStatusId = v.MemberStatus.MemberStatusId, MemberStatusName = v.MemberStatus.MemberStatusName }, LastLockout = v.LastLockout, LastLockoutDate = v.LastLockoutDate };
+
+        //    return View(Member);
+        //}
+        //[HttpPost]
+        //public ActionResult MemberEdit(FormCollection collection, MemberModel.Member Member)
+        //{
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+
+        //            com.kuazoo.Member pro = new com.kuazoo.Member();
+        //            pro.MemberId = Member.MemberId;
+        //            pro.FirstName = Member.FirstName;
+        //            pro.LastName = Member.LastName;
+        //            pro.Email = Member.Email;
+        //            pro.Gender = Member.Gender;
+        //            pro.DateOfBirth = Member.DateOfBirth;
+        //            MemberModel.MemberStatus ms = new MemberModel.MemberStatus();
+        //            ms.MemberStatusId = Member.MemberStatus.MemberStatusId;
+        //            pro.LastLockout = Member.LastLockout;
+        //            pro.LastLockoutDate = Member.LastLockoutDate;
+
+        //            bool result = memberservice.CreateMember(pro).Result;
+
+        //            if (result == true)
+        //            {
+        //                ViewBag.result = "1";
+        //                TempData["msg"] = "11";
+        //            }
+        //            else
+        //            {
+        //                ViewBag.result = "3";
+        //                TempData["msg"] = "33";
+        //            }
+        //            return RedirectToAction("Member", "Admin");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            ViewBag.result = ex.Message;
+        //        }
+        //    }
+        //    return View(Member);
+
+        //}
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Member_Destroy([DataSourceRequest] DataSourceRequest request, MemberModel.Member Member)
+        {
+
+            try
+            {
+                if (Member != null)
+                {
+                    Boolean result = memberservice.ChangeMemberStatus(Member.MemberId,3).Result;
+
+                    if (result) ViewBag.result = "1";
+                    else ViewBag.result = "2";
+                    ModelState.AddModelError("", ViewBag.result);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.result = ex.Message;
+                ModelState.AddModelError("", ViewBag.result);
+            }
+
+            return Json(ModelState.ToDataSourceResult());
+        }
+
+        public ActionResult MemberEdit(int MemberId)
+        {
+            com.kuazoo.Member v = memberservice.GetMemberById(MemberId).Result;
+            MemberModel.Member Member;
+            string gender = "";
+            if (v.Gender == 0) gender = "Male";
+            else if (v.Gender == 1) gender = "Female";
+            Member = new MemberModel.Member() { MemberId = v.MemberId, FirstName = v.FirstName, LastName = v.LastName, Email = v.Email, Gender = v.Gender, GenderStr = gender, DateOfBirth = v.DateOfBirth, MemberStatus = new MemberModel.MemberStatus() { MemberStatusId = v.MemberStatus.MemberStatusId, MemberStatusName = v.MemberStatus.MemberStatusName }, LastLockout = v.LastLockout, LastLockoutDate = v.LastLockoutDate };
+            return View(Member);
+        }
+        [HttpPost]
+        public ActionResult MemberEdit(FormCollection collection, MemberModel.Member Member)
+        {
+            try
+            {
+                com.kuazoo.Member mer = new com.kuazoo.Member();
+                mer.MemberId = Member.MemberId;
+                mer.FirstName = Member.FirstName;
+                mer.LastName = Member.LastName;
+                mer.Email = Member.Email;
+                mer.Gender = Member.Gender;
+                mer.DateOfBirth = Member.DateOfBirth;
+                com.kuazoo.MemberStatus status = new com.kuazoo.MemberStatus();
+                status.MemberStatusId = Member.MemberStatus.MemberStatusId;
+                mer.MemberStatus = status;
+                bool result = memberservice.CreateMember(mer).Result;
+
+                if (result == true)
+                {
+                    ViewBag.result = "1";
+                    TempData["msg"] = "11";
+                }
+                else
+                {
+                    ViewBag.result = "3";
+                    TempData["msg"] = "33";
+                }
+                return RedirectToAction("Member", "Admin");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.result = ex.Message;
+            }
+            return View(Member);
+        }
+        public ActionResult MemberView(int MemberId)
+        {
+            com.kuazoo.Member v = memberservice.GetMemberById(MemberId).Result;
+            MemberModel.Member Member;
+            string gender = "";
+            if (v.Gender == 0) gender = "Male";
+            else if (v.Gender == 1) gender = "Female";
+            Member = new MemberModel.Member() { MemberId = v.MemberId, FirstName = v.FirstName, LastName = v.LastName, Email = v.Email, Gender = v.Gender, GenderStr = gender, DateOfBirth = v.DateOfBirth, MemberStatus = new MemberModel.MemberStatus() { MemberStatusId = v.MemberStatus.MemberStatusId, MemberStatusName = v.MemberStatus.MemberStatusName }, LastLockout = v.LastLockout, LastLockoutDate = v.LastLockoutDate };
+
+            return View(Member);
+        }
+
+        #endregion
+
+
+        #region Transaction
+
+        public ActionResult Transaction()
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+        public ActionResult Transaction_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.Transaction> listmer = transactionservice.GetTransactionList().Result;
+            List<TransactionModel.Transaction> newlistmer = new List<TransactionModel.Transaction>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new TransactionModel.Transaction() {InventoryItemId =v.InventoryItemId,InventoryItemName =v.InventoryItemName,MerchantId =v.MerchantId,MerchantName = v.MerchantName, Sales = v.Sales,MaximumSales =v.MaximumSales,ExpireDate=v.ExpireDate, ExpireDateStr = string.Format("{0:dd MMM yyyy hh:mm tt}",v.ExpireDate) });
+            }
+            IEnumerable<TransactionModel.Transaction> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult TransactionDetail(int InventoryItemId)
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            ViewBag.InventoryItemId = InventoryItemId;
+            return View();
+        }
+        public ActionResult TransactionDetail_Read([DataSourceRequest] DataSourceRequest request, int InventoryItemId)
+        {
+            List<com.kuazoo.TransactionDetail> listmer = transactionservice.GetTransactionDetailByInventoryItemId(InventoryItemId).Result;
+            List<TransactionModel.TransactionDetail> newlistmer = new List<TransactionModel.TransactionDetail>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new TransactionModel.TransactionDetail() { TransactionId = v.TransactionId, InventoryItemId = v.InventoryItemId, InventoryItemName = v.InventoryItemName, MerchantId = v.MerchantId, MerchantName = v.MerchantName,TransactionDate = v.TransactionDate, TransactionDateStr = string.Format("{0:dd MMM yyyy hh:mm tt}",v.TransactionDate), MemberId =v.MemberId,MemberEmail = v.MemberEmail,FlashDealId =v.FlashDealId,LastAction =v.LastAction});
+            }
+            IEnumerable<TransactionModel.TransactionDetail> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult TransactionView(int TransactionId)
+        {
+            com.kuazoo.TransactionDetail v = transactionservice.GetTransactionDetailById(TransactionId).Result;
+            ViewBag.InventoryItemId = v.InventoryItemId;
+
+            string gender = "";
+            if (v.Member.Gender == 0) gender = "Male";
+            else if (v.Member.Gender == 1) gender = "Female";
+            TransactionModel.TransactionDetail Transaction;
+            Transaction = new TransactionModel.TransactionDetail()
+            {
+                TransactionId = v.TransactionId,
+                InventoryItemId = v.InventoryItemId,
+                InventoryItemName = v.InventoryItemName,
+                MerchantId = v.MerchantId,
+                MerchantName = v.MerchantName,
+                TransactionDate = v.TransactionDate,
+                TransactionDateStr = string.Format("{0:dd MMM yyyy hh:mm tt}", v.TransactionDate),
+                MemberId = v.MemberId,
+                MemberEmail = v.MemberEmail,
+                FlashDealId = v.FlashDealId,
+                LastAction = v.LastAction,
+                InventoryItem = new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.InventoryItem.Name, Price = v.InventoryItem.Price, Description = v.InventoryItem.Description, MerchantId = v.InventoryItem.Merchant.MerchantId, MerchantName = v.InventoryItem.Merchant.Name, CityName = v.InventoryItem.Merchant.City.Name, CountryName = v.InventoryItem.Merchant.Country.Name, Keyword = v.InventoryItem.Keyword, InventoryItemTypeId = v.InventoryItem.InventoryItemType.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItem.InventoryItemType.InventoryItemTypeName, Discount = v.InventoryItem.Discount, ExpireDate = v.InventoryItem.ExpireDate, MaximumSales = v.InventoryItem.MaximumSales, PublishDate = v.InventoryItem.PublishDate, MinimumTarget = v.InventoryItem.MinimumTarget, LastAction = v.InventoryItem.LastAction, Tag = v.InventoryItem.Tag, TagName = v.InventoryItem.TagName, ImageName = v.InventoryItem.ImageName, ImageUrl = v.InventoryItem.ImageUrl, Flag = v.InventoryItem.Flag },
+                Member = new MemberModel.Member() { MemberId = v.MemberId, FirstName = v.Member.FirstName, LastName = v.Member.LastName, Email = v.Member.Email, Gender = v.Member.Gender, GenderStr = gender, DateOfBirth = v.Member.DateOfBirth, MemberStatus = new MemberModel.MemberStatus() { MemberStatusId = v.Member.MemberStatus.MemberStatusId, MemberStatusName = v.Member.MemberStatus.MemberStatusName }, LastLockout = v.Member.LastLockout, LastLockoutDate = v.Member.LastLockoutDate },
+            };
+
+            return View(Transaction);
+        }
+
+        #endregion
+
+        #region MinimumTarget
+
+        public ActionResult MinimumTarget()
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+        public ActionResult MinimumTarget_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.MinimumTarget> listmer = transactionservice.GetMinimumTargetList().Result;
+            List<TransactionModel.MinimumTarget> newlistmer = new List<TransactionModel.MinimumTarget>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new TransactionModel.MinimumTarget() { InventoryItemId = v.InventoryItemId, InventoryItemName = v.InventoryItemName, MerchantId = v.MerchantId, MerchantName = v.MerchantName, CurrentSales = v.CurrentSales, Minimum = v.Minimum });
+            }
+            IEnumerable<TransactionModel.MinimumTarget> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult MinimumTargetDetail(int InventoryItemId)
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            ViewBag.InventoryItemId = InventoryItemId;
+            return View();
+        }
+        public ActionResult MinimumTargetDetail_Read([DataSourceRequest] DataSourceRequest request, int InventoryItemId)
+        {
+            List<com.kuazoo.TransactionDetail> listmer = transactionservice.GetTransactionDetailByInventoryItemId(InventoryItemId).Result;
+            List<TransactionModel.TransactionDetail> newlistmer = new List<TransactionModel.TransactionDetail>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new TransactionModel.TransactionDetail() { TransactionId = v.TransactionId, InventoryItemId = v.InventoryItemId, InventoryItemName = v.InventoryItemName, MerchantId = v.MerchantId, MerchantName = v.MerchantName, TransactionDate = v.TransactionDate, TransactionDateStr = string.Format("{0:dd MMM yyyy hh:mm tt}", v.TransactionDate), MemberId = v.MemberId, MemberEmail = v.MemberEmail, FlashDealId = v.FlashDealId, LastAction = v.LastAction });
+            }
+            IEnumerable<TransactionModel.TransactionDetail> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+
+        #region image
+        public ActionResult Image()
+        {
+            if (TempData["msg"] != null)
+            {
+                ViewBag.msg = TempData["msg"];
+            }
+            return View();
+        }
+        public ActionResult Image_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            List<com.kuazoo.Image> listmer = imageservice.GetImageList().Result;
+            List<InventoryItemModel.Image> newlistmer = new List<InventoryItemModel.Image>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new InventoryItemModel.Image() { ImageId = v.ImageId, Name = v.Name, Url = v.Url, LastAction = v.LastAction });
+            }
+            IEnumerable<InventoryItemModel.Image> ienuList = newlistmer;
+            var result = ienuList.ToDataSourceResult(request);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Image_Destroy([DataSourceRequest] DataSourceRequest request, InventoryItemModel.Image Image)
+        {
+            if (Image != null)
+            {
+                Boolean result = imageservice.DeleteImage(Image.ImageId).Result;
+
+                if (result) ViewBag.result = "1";
+                else ViewBag.result = "2";
+                ModelState.AddModelError("", ViewBag.result);
+
+            }
+
+            return Json(ModelState.ToDataSourceResult());
+        }
+
+        public ActionResult ImageAdd()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult ImageAdd(HttpPostedFileBase imageUpload, InventoryItemModel.Image Image)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string imageurl = "";
+                    if (imageUpload != null)
+                    {
+                        if (!Helper.IsValidImage(imageUpload.FileName))
+                        {
+                            throw new Exception("File is not an image file");
+                        }
+                        string name = DateTime.UtcNow.ToString("yyyyMMddhhmmss");
+                        imageurl = Helper.uploadImageWithName(imageUpload, name);
+                    }
+                    com.kuazoo.Image pro = new com.kuazoo.Image();
+                    pro.ImageId = 0;
+                    pro.Name = imageurl;
+
+                    bool result = imageservice.CreateImage(pro).Result;
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                    }
+
+                    TempData["msg"] = ViewBag.result;
+                    return RedirectToAction("Image", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(Image);
+
+        }
+        public ActionResult ImageEdit(int ImageId)
+        {
+            com.kuazoo.Image v = imageservice.GetImageById(ImageId).Result;
+            InventoryItemModel.Image InventoryItem = new InventoryItemModel.Image() { ImageId = v.ImageId, Name=v.Name, Url = v.Url, LastAction = v.LastAction };
+            return View(InventoryItem);
+        }
+        [HttpPost]
+        public ActionResult ImageEdit(HttpPostedFileBase imageUpload, InventoryItemModel.Image Image)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string imageurl = "";
+                    if (imageUpload != null)
+                    {
+                        if (!Helper.IsValidImage(imageUpload.FileName))
+                        {
+                            throw new Exception("File is not an image file");
+                        }
+                        string name = DateTime.UtcNow.ToString("yyyyMMddhhmmss");
+                        imageurl = Helper.uploadImageWithName(imageUpload, name);
+                    }
+                    
+                    com.kuazoo.Image pro = new com.kuazoo.Image();
+                    pro.ImageId = Image.ImageId;
+                    if (imageurl == "") pro.Url = Image.Url;
+                    else pro.Name = imageurl;
+
+                    bool result = imageservice.CreateImage(pro).Result;
+                    if (result == true)
+                    {
+                        ViewBag.result = "1";
+                        TempData["msg"] = "11";
+                    }
+                    else
+                    {
+                        ViewBag.result = "3";
+                        TempData["msg"] = "33";
+                    }
+                    return RedirectToAction("Image", "Admin");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.result = ex.Message;
+                }
+            }
+            return View(Image);
+
+        }
+        public ActionResult ImageView(int ImageId)
+        {
+            com.kuazoo.Image v = imageservice.GetImageById(ImageId).Result;
+            InventoryItemModel.Image InventoryItem = new InventoryItemModel.Image() { ImageId = v.ImageId, Name = v.Name, Url = v.Url, LastAction = v.LastAction };
+            return View(InventoryItem);
+        }
+
+
+        public ActionResult ImageList()
+        {
+            List<com.kuazoo.Image> listmer = imageservice.GetImageListDesc().Result;
+            List<InventoryItemModel.Image> newlistmer = new List<InventoryItemModel.Image>();
+            foreach (var v in listmer)
+            {
+                newlistmer.Add(new InventoryItemModel.Image() { ImageId = v.ImageId, Name = v.Name, Url = v.Url, LastAction = v.LastAction });
+            }
+            InventoryItemModel.ImageList inventorymodel = new InventoryItemModel.ImageList();
+            inventorymodel.List = newlistmer;
+            return View(inventorymodel);
+        }
+        [HttpPost]
+        public virtual ActionResult ImageListUploadImage()//name and strsubimage come from post jquery
+        {
+            HttpPostedFileBase imageUpload = Request.Files["imagefile"];
+            bool isUpload = false;
+            string message = "";
+            string imageurl = "";
+            string imagename = "";
+            int result=0;
+            if (imageUpload != null)
+            {
+                try
+                {
+                    if (!Helper.IsValidImage(imageUpload.FileName))
+                    {
+                        message = "File is not an image file";
+                    }
+                    string name = DateTime.UtcNow.ToString("yyyyMMddhhmmss");
+                    imagename = Helper.uploadImageWithName(imageUpload, name);
+                    imageurl = ConfigurationManager.AppSettings["uploadpath"] + imagename;
+
+                    com.kuazoo.Image pro = new com.kuazoo.Image();
+                    pro.Name = imagename;
+
+                    result = imageservice.CreateImageId(pro).Result;
+                    isUpload = true;
+                    message = "Image uploaded successfully!";
+                }
+                catch (Exception ex)
+                {
+                    message = string.Format("File upload failed: {0}", ex.Message);
+                }
+            }
+            return Json(new { isUpload = isUpload, message = message, imageurl = imageurl, imagename = imagename, imageid = result }, "text/html");
+        }
+        #endregion
+
+        #region jsonlist
+        public JsonResult CountryList()
+        {
+            List<com.kuazoo.Country> listc = countryservice.GetCountryList().Result;
+            List<MasterModel.Country> newlistcat = new List<MasterModel.Country>();
+            foreach (var v in listc)
+            {
+                newlistcat.Add(new MasterModel.Country() { CountryId = v.CountryId, CountryName = v.Name });
+            }
+            IEnumerable<MasterModel.Country> ienuList = newlistcat;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult CityList(int countryid = 0, int stateid = 0)
+        {
+            List<com.kuazoo.City> listc = countryservice.GetCityList(countryid).Result;
+            List<MasterModel.City> newlistcat = new List<MasterModel.City>();
+            foreach (var v in listc)
+            {
+                newlistcat.Add(new MasterModel.City() { CityId = v.CityId, CityName = v.Name });
+            }
+            IEnumerable<MasterModel.City> ienuList = newlistcat;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult MerchantList()
+        {
+            List<com.kuazoo.Merchant> listc = merchantservice.GetMerchantList().Result;
+            List<MerchantModel> newlistcat = new List<MerchantModel>();
+            listc = listc.Where(x => x.LastAction != "5").ToList();
+            foreach (var v in listc)
+            {
+                newlistcat.Add(new MerchantModel() { MerchantId = v.MerchantId, Name = v.Name });
+            }
+            IEnumerable<MerchantModel> ienuList = newlistcat;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult InventoryItemList()
+        {
+            List<com.kuazoo.InventoryItem> listc = flashdealservice.GetInventoryItemList().Result;
+            List<InventoryItemModel.InventoryItem> newlistcat = new List<InventoryItemModel.InventoryItem>();
+            foreach (var v in listc)
+            {
+                newlistcat.Add(new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name });
+            }
+            IEnumerable<InventoryItemModel.InventoryItem> ienuList = newlistcat;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult InventoryItemListByMerchant(int MerchantId)
+        {
+            List<com.kuazoo.InventoryItem> listc = flashdealservice.GetInventoryItemListByMerchant(MerchantId).Result;
+            List<InventoryItemModel.InventoryItem> newlistcat = new List<InventoryItemModel.InventoryItem>();
+            foreach (var v in listc)
+            {
+                newlistcat.Add(new InventoryItemModel.InventoryItem() { InventoryItemId = v.InventoryItemId, Name = v.Name });
+            }
+            IEnumerable<InventoryItemModel.InventoryItem> ienuList = newlistcat;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult InventoryItemTypeList()
+        {
+            List<com.kuazoo.InventoryItemType> listc = inventoryitemservice.GetInventoryItemTypeList().Result;
+            List<InventoryItemModel.InventoryItemType> newlistcat = new List<InventoryItemModel.InventoryItemType>();
+            foreach (var v in listc)
+            {
+                newlistcat.Add(new InventoryItemModel.InventoryItemType() { InventoryItemTypeId = v.InventoryItemTypeId, InventoryItemTypeName = v.InventoryItemTypeName });
+            }
+            IEnumerable<InventoryItemModel.InventoryItemType> ienuList = newlistcat;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult TagList()
+        {
+            List<com.kuazoo.Tag> listtag = inventoryitemservice.GetTagList().Result;
+            List<InventoryItemModel.Tag> newlisttag = new List<InventoryItemModel.Tag>();
+            foreach (var v in listtag)
+            {
+                newlisttag.Add(new InventoryItemModel.Tag() { TagId = v.TagId, TagName = v.Name });
+            }
+            IEnumerable<InventoryItemModel.Tag> ienuList = newlisttag;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        public JsonResult MemberStatusList()
+        {
+            List<com.kuazoo.MemberStatus> listtag = memberservice.GetMemberStatusList().Result;
+            List<MemberModel.MemberStatus> newlisttag = new List<MemberModel.MemberStatus>();
+            foreach (var v in listtag)
+            {
+                newlisttag.Add(new MemberModel.MemberStatus() { MemberStatusId = v.MemberStatusId,MemberStatusName =v.MemberStatusName });
+            }
+            IEnumerable<MemberModel.MemberStatus> ienuList = newlisttag;
+            return Json(ienuList, JsonRequestBehavior.AllowGet);
+
+        }
+        #endregion
+
+    }
+}

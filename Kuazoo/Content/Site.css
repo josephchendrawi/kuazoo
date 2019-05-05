@@ -1,0 +1,140 @@
+﻿body {
+    font-size: .85em;
+    font-family: "Trebuchet MS", Verdana, Helvetica, Sans-Serif;
+    margin: 0;
+    padding: 0;
+    background:#999;
+}
+.center
+{
+    width:920px;
+    margin-left:auto;
+    margin-right:auto;
+}
+#header
+{
+    background:#1c638d;
+    height:50px;
+}
+#welcome
+{
+    width:900px;
+    height:20px;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:right;
+    padding-right:20px;
+    margin-top:10px;
+    font-size:18px;
+}
+#menunav
+{
+    width:920px;
+    height:50px;
+    margin-left:auto;
+    margin-right:auto;
+}
+    #menunav ul
+    {
+        list-style:none;
+        text-align:right;
+        width:920px;
+        display:inline-table;
+        padding:0px;
+        margin:0px;
+        height:50px;
+    }
+    #menunav li
+    {
+        display:inline-table;
+        height:50px;
+    }
+    #menunav li a
+    {
+        color:White;
+        text-decoration:none;
+        padding:10px;
+        font-size:20px;
+        line-height:50px;
+    }
+    #menunav li:hover
+    {
+        background:#0c2d41;
+    }
+    #menunav li .active
+    {
+        background:#0c2d41;
+    }
+    
+#main
+{
+    min-height:500px;
+    background:#F2F2F2;
+}
+    #contentwrap
+    {
+        display: inline-block;
+        padding-top:10px;
+        padding-left:20px;
+        padding-right:20px;
+        width:880px;
+    }
+#footer
+{
+    margin-top:20px;
+    height:50px;
+    text-align:center;
+}
+.title
+{
+    font-size:30px;
+    color:Black;
+}
+.red
+{
+    color:Red;
+}
+.btnSubmit
+{
+}
+#wrap
+{
+    margin-top:20px;
+}
+#wrap .title
+{
+    font-size:22px;
+}
+#wrap .colleft
+{
+    width:200px;
+    display:inline-block;
+}
+#wrap .colright
+{
+    width:500px;
+    display:inline-block;
+}
+
+.field-validation-error
+{
+    color:Red;
+}
+
+#map_canvas
+{
+    height:300px;
+    width:300px;
+}
+.btnLocate
+{
+	display:block; 
+	background:#a5a5a5;
+	font:bold 12px verdana;
+	color:#fff;
+	text-align:center;
+	width:140px;
+	padding-top:4px;
+	height:20px;
+	cursor:pointer;
+}

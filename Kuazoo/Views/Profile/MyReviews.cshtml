@@ -1,0 +1,155 @@
+﻿@model List<com.kuazoo.Models.ReviewVM>
+@{
+    ViewBag.Title = "My Reviews";
+    Layout = "~/Views/Shared/_ProfileLayout.cshtml";
+}
+@section AddToHead{
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/Review.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/jquery.raty.js")"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeprofilenav(2);
+        $.fn.raty.defaults.path = '@Url.Content("~/Content/img")';
+    });
+    function editRow(i) {
+        $("#reviewShow" + i).css("display", "none");
+        $("#reviewEdit" + i).css("display", "block");
+        $("#reviewaction" + i + " .btnEdit100").attr("disabled", "disabled");
+        $("#reviewaction" + i + " .btnEdit100").addClass("disabled");
+
+        var rating =$("#reviewaction"+i).attr("data-value");
+        rating = rating / 2;
+        $(function () {
+            $('#ratinghalf' + i).raty({ half: true, score:rating });
+        });
+    }
+    function save(i) {
+        $("#reviewEdit"+i+" #btnComment").attr("disabled", "disabled");
+        $("#reviewEdit"+i+" #btnComment").addClass("disabled");
+        var message = $("#reviewEdit"+i+" #txtComment").val();
+        var score = ($("#ratinghalf"+i).raty("score") * 2);
+        var scoredata = ($("#ratinghalf"+i).raty("score"));
+        if(i != "" && message !=""){
+            if (isNaN(score)) score = 0;
+            //console.log(id + "-" + message + "-" + score);
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("ReviewEdit","Profile")",
+                data: {id:i,rating:score,message:message},
+                dataType:"json",
+                success:function(data){
+                    if(data.success){
+                        $("#reviewShow" + i).css("display", "block");
+                        $("#reviewShow"+i+" .reviewtext").html(message);
+                        $("#reviewShow"+i+" .ratingplace").html(scoredata);
+                        $("#reviewaction"+i).attr("data-value",score);
+                    }
+                    else{
+                        alert(data.error);
+                    }
+                    $("#reviewEdit"+i+" #btnComment").removeAttr("disabled");
+                    $("#reviewEdit"+i+" #btnComment").removeClass("disabled");
+                    $("#reviewEdit" + i).css("display", "none");
+                    $("#reviewaction" + i + " .btnEdit100").removeAttr("disabled");
+                    $("#reviewaction" + i + " .btnEdit100").removeClass("disabled");
+                }
+            });
+        }
+        else{
+            $("#reviewEdit"+i+" #btnComment").removeAttr("disabled");
+            $("#reviewEdit"+i+" #btnComment").removeClass("disabled");
+            $("#reviewaction" + i + " .btnEdit100").removeAttr("disabled");
+            $("#reviewaction" + i + " .btnEdit100").removeClass("disabled");
+        }
+    }
+    function deleteRow(i) {
+        if(i != ""){
+            $.ajax({
+                type:'POST',
+                url: "@Url.Action("ReviewDelete","Profile")",
+                data: {id:i},
+                dataType:"json",
+                success:function(data){
+                    console.log(data);
+                    if(data.success){
+                        $("#reviewdelete" + i).remove();
+                    }
+                    else{
+                        alert(data.error);
+                    }
+                }
+            });
+        }
+    }
+</script>
+}
+@section AddToBread{
+
+
+<div class="notifwrap" id="notification">
+</div>
+}
+@if (Model != null && Model.Count() > 0)
+{
+    foreach (var v in Model)
+    {
+        var reviewdel = "reviewdelete" + v.ReviewId;
+        <div class="reviewrow" id="@reviewdel">
+            <div class="reviewitem">
+                <div class="imageplace">
+                    <div class="image1">
+                        <img src="@v.InventoryItemImageUrl">
+                    </div>
+                    <div class="image2">
+                        <div>surPRIZE</div>
+                        <img src="@v.PrizeImageUrl">
+                    </div>
+                </div>
+            </div>
+            <div class="reviewcontent">
+            @{
+        var reviewshow = "reviewShow" + v.ReviewId;
+        var reviewedit = "reviewEdit" + v.ReviewId;
+        var rating = "ratinghalf" + v.ReviewId;
+        var reviewaction = "reviewaction" + v.ReviewId;
+              }
+                <div id="@reviewshow">
+                    <div class="title">@v.MemberFullName<span id="timeago19">@string.Format("{0:dd MMM yyyy hh:mm tt}", v.ReviewDate)</span>
+                    </div>
+                    <div class="star"><div class="ratingStar"></div> <span class="ratingplace">@((decimal)v.Rating / 2)</span>/5</div>
+                    <div class="reviewtext">
+                        @v.Message
+                    </div>
+                </div>
+                <div id="@reviewedit" style="display:none">
+                    <div class="star"><div id="@rating"></div></div>
+                    <div class="commentbox">
+                        <textarea id="txtComment" placeholder="Add a comment...">@v.Message</textarea>
+                    </div>
+                    <div><button class="btnComment" id="btnComment" onclick="save(@v.ReviewId)">Save</button></div>
+                </div>
+            </div>
+            <div class="reviewaction" id="@reviewaction" data-value="@v.Rating">
+                <button class="btnEdit100" style="margin-bottom:10px;" onclick="editRow(@v.ReviewId);">Edit</button>
+                <button class="btnEdit100" onclick="deleteRow(@v.ReviewId);">Delete</button>
+            </div>
+        </div>
+
+    }
+}
+else
+{
+    <div class="noentry">
+        <span class="noreviewimg"></span>
+        <br /><br />
+        <p><h4>You have no reviews.</h4></p>
+        <br />
+        <p><h6 style="line-height: 20px;">It seems you haven’t written any reviews yet. Go ahead, and tell others about any product or experience you bought on <u><a href="@Url.Action("Index", "Home")">Kuazoo.com</a></u>. The best thing is, you’ll earn K-Points for every review you write.</h6></p>
+        <br /><br />
+        <p>
+            <a href="@Url.Action("MyPurchases", "Profile")" class="btnCheckOut">MY PURCHASES</a>
+        </p>
+    </div>
+}

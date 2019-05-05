@@ -1,0 +1,13 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+<div style="min-height:400px">
+<h2>
+    @Model.Exception.Message
+</h2>
+
+</div>

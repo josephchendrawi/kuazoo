@@ -1,0 +1,159 @@
+﻿@model com.kuazoo.Models.TransactionModel.MinimumTarget
+@{
+    ViewBag.Title = "Minimum Target";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div id="mainlist">
+<div id="mainwrap">
+    <h1>Minimum Target @*<a href="MinimumTargetAdd" class="addNewBtn">Add New</a>*@</h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.TransactionModel.MinimumTarget>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.InventoryItemName).Title("Item Name");
+            columns.Bound(p => p.Minimum).Title("Minimum Target");
+            columns.Bound(p => p.CurrentSales).Title("Current Sales");
+            columns.Bound(p => p.InventoryItemId).ClientTemplate(
+                "<a class='gridBtn' href='MinimumTargetDetail?InventoryItemId=#=InventoryItemId#'><span class='fa fa-eye' title='View' ></span></a>&nbsp;&nbsp;"
+                ).Title("Action").Filterable(filter => filter.Enabled(false));
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("MinimumTarget_Read", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.InventoryItemId);
+            })
+        )
+        .Events(events=>events.DataBound("onDataBound").Change("onChange"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Filterable()
+        .Selectable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    $(window).load(function () {
+        filtergrid();
+    });
+    var viewactive = 0;
+    function onDataBound(e) {
+        var data = this.dataSource.filter();
+        if (data != null) {
+            //console.log(data);
+            document.location.hash = "";
+            if (data.filters.length > 1) {
+                for (var i = 1; i < data.filters.length; i++) {
+                    console.log(data.filters[i].field + " " + data.filters[i].operator + " " + data.filters[i].value);
+                    insertParam(data.filters[i].field, data.filters[i].value);
+                }
+            }
+        }
+        $(".gridBtn").click(function () {
+            viewactive = 1;
+            setTimeout(function () {
+                viewactive = 0;
+            }, 100);
+        });
+    }
+    function onChange(e) {
+        setTimeout(function () {
+            if (viewactive == 0) {
+                //var data = this.select();
+                //console.log(data);
+                var grid = $("#grid").data("kendoGrid");
+                var selectedItem = grid.dataItem(grid.select());
+                window.location = "MinimumTargetDetail?InventoryItemId=" + selectedItem.InventoryItemId;
+            }
+        }, 100);
+    }
+    function insertParam(key, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        //console.log(kvp);
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+
+            if (x[0] == key) {
+                x[1] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': 'contains', 'value': re[1] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+        }
+    }
+    function error_handler(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> MinimumTarget suspended successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Suspend</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

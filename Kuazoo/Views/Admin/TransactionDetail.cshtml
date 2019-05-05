@@ -1,0 +1,254 @@
+﻿@model com.kuazoo.Models.TransactionModel.TransactionDetail
+@{
+    ViewBag.Title = "TransactionDetail";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(9);
+        $(document).tooltip();
+    });
+</script>
+<div id="msgresult">
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Transaction">Transaction</a> <span class="active"> / Transaction Detail</span>
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+        if (ViewBag.msg == "1")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New TransactionDetail successfully created</div></div>
+        }
+        else if (ViewBag.msg == "3")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Create new Transaction Detail unsuccessful.</div></div>
+        }
+        else if (ViewBag.msg == "11")
+        {
+            <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> TransactionDetail updated successfully</div></div>
+        }
+        else if (ViewBag.msg == "33")
+        {
+            <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Transaction detail failed to update.</div></div>
+        }
+        @*<div class="notif cnotice"><div class="notifwrap notice"><strong>Notice:</strong> A</div></div>
+        <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> A</div></div>
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> A</div></div>
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> A</div></div>*@
+}
+    </div>
+</div>
+</div>
+<div id="mainlist">
+<div id="mainwrap">
+    <h1>Transaction Detail @*<a href="TransactionDetailAdd" class="addNewBtn">Add New</a>*@</h1>
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.TransactionModel.TransactionDetail>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.TransactionId).Title("Transaction ID");
+            columns.Bound(p => p.OrderId).Title("Order ID");
+            columns.Bound(p => p.InventoryItemName).Title("Item Name");
+            columns.Bound(p => p.MemberEmail).Title("Member");
+            columns.Bound(p => p.TransactionDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Transaction Date");
+            columns.Bound(p => p.FlashDealId).ClientTemplate("#if(FlashDealId != null){#<a class='gridBtn' href='FlashDealView?FlashDealId=#=FlashDealId#' target='_blank'>View Flash</a>#}#").Title("Flash Deal").Filterable(filter => filter.Enabled(false));
+            columns.Bound(p => p.ProcessStatus).ClientTemplate("#=ProcessStatus.Name#").Title("Processed Status");
+            columns.Bound(p => p.ProcessDate).Format("{0:dd MMM yyyy hh:mm tt}").Title("Processed Date");
+            columns.Command(command => { command.Custom("view").Click("showView"); command.Edit().Text("").CancelText("").UpdateText(""); });
+            //columns.Bound(p => p.TransactionId).ClientTemplate(
+            //    "<a class='gridBtn' href='TransactionView?TransactionId=#=TransactionId#' target='_blank'><span class='fa fa-eye' title='View' ></span></a>&nbsp;&nbsp;" +
+            //     "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-edit'  href=''><span class='fa fa-pencil' title='Edit' ></span></a>" +
+            //     "|&nbsp;&nbsp;<a class='gridBtn k-button-icontext k-grid-update'  href=''><span class='fa fa-pencil' title='Update' ></span></a>"
+            //   ).Title("Action").Filterable(filter => filter.Enabled(false));
+            //columns.Command(command => command.Edit()).Visible(true);//for make custom button work
+        })
+        .Editable(editable => editable.DisplayDeleteConfirmation("Do you want to suspend this TransactionDetail?"))
+        @*.ToolBar(toolbar =>
+        {
+            toolbar.Template(@<text>
+                @(Html.Kendo().DropDownList()
+                    .Name("LastAction")
+                    .OptionLabel("All")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .AutoBind(false)
+                    .Events(e => e.Change("changeLastAction"))
+                    .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                            Text = "Created",
+                            Value = "1"
+                        },
+                        new SelectListItem() {
+                            Text = "Updated",
+                            Value = "3"
+                        },
+                        new SelectListItem() {
+                            Text = "Deleted",
+                            Value = "5"
+                        }
+                    })
+                )
+                    
+            </text>);
+        })*@
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("TransactionDetail_Read", "Admin", new { InventoryItemId = ViewBag.InventoryItemId }))
+            .Update(update => update.Action("TransactionDetail_Update", "Admin", new { InventoryItemId = ViewBag.InventoryItemId }))
+            .Model(model =>
+            {
+                model.Id(p => p.TransactionId);
+                model.Field(p => p.OrderId).Editable(false);
+                model.Field(p => p.TransactionId).Editable(false);
+                model.Field(p => p.InventoryItemName).Editable(false);
+                model.Field(p => p.MemberEmail).Editable(false);
+                model.Field(p => p.TransactionDate).Editable(false);
+                model.Field(p => p.FlashDealId).Editable(false);
+                model.Field(p => p.ProcessDate).Editable(false);
+                model.Field(p => p.ProcessStatus).DefaultValue(ViewData["defaultStatus"] as com.kuazoo.Models.TransactionModel.TransactionStatusDrop);
+            })
+        )
+                .Events(events => events.DataBound("onDataBound").Edit("onEdit").Cancel("onCancel"))
+            .Editable(editable => editable.Mode(GridEditMode.InLine))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Filterable()
+        .Scrollable(scr => scr.Height(480))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+            //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    $(window).load(function () {
+        filtergrid();
+    });
+    function onDataBound(e) {
+        $(".k-grid-edit").addClass("gridBtn");
+        $(".k-grid-edit").removeClass("k-button");
+        $(".k-grid-edit").html("|&nbsp;&nbsp;<span class='fa fa-pencil' title='Edit' ></span>&nbsp;&nbsp;");
+        $(".k-grid-view").addClass("gridBtn");
+        $(".k-grid-view").removeClass("k-button");
+        $(".k-grid-view").html("<span class='fa fa-eye' title='View' ></span>&nbsp;&nbsp;");
+        
+        var data = this.dataSource.filter();
+        if (data != null) {
+            //console.log(data);
+            document.location.hash = "";
+            if (data.filters.length > 1) {
+                for (var i = 1; i < data.filters.length; i++) {
+                    console.log(data.filters[i].field + " " + data.filters[i].operator + " " + data.filters[i].value);
+                    insertParam(data.filters[i].field, data.filters[i].value);
+                }
+            }
+        }
+    }
+    function showView(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        window.location = "TransactionView?TransactionId="+dataItem.TransactionId;
+    }
+    function onEdit(e) {
+        $(".k-grid-update").addClass("gridBtn");
+        $(".k-grid-update").removeClass("k-button");
+        $(".k-grid-update").html("<span class='fa fa-check' title='Update' ></span>&nbsp;&nbsp;");
+        $(".k-grid-cancel").addClass("gridBtn");
+        $(".k-grid-cancel").removeClass("k-button");
+        $(".k-grid-cancel").html("|&nbsp;&nbsp;<span class='fa fa-ban' title='Cancel' ></span>&nbsp;&nbsp;");
+    }
+    function onCancel(e) {
+        setTimeout(function () {
+            $(".k-grid-edit").addClass("gridBtn");
+            $(".k-grid-edit").removeClass("k-button");
+            $(".k-grid-edit").html("|&nbsp;&nbsp;<span class='fa fa-pencil' title='Edit' ></span>&nbsp;&nbsp;");
+            $(".k-grid-view").addClass("gridBtn");
+            $(".k-grid-view").removeClass("k-button");
+            $(".k-grid-view").html("<span class='fa fa-eye' title='View' ></span>&nbsp;&nbsp;");
+        }, 1);
+    }
+    function insertParam(key, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        //console.log(kvp);
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+
+            if (x[0] == key) {
+                x[1] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': 'contains', 'value': re[1] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+        }
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Transaction Status update successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

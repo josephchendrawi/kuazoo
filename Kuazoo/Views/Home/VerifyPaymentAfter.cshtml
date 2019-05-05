@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "VerifyPaymentAfter";
+    Layout = "~/Views/Shared/_EmptyJSLayout.cshtml";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        @if (ViewBag.err != null)
+        {
+            <text>
+                parent.$("#paymenterr").val('@ViewBag.err');
+            </text>
+        }
+        parent.$.fancybox.close();
+    });
+</script>

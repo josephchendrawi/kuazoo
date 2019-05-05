@@ -1,0 +1,125 @@
+﻿@model com.kuazoo.Models.MemberModel.Member
+@{
+    ViewBag.Title = "Member Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(8);
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Member">Member</a> <span class="active"> / Edit Member</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Member updated successfully</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Update Member</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Edit Member</h1>
+    </div>
+        @using (Html.BeginForm())
+        {
+            @Html.HiddenFor(model => model.MemberId)
+            
+    <div id="wrap">
+    <div class="colright">
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.FirstName)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.FirstName, new { @class = "long" })@Html.ValidationMessageFor(model => model.FirstName)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.LastName)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.LastName, new { @class = "long" })@Html.ValidationMessageFor(model => model.LastName)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Email)</div>
+            <div class="colright">@Html.TextBoxFor(model => model.Email, new { @class = "long" })@Html.ValidationMessageFor(model => model.Email)</div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.Gender)</div>
+            <div class="colright">@(Html.Kendo().DropDownListFor(model=>model.Gender)
+                                    .HtmlAttributes(new { @class = "w200" })
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .BindTo(new List<SelectListItem>(){
+                                        new SelectListItem(){
+                                            Text="Male",
+                                            Value="1" 
+                                        },
+                                        new SelectListItem(){
+                                            Text="Female",
+                                            Value="2"
+                                        }
+                                    })
+                                    .Value(Model.Gender.ToString())
+                                  )
+            
+            </div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.DateOfBirth)</div>
+            <div class="colright">
+                    @(Html.Kendo().DatePickerFor(model => model.DateOfBirth)
+                        .HtmlAttributes(new { @class = "w200" })
+                        .Format("dd MMM yyyy")
+                    )
+                    @Html.ValidationMessageFor(model => model.DateOfBirth)
+            </div>
+        </div>
+        <div>
+            <div class="colleft">@Html.LabelFor(model => model.MemberStatus)</div>
+            <div class="colright">@(Html.Kendo().DropDownListFor(model=>model.MemberStatus.MemberStatusId)
+                                .HtmlAttributes(new { @class = "kendoDropdown" })
+                                .OptionLabel("--Select Status--")
+                                .DataTextField("MemberStatusName")
+                                .DataValueField("MemberStatusId")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("MemberStatusList", "Admin");
+                                    });
+                                })
+                        )
+            </div>
+        </div>
+    </div>
+    </div>
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    <input type="submit" value="Update" class="submitBtn" onclick="return UpdateConf()"/>
+                    <a href="Member"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>
+        }
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#FirstName").focus();
+    });
+    function UpdateConf() {
+        var r = confirm("Confirm update Member details?");
+        if (r == true) return true;
+        else return false;
+    }
+</script>

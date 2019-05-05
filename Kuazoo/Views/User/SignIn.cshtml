@@ -1,0 +1,212 @@
+﻿@*@model com.kuazoo.Models.SignInSignUpModel*@
+@{
+    ViewBag.Title = "LOG IN / SIGN UP";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+<div id="fb-root"></div>
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml      : true,
+            version    : 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+    function FBlogin() {
+        var url = "https://www.facebook.com/dialog/oauth?client_id=@Kuazoo.Helper.SetFacebookId" +
+                    "&redirect_uri=@Kuazoo.Helper.SetUrl/User/FacebookRedirect?returnUrl=" + $('#returnUrl').val() +
+                    "&response_type=token" +
+                    "&scope=email,public_profile,user_birthday";
+        window.location.href = url;
+    };
+    function Twitterlogin(){
+        
+    }
+
+    function getUrlParameter(sParam)
+    {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) 
+        {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == sParam) 
+            {
+                return sParameterName[1];
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('#returnUrl').val(getUrlParameter('returnUrl'));
+        if (decodeURIComponent(getUrlParameter('returnUrl')).toLowerCase().indexOf("/Home/CheckOutShip".toLowerCase()) >= 0) {
+            $('.btnFacebook').hide();
+            $('.loginhr').hide();
+        }
+        if (getUrlParameter('popUp') == "1") {
+            bootbox.alert("Please log in to proceed.");
+        }
+    });
+</script>
+
+<div class="notifwrap">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+    if (ViewBag.msg == "1")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Please find your email to verify account</div></div>
+    }
+    else if (ViewBag.msg == "3")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create</div></div>
+    }
+    @*else if (ViewBag.msg == "11")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully login</div></div>
+    }*@
+    else if (ViewBag.msg == "22")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Account activated successfully.</div></div>
+    }
+    else if (ViewBag.msg == "33")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Email or password incorrect</div></div>
+    }
+    else if (ViewBag.msg == "44")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Error with facebook login, Please make sure you allow your infomation email to us</div></div>
+    }
+    else
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> @ViewBag.msg </div></div>
+    }
+}
+@if (ViewBag.result != null)
+{
+    @*if (ViewBag.result == "1")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully login</div></div>
+    }
+    else *@
+    if (ViewBag.result == "3")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Email or password incorrect</div></div>
+    }
+    else if (ViewBag.result == "93")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create</div></div>
+    }
+    else
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Warning:</strong> @ViewBag.result</div></div>
+    }
+}
+</div>
+
+<div class="signinup">
+
+<div class="loginwrap">
+<div class="logincontent">
+    <div class="margintop40">
+        <button class="btnFacebook" onclick="FBlogin()"><div class="facebook"></div>Sign in with Facebook</button>
+       @* <br /><br />
+        <button class="btnTwitter" onclick="Twitterlogin()"><span class="fa fa-twitter"></span>Sign in with Twitter</button>*@
+    </div>
+    <div class="loginhr"><div><span>OR</span></div></div>
+</div></div>
+    
+<table class="tabl"><tr valign="top"><td>
+<div class="loginwrap">
+<div class="logincontent">
+
+<h2>Log In</h2>
+   @* @using (Html.BeginForm())
+    {
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="returnUrl" id="returnUrl" />
+    <div class="loginrow">
+        <div class="logintext width150">Email</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.SignIn.UserName, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.SignIn.UserName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150">Password</div>
+        <div class="logininput">@Html.PasswordFor(model => model.SignIn.Password, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.SignIn.Password)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput">@Html.CheckBoxFor(model => model.SignIn.RememberMe) <label class="rememberme" for="RememberMe">Stay signed in</label></div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput"><button class="btnInput" type="submit">Log In</button></div>
+    </div>
+    }*@
+    @{Html.RenderPartial("_SignIn");}
+    @*<div class="loginrow" style="margin:0px">
+        <div class="logintext width150"></div>
+        <div class="logininput"><hr /></div>
+    </div>*@
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput"><a href="@Url.Action("ForgotPassword", "User")" class="forgotpass">Forgot your password?</a></div>
+    </div>
+</div>
+</div>
+</td>
+<td>
+<div style="border-left: 1px solid #CCCCCC; height:400px;"></div>
+</td>
+<td>
+<div class="loginwrap">
+<div class="logincontent">
+<h2>Sign Up</h2>
+    
+    @*@using (Html.BeginForm("SignUp2","User"))
+    {
+    @Html.AntiForgeryToken()
+    <div class="loginrow">
+        <div class="logintext width200">First Name</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.FirstName, new { @class = "txtInput" })<br />@Html.ValidationMessageFor(model => model.FirstName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Last Name</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.LastName, new { @class = "txtInput" })<br />@Html.ValidationMessageFor(model => model.LastName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Email</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.Email, new { @class = "txtInput" })<br />@Html.ValidationMessageFor(model => model.Email)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Password</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.Password, new { @class = "txtInput", type = "password" })<br />@Html.ValidationMessageFor(model => model.Password)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200">Confirm Password</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.ConfirmPassword, new { @class = "txtInput", type = "password" })<br />@Html.ValidationMessageFor(model => model.ConfirmPassword)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200"></div>
+        <div class="logininput terms">By click Sign Up, you confirm that you accept our <a href="#">Terms of use</a> and <a href="#">Privacy Policy</a>.</div>
+    </div>
+    @*<div class="loginrow">
+        <div class="logintext width200"></div>
+        <div class="logininput">@Html.CheckBoxFor(model => model.VerifyEmail) <label class="VerifyEmail" for="VerifyEmail">Verify Email</label></div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width200"></div>
+        <div class="logininput"><button class="btnInput" type="submit">Sign Up</button></div>
+    </div>
+    }*@
+    
+    @{Html.RenderPartial("_SignUp");}
+</div>
+</div>
+</td></tr></table>
+
+</div>

@@ -1,0 +1,251 @@
+﻿@{
+    ViewBag.Title = "Admin";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(0);
+    });
+</script>
+<div id="msgresult">
+</div>
+<div id="mainlist">
+<div id="mainwrap">
+<h1>Dashboard</h1>
+<br />
+<div class="col-lg-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">Expiring Prize in 5 days</div>
+            <div class="panel-body">
+                @(Html.Kendo().Grid<com.kuazoo.Models.InventoryItemModel.Prize>()
+                .Name("gridPrize")
+                .Columns(columns =>
+                {
+                    columns.Bound(p => p.PrizeId).Title("Prize ID").Hidden(false).Visible(true).Width(80);
+                    columns.Bound(p => p.Name).Title("Prize Name");
+                    columns.Bound(p => p.ExpiryDate).Format("{0:dd MMM yyyy}").Title("Expiry Date").Width(110);
+                })
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .PageSize(10)
+                    .Events(events => events.Error("error_handlerPrize"))
+                    .Read(read => read.Action("IndexPrize_Read", "Admin"))
+                    .Model(model =>
+                    {
+                        model.Id(p => p.PrizeId);
+                    })
+                )
+                .Events(events => events.Change("onChangePrize"))
+                .Filterable(filterable => filterable
+                    .Extra(false)
+                        .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                            .StartsWith("Starts with")
+                            .Contains("Contains")
+                        ))
+                )
+                .Pageable(page => page
+                    .Refresh(true)
+                    .PageSizes(true)
+                )
+                .Filterable()
+                .Scrollable(scr => scr.Height(100))
+                .Sortable(sortable => sortable
+                    .AllowUnsort(true)
+                    .SortMode(GridSortMode.MultipleColumn))
+                .Resizable(resize => resize.Columns(true))
+                .Reorderable(reorder => reorder.Columns(true))
+                .Selectable()
+               )
+             </div>
+      </div>
+</div>
+
+@*<div class="col-lg-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">Expiring Deal in 5 days</div>
+            <div class="panel-body">
+             @(Html.Kendo().Grid<com.kuazoo.Models.InventoryItemModel.InventoryItem>()
+                .Name("gridDeal")
+                .Columns(columns =>
+                {
+                    columns.Bound(p => p.InventoryItemId).Title("Deal ID").Hidden(false).Visible(true).Width(80);
+                    columns.Bound(p => p.Name).Title("Deal Name");
+                    columns.Bound(p => p.ExpireDate).Format("{0:dd MMM yyyy}").Title("Expiry Date").Width(110);
+                })
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .PageSize(10)
+                    .Events(events => events.Error("error_handlerDeal"))
+                    .Read(read => read.Action("IndexDeal_Read", "Admin"))
+                    .Model(model =>
+                    {
+                        model.Id(p => p.InventoryItemId);
+                    })
+                )
+                .Events(events => events.Change("onChangeDeal"))
+                .Filterable(filterable => filterable
+                    .Extra(false)
+                        .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                            .StartsWith("Starts with")
+                            .Contains("Contains")
+                        ))
+                )
+                .Pageable(page => page
+                    .Refresh(true)
+                    .PageSizes(true)
+                )
+                .Filterable()
+                .Scrollable(scr => scr.Height(100))
+                .Sortable(sortable => sortable
+                    .AllowUnsort(true)
+                    .SortMode(GridSortMode.MultipleColumn))
+                .Resizable(resize => resize.Columns(true))
+                .Reorderable(reorder => reorder.Columns(true))
+                .Selectable()
+            )
+             </div>
+      </div>
+</div>*@
+
+<div class="col-lg-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">Top 3 Hottest Deal</div>
+            <div class="panel-body">
+            @(Html.Kendo().Grid<com.kuazoo.Models.TransactionModel.Transaction>()
+        .Name("gridHot")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.InventoryItemId).Title("Deal ID").Hidden(false).Visible(true).Width(80);
+            columns.Bound(p => p.InventoryItemName).Title("Deal Name");
+            columns.Bound(p => p.Sales).Format("{0:dd MMM yyyy}").Title("No of Purchases").Width(140);
+        })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handlerHot"))
+            .Read(read => read.Action("IndexHot_Read", "Admin"))
+            .Model(model =>
+            {
+                model.Id(p => p.InventoryItemId);
+            })
+        )
+        .Events(events => events.Change("onChangeHot"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Filterable()
+        .Scrollable(scr => scr.Height(120))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+        .Selectable()
+    )
+          </div>
+        </div>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+    function onDataBoundPrize(e) {
+    }
+    function onChangePrize(e) {     
+        var grid = $("#gridPrize").data("kendoGrid");
+        var selectedItem = grid.dataItem(grid.select());
+        window.location = "PrizeView?PrizeId=" + selectedItem.PrizeId;
+    }
+    function error_handlerPrize(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#gridPrize').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+
+    //function onDataBoundDeal(e) {
+    //}
+    //function onChangeDeal(e) {     
+    //    var grid = $("#gridDeal").data("kendoGrid");
+    //    var selectedItem = grid.dataItem(grid.select());
+    //    window.location = "InventoryItemView?InventoryItemId=" + selectedItem.InventoryItemId;
+    //}
+    //function error_handlerDeal(e) {
+    //    if (e.errors) {
+    //        var result = '<div id="breadcrumbs"><div class="mainwrap">';
+    //        var message = "";
+    //        $.each(e.errors, function (key, value) {
+    //            if ('errors' in value) {
+    //                $.each(value.errors, function () {
+    //                    message = this;
+    //                });
+    //            }
+    //        });
+    //        if (message != "") {
+    //            result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+
+    //            result += "</div></div>";
+    //            $("#msgresult").html(result);
+    //        }
+    //        //alert(message);
+    //        var grid = $('#gridDeal').data('kendoGrid');
+    //        grid.dataSource.read();
+    //        grid.refresh();
+    //    }
+    //}
+
+    function onDataBoundHot(e) {
+    }
+    function onChangeHot(e) {   
+        var grid = $("#gridHot").data("kendoGrid");
+        var selectedItem = grid.dataItem(grid.select());
+        window.location = "TransactionDetail?InventoryItemId=" + selectedItem.InventoryItemId;
+    }
+    function error_handlerHot(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#gridHot').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

@@ -1,0 +1,142 @@
+﻿@model com.kuazoo.Models.LogOnModel
+@{
+    ViewBag.Title = "LOG IN";
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+<div id="fb-root"></div>
+<script language="javascript" type="text/javascript">
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '@Kuazoo.Helper.SetFacebookId',
+            xfbml      : true,
+            version    : 'v2.1'
+        });
+    };
+    (function (d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) { return; }
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    } (document));
+    function FBlogin() {
+        var url = "https://www.facebook.com/dialog/oauth?client_id=@Kuazoo.Helper.SetFacebookId" +
+                    "&redirect_uri=@Kuazoo.Helper.SetUrl/User/FacebookRedirect?returnUrl=" + $('#returnUrl').val() +
+                    "&response_type=token" +
+                    "&scode=user_birthday,email,user_checkins,publish_stream,read_friendlists,manage_friendlists,offline_access";
+        window.location.href = url;
+    };
+    function Twitterlogin(){
+        
+    }
+
+    function getUrlParameter(sParam)
+    {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) 
+        {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == sParam) 
+            {
+                return sParameterName[1];
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('#returnUrl').val(getUrlParameter('returnUrl'));
+
+        if(decodeURIComponent(getUrlParameter('returnUrl')).toLowerCase().indexOf("/Home/CheckOutShip".toLowerCase()) >= 0){
+            $('.margintop40').hide();
+            $('.loginhr').hide();
+        }
+    });
+</script>
+<h2>Log In</h2>
+
+<div class="notifwrap">
+@if (ViewBag.msg != null && ViewBag.msg != "")
+{
+    if (ViewBag.msg == "1")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Please find your email to verify account</div></div>
+    }
+    else if (ViewBag.msg == "3")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create</div></div>
+    }
+    @*else if (ViewBag.msg == "11")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully login</div></div>
+    }*@
+    else if (ViewBag.msg == "22")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Account activated successfully.</div></div>
+    }
+    else if (ViewBag.msg == "33")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Email or password incorrect</div></div>
+    }
+    else
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> @ViewBag.msg </div></div>
+    }
+}
+@if (ViewBag.result != null)
+{
+    @*if (ViewBag.result == "1")
+    {
+        <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Successfully login</div></div>
+    }
+    else *@
+    if (ViewBag.result == "3")
+    {
+        <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Email or password incorrect</div></div>
+    }
+    else
+    {
+        <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+    }
+}
+</div>
+
+<div class="loginwrap">
+<div class="logincontent">
+    <div class="margintop40">
+        <button class="btnFacebook" onclick="FBlogin()"><div class="facebook"></div>Log in with Facebook</button>
+       @* <br /><br />
+        <button class="btnTwitter" onclick="Twitterlogin()"><span class="fa fa-twitter"></span>Sign in with Twitter</button>*@
+    </div>
+    <div class="loginhr"><div><span>OR</span></div></div>
+    
+    @using (Html.BeginForm())
+    {
+    @Html.AntiForgeryToken()
+    <input type=hidden name="returnUrl" id="returnUrl" />
+    <div class="loginrow">
+        <div class="logintext width150">Email</div>
+        <div class="logininput">@Html.TextBoxFor(model => model.UserName, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.UserName)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150">Password</div>
+        <div class="logininput">@Html.PasswordFor(model => model.Password, new { @class = "txtInput" })@Html.ValidationMessageFor(model => model.Password)</div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput">@Html.CheckBoxFor(model => model.RememberMe) <label class="rememberme" for="RememberMe">Stay signed in</label></div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput"><button class="btnInput" type="submit">Log In</button></div>
+    </div>
+    }
+    <div class="loginrow" style="margin:0px">
+        <div class="logintext width150"></div>
+        <div class="logininput"><hr /></div>
+    </div>
+    <div class="loginrow">
+        <div class="logintext width150"></div>
+        <div class="logininput"><a href="@Url.Action("ForgotPassword","User")" class="forgotpass">Forgot your password?</a></div>
+    </div>
+</div>
+</div>

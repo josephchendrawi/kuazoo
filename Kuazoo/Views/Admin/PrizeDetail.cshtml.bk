@@ -1,0 +1,190 @@
+﻿@model com.kuazoo.Models.InventoryItemModel.InventoryItem
+@{
+    ViewBag.Title = "Prize";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(2);
+        $(document).tooltip();
+    });
+</script>
+<div id="msgresult">
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="Prize">Prize</a> <span class="active"> / Prize Detail</span>
+    </div>
+</div>
+</div>
+<div id="mainlist">
+<div id="mainwrap">
+    <div class="gridlist">
+    @(Html.Kendo().Grid<com.kuazoo.Models.InventoryItemModel.InventoryItem>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.InventoryItemId).Hidden(true);
+            columns.Bound(p => p.Name).Title("Inventory Name");
+        })
+        @*.ToolBar(toolbar =>
+        {
+            toolbar.Template(@<text>
+                @(Html.Kendo().DropDownList()
+                    .Name("LastAction")
+                    .OptionLabel("All")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .AutoBind(false)
+                    .Events(e => e.Change("changeLastAction"))
+                    .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                            Text = "Created",
+                            Value = "1"
+                        },
+                        new SelectListItem() {
+                            Text = "Updated",
+                            Value = "3"
+                        },
+                        new SelectListItem() {
+                            Text = "Deleted",
+                            Value = "5"
+                        }
+                    })
+                )
+                    
+            </text>);
+        })*@
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(10)
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("PrizeDetail_Read", "Admin", new { PrizeId = ViewBag.PrizeId }))
+            .Model(model =>
+            {
+                model.Id(p => p.PrizeId);
+            })
+            //.Filter(filter=>filter.Add(p=>p.LastAction).IsNotEqualTo("5"))
+        )
+        .Events(events => events.DataBound("onDataBound"))
+        .Filterable(filterable => filterable
+            .Extra(false)
+                .Operators(operators => operators
+                .ForString(str => str.Clear()
+                    .StartsWith("Starts with")
+                    .Contains("Contains")
+                ))
+        )
+        .Pageable(page => page
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Selectable()
+        .Filterable()
+        .Scrollable(scr => scr.Height(280))
+        .Sortable(sortable => sortable
+            .AllowUnsort(true)
+            .SortMode(GridSortMode.MultipleColumn))
+        //.Groupable()
+        .Resizable(resize => resize.Columns(true))
+        .Reorderable(reorder => reorder.Columns(true))
+    )
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    $(window).load(function () {
+        filtergrid();
+    });
+    function onDataBound(e) {
+        var data = this.dataSource.filter();
+        if (data != null) {
+            //console.log(data);
+            document.location.hash = "";
+            if (data.filters.length > 1) {
+                for (var i = 1; i < data.filters.length; i++) {
+                    console.log(data.filters[i].field + " " + data.filters[i].operator + " " + data.filters[i].value);
+                    insertParam(data.filters[i].field, data.filters[i].value);
+                }
+            }
+        }
+    }
+    function insertParam(key, value) {
+        key = encodeURI(key); value = encodeURI(value);
+
+        var kvp = document.location.hash.substr(1).split('&');
+        //console.log(kvp);
+        var i = kvp.length; var x; while (i--) {
+            x = kvp[i].split('=');
+
+            if (x[0] == key) {
+                x[1] = value;
+                kvp[i] = x.join('=');
+                break;
+            }
+        }
+
+        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
+
+        //this will reload the page, it's likely better to store this until finished
+        document.location.hash = kvp.join('&');
+    }
+    function filtergrid() {
+        var param = []
+        var array = { 'field': 'LastAction', 'operator': 'neq', 'value': '5' };
+        param.push(array);
+        var kvp = document.location.hash.substr(1).split('&');
+        for (var i = 0; i < kvp.length; i++) {
+            if (kvp[i] != "") {
+                var re = kvp[i].split('=');
+                var array = { 'field': re[0], 'operator': 'contains', 'value': re[1] };
+                param.push(array);
+            }
+        }
+        if (param.length > 0) {
+            //console.log(param);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.filter(param);
+            grid.refresh();
+        }
+    }
+    function changeLastAction() {
+        var value = this.value(),
+		 	 grid = $("#grid").data("kendoGrid");
+
+        if (value) {
+            grid.dataSource.filter({ field: "LastAction", operator: "eq", value: value });
+        } else {
+            grid.dataSource.filter({});
+        }
+    }
+    function error_handler(e) {
+        if (e.errors) {
+            var result = '<div id="breadcrumbs"><div class="mainwrap">';
+            var message = "";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message = this;
+                    });
+                }
+            });
+            if (message != "") {
+                if (message == "1") {
+                    result += '<div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> Prize archived successfully</div></div>';
+                }
+                else if (message == "2") {
+                    result += '<div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Delete</div></div>';
+                }
+                else {
+                    result += '<div class="notif cwarning"><div class="notifwrap warning"><strong>Error:</strong> ' + this + '</div></div>';
+                }
+                result += "</div></div>";
+                $("#msgresult").html(result);
+            }
+            //alert(message);
+            var grid = $('#grid').data('kendoGrid');
+            grid.dataSource.read();
+            grid.refresh();
+        }
+    }
+</script>

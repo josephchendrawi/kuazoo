@@ -1,0 +1,79 @@
+﻿@model com.kuazoo.Models.CityModel
+@{
+    ViewBag.Title = "City Add";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        changeverticalnav(10);
+        
+        
+    });
+</script>
+<div id="breadcrumbs">
+    <div class="mainwrap">
+        <a href="City">City</a> <span class="active"> / Add City</span>
+        @{
+            if (ViewBag.result != null)
+            {
+                if (ViewBag.result == "1")
+                {
+                    <div class="notif csuccess"><div class="notifwrap success"><strong>Success:</strong> New City successfully created</div></div>
+                }
+                else if (ViewBag.result == "3")
+                {
+                    <div class="notif cerror"><div class="notifwrap error"><strong>Error:</strong> Failed Create New City</div></div>
+                }
+                else
+                {
+                    <div class="notif cwarning"><div class="notifwrap warning"><strong>Warning:</strong> @ViewBag.result</div></div>
+                }
+            }
+        }
+    </div>
+</div>
+<div id="main">
+    <div id="mainwrap">
+        <h1>Add City</h1>
+    </div>
+        @using (Html.BeginForm())
+        {
+    <div id="wrap">
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.CountryId)</div>
+                <div class="colright">
+                                    @(Html.Kendo().DropDownListFor(model => model.CountryId)
+                                        .HtmlAttributes(new { style = "width: 250px" })
+                                        .OptionLabel("--Select Country--")
+                                        .DataTextField("CountryName")
+                                        .DataValueField("CountryId")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("CountryList", "Admin");
+                                            });
+                                        })
+                                    )
+                                    @Html.ValidationMessageFor(model => model.CountryId)
+                </div>
+            </div> 
+            <div>
+                <div class="colleft">@Html.LabelFor(model => model.CityName)</div>
+                <div class="colright">@Html.TextBoxFor(model => model.CityName, new { @class = "long" })@Html.ValidationMessageFor(model => model.CityName)</div>
+            </div>
+    </div>
+            <div class="wrapend">
+                <div class="colleft"></div>
+                <div class="colright">
+                    <input type="submit" value="Submit" class="submitBtn"/>
+                    <a href="Location#city"><input type="button" value="Cancel" class="grayBtn"/></a>
+                </div>
+            </div>
+        }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#CityName").focus();
+    });
+</script>
